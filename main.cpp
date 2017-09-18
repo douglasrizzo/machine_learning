@@ -86,8 +86,9 @@ vector<vector<double>> csvToVector(string path,
 }
 
 void testBooks() {
-  const vector<vector<double>> &data = csvToVector("/home/dodo/Desktop/data/books.csv", true, 2);
-  const vector<vector<double>> &test = csvToVector("/home/dodo/Desktop/data/books_test.csv", true, 4);
+  const vector<vector<double>> &data = csvToVector("/home/dodo/repos/machine_learning/datasets/books.csv", true, 2);
+  const vector<vector<double>>
+      &test = csvToVector("/home/dodo/repos/machine_learning/datasets/books_test.csv", true, 4);
   KNN knn(data, 2);
 
   int ks[] = {1, 2, 3, 5, 10};
@@ -95,23 +96,49 @@ void testBooks() {
   for (auto k:ks) {
     knn.setK(k);
     cout << "k = " << k << endl;
-    for (const auto testie: test) {
-      cout << "  " << knn.regression(testie) << endl;
+
+    const vector<double> yPred = knn.regression(test);
+
+    for (const double y : yPred) {
+      cout << "  " << y << endl;
     }
   }
+}
+
+double accuracy(vector<double> yTrue, vector<double> yPred) {
+  int right = 0;
+
+#pragma omp parallel for reduction(+:right)
+  for (int i = 0; i < yTrue.size(); i ++)
+    right += (yTrue[i] == yPred[i]);
+
+  return right / yTrue.size();
 }
 
 void testIris() {
   // 0 = setosa
   // 1 = versicolor
   // 2 = virginica
-  const vector<vector<double>> &data = csvToVector("/home/dodo/Desktop/data/iris.csv");
-  const vector<vector<double>> &test = csvToVector("/home/dodo/Desktop/data/iris_test.csv");
+  const vector<vector<double>>
+      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/iris_train.csv", true, 4);
+  const vector<vector<double>> &test =
+      csvToVector("/home/dodo/repos/machine_learning/datasets/iris_test.csv", true);
+  const vector<double> &yTrue = csvToRowVector("/home/dodo/repos/machine_learning/datasets/iris_test_y.csv");
 
   KNN knn(data, 4);
   int ks[] = {1, 2, 3, 5, 10};
   for (auto k:ks) {
     knn.setK(k);
+
+    const vector<double> yPred = knn.classify(test);
+    cout << "k = " << k << "\t(accuracy = " << accuracy(yTrue, yPred) << ")" << endl;
+    for (const double y : yPred) {
+      cout << "  " << y;
+    }
+    cout << endl;
+  }
+}
+
     cout << "k = " << k << endl;
     for (const auto testie:test) {
       cout << "  " << knn.classify(testie) << endl;
