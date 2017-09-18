@@ -80,6 +80,10 @@ class KNN {
     return yColumn;
   }
 
+  //! k-nearest neighbors algorithm, able to do regression and classification
+  //! \param data a dataset, where each vector represents a data element
+  //! \param yColumn which column of the dataset is the dependent variable
+  //! \param k number of nearest neighbors
   explicit KNN(vector<vector<double>> data, int yColumn, int k = 1) {
     this->data = std::move(data);
 
@@ -160,10 +164,27 @@ class KNN {
         winner = classes[j];
         winner_votes = class_votes[j];
       }
-
     }
 
     return winner;
+  }
+
+  vector<double> classify(const vector<vector<double>> &test) {
+    vector<double> y;
+
+    for (auto &testie:test)
+      y.push_back(classify(testie));
+
+    return y;
+  }
+
+  vector<double> regression(const vector<vector<double>> &test) {
+    vector<double> y;
+
+    for (auto &testie:test)
+      y.push_back(regression(testie));
+
+    return y;
   }
 };
 
