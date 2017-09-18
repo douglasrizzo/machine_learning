@@ -19,15 +19,23 @@ std::vector<double> getNextLineAndSplitIntoTokens(std::istream &str) {
     double value = stod(cell);
     result.push_back(value);
   }
-  // This checks for a trailing comma with no data after it.
-//  if (! lineStream && cell.empty()) {
-  // If there was a trailing comma then add an empty element.
-//    result.push_back(0);
-//  }
+
   return result;
 }
 
-vector<vector<double>> csvToVector(string path, bool normalize = false, int ignoreColumn = - 1) {
+vector<double> csvToRowVector(string path) {
+  vector<double> row, aux;
+
+  ifstream arquivo(path);
+  while (! (aux = getNextLineAndSplitIntoTokens(arquivo)).empty()) {
+    row.push_back(aux[0]);
+  }
+  return row;
+}
+
+vector<vector<double>> csvToVector(string path,
+                                   bool normalize = false,
+                                   int ignoreColumn = - 1) {
   vector<vector<double>> outer;
   vector<double> innerVector;
   vector<double> sums;
