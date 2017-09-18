@@ -44,6 +44,7 @@ vector<vector<double>> csvToVector(string path, bool normalize = false, int igno
       }
 
       else {
+#pragma omp parallel for
         for (int i = 0; i < sums.size(); i ++) {
           sums[i] += innerVector[i];
         }
@@ -63,10 +64,11 @@ vector<vector<double>> csvToVector(string path, bool normalize = false, int igno
       dev.push_back(sqrt(squaredSum / (outer.size() - 1)));
     }
 
-    for (auto datum : outer) {
-      for (int i = 0; i < datum.size(); i ++) {
+#pragma omp parallel for
+    for (int j = 0; j < outer.size(); j ++) {
+      for (int i = 0; i < outer[j].size(); i ++) {
         if (i != ignoreColumn) {
-          datum[i] = (datum[i] - means[i]) / dev[i];
+          outer[j][i] = (outer[j][i] - means[i]) / dev[i];
         }
       }
     }
