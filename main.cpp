@@ -139,9 +139,28 @@ void testIris() {
   }
 }
 
+void testPoker() {
+  const vector<vector<double>>
+      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/poker-hand-training-true.csv", true, 10);
+  const vector<vector<double>>
+      &test = csvToVector("/home/dodo/repos/machine_learning/datasets/poker-hand-testing-no-y.csv", true, 0);
+  const vector<double>
+      &yTrue = csvToRowVector("/home/dodo/repos/machine_learning/datasets/poker-hand-testing-y.csv");
+
+  KNN knn(data, 10);
+
+  int ks[] = {1, 2, 3, 5, 10};
+
+  for (auto k:ks) {
+    knn.setK(k);
     cout << "k = " << k << endl;
-    for (const auto testie:test) {
-      cout << "  " << knn.classify(testie) << endl;
+
+    const vector<double> yPred = knn.classify(test);
+
+    cout << "accuracy = " << accuracy(yTrue, yPred) << endl;
+
+    for (const double y : yPred) {
+      cout << "  " << y << endl;
     }
   }
 }
