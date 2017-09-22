@@ -27,6 +27,9 @@ vector<double> csvToRowVector(string path) {
   vector<double> row, aux;
 
   ifstream arquivo(path);
+  if (! arquivo.good())
+    throw runtime_error("File doesn't exist");
+
   while (! (aux = getNextLineAndSplitIntoTokens(arquivo)).empty()) {
     row.push_back(aux[0]);
   }
@@ -43,6 +46,9 @@ vector<vector<double>> csvToVector(string path,
   vector<double> dev;
 
   ifstream arquivo(path);
+  if (! arquivo.good())
+    throw runtime_error("File '" + path + "' doesn't exist");
+
   while (! (innerVector = getNextLineAndSplitIntoTokens(arquivo)).empty()) {
     outer.push_back(innerVector);
     if (normalize) {
@@ -86,22 +92,23 @@ vector<vector<double>> csvToVector(string path,
 }
 
 void testBooks() {
-  const vector<vector<double>> &data = csvToVector("/home/dodo/repos/machine_learning/datasets/books.csv", true, 2);
   const vector<vector<double>>
-      &test = csvToVector("/home/dodo/repos/machine_learning/datasets/books_test.csv", true, 4);
+      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/books/normalized-training.csv", false);
+  const vector<vector<double>>
+      &test = csvToVector("/home/dodo/repos/machine_learning/datasets/books/normalized-test.csv", false);
   KNN knn(data, 2);
 
   int ks[] = {1, 2, 3, 5, 10};
 
   for (auto k:ks) {
     knn.setK(k);
-    cout << "k = " << k << endl;
-
     const vector<double> yPred = knn.regression(test);
 
     for (const double y : yPred) {
-      cout << "  " << y << endl;
+      cout << "\t" << y;
     }
+
+    cout << endl;
   }
 }
 
@@ -112,7 +119,7 @@ double accuracy(vector<double> yTrue, vector<double> yPred) {
   for (int i = 0; i < yTrue.size(); i ++)
     right += (yTrue[i] == yPred[i]);
 
-  return right / yTrue.size();
+  return right / (double) yTrue.size();
 }
 
 void testIris() {
@@ -120,18 +127,18 @@ void testIris() {
   // 1 = versicolor
   // 2 = virginica
   const vector<vector<double>>
-      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/iris_train.csv", true, 4);
+      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/iris/normalized-training.csv", true, 4);
   const vector<vector<double>> &test =
-      csvToVector("/home/dodo/repos/machine_learning/datasets/iris_test.csv", true);
-  const vector<double> &yTrue = csvToRowVector("/home/dodo/repos/machine_learning/datasets/iris_test_y.csv");
+      csvToVector("/home/dodo/repos/machine_learning/datasets/iris/normalized-testing.csv", true);
+  const vector<double>
+      &yTrue = csvToRowVector("/home/dodo/repos/machine_learning/datasets/iris/normalized-testing-y.csv");
 
   KNN knn(data, 4);
   int ks[] = {1, 2, 3, 5, 10};
   for (auto k:ks) {
     knn.setK(k);
-
     const vector<double> yPred = knn.classify(test);
-    cout << "k = " << k << "\t(accuracy = " << accuracy(yTrue, yPred) << ")" << endl;
+    cout << k << "\t" << accuracy(yTrue, yPred) << endl;
     for (const double y : yPred) {
       cout << "  " << y;
     }
@@ -141,33 +148,51 @@ void testIris() {
 
 void testPoker() {
   const vector<vector<double>>
-      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/poker-hand-training-true.csv", true, 10);
+      &data = csvToVector("/home/dodo/repos/machine_learning/datasets/poker-hand/training.csv", false);
   const vector<vector<double>>
-      &test = csvToVector("/home/dodo/repos/machine_learning/datasets/poker-hand-testing-no-y.csv", true, 0);
+      &test = csvToVector("/home/dodo/repos/machine_learning/datasets/poker-hand/testing-single.csv", false);
   const vector<double>
-      &yTrue = csvToRowVector("/home/dodo/repos/machine_learning/datasets/poker-hand-testing-y.csv");
+      &yTrue = csvToRowVector("/home/dodo/repos/machine_learning/datasets/poker-hand/testing-single-y.csv");
 
-  KNN knn(data, 10);
+  KNN knn(data, 10, 1, KNN::Distance::HAMMING);
 
   int ks[] = {1, 2, 3, 5, 10};
 
-  for (auto k:ks) {
+  for (int k:ks) {
     knn.setK(k);
-    cout << "k = " << k << endl;
+    const vector<double> yPred = knn.classify(test, test.size() >= 1000);
+    cout << k << "\t" << accuracy(yTrue, yPred) << endl;
+  }
+}
 
-    const vector<double> yPred = knn.classify(test);
+void testWine(const string &path) {
+  const vector<vector<double>>
+      &data = csvToVector(path + "normalized-training.csv", false);
+  const vector<vector<double>>
+      &test = csvToVector(path + "normalized-testing.csv", false);
+  const vector<double>
+      &yTrue = csvToRowVector(path + "normalized-testing-y.csv");
 
-    cout << "accuracy = " << accuracy(yTrue, yPred) << endl;
+  KNN knn(data, 11);
 
-    for (const double y : yPred) {
-      cout << "  " << y << endl;
-    }
+  int ks[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50};
+
+  for (int k:ks) {
+    knn.setK(k);
+    const vector<double> yPred = knn.classify(test, test.size() >= 1000);
+    cout << k << "\t" << accuracy(yTrue, yPred) << endl;
   }
 }
 
 int main() {
+//  cout.precision(12);
   testBooks();
-  testIris();
+//  testIris();
+//  testPoker();
+//  string red_path = "/home/dodo/repos/machine_learning/datasets/winequality-red/";
+//  string white_path = "/home/dodo/repos/machine_learning/datasets/winequality-white/";
+//  testWine(red_path);
+//  testWine(white_path);
 
   return 0;
 }
