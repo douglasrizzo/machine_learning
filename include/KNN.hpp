@@ -1,6 +1,8 @@
-//
-// Created by dodo on 13/09/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  k-nearest neighbors algorithm, able to do regression and classification
+ * @date   2017-9-13
+ */
 
 #ifndef MACHINE_LEARNING_KNN_HPP
 #define MACHINE_LEARNING_KNN_HPP
