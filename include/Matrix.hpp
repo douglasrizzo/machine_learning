@@ -107,7 +107,7 @@ public:
     //! \return diagonal of the square matrix as a column vector
     Matrix diagonal() {
         if (!isSquare()) {
-            throw runtime_error("Can't get the diagonal, not a square matrix")
+            throw runtime_error("Can't get the diagonal, not a square matrix");
         }
         Matrix result(mRows, 1);
         for (size_t i = 0; i < mRows; i++)
@@ -678,6 +678,64 @@ public:
         return result;
     }
 
+    //! Calculates the eigenvalues and eigenvectors of the matrix using the Jacobi eigenvalue algorithm
+    //! \return a pair containing eigenvalues in a column vector in the first element of the pair
+    //! and the correponding eigenvectors in the second element
+    pair<Matrix, Matrix> eigen() {
+        // Jacobi eigenvalue algorithm as explained
+        // by profs Marina Andretta and Franklina Toledo
+
+        // copy the current matrix
+        Matrix A = copy();
+        // initialize the eigenvector matrix
+        Matrix V = identity(A.mCols);
+
+        // get the tolerance
+        double eps = numeric_limits<double>::epsilon();
+
+        // initiate the loop for numerical approximation of the eigenvalues
+        while (true) {
+            // find the element in the matrix with the largest modulo
+            size_t p, q;
+            double largest = 0;
+            for (size_t i = 0; i < A.mRows; i++) {
+                for (size_t j = 0; j < A.mCols; j++) {
+                    // it can't be in the diagonal
+                    if (i == j) continue;
+                    if (abs(A(i, j)) > largest) {
+                        largest = abs(A(i, j));
+                        p = i;
+                        q = j;
+                    }
+                }
+            }
+
+            // if the largest non-diagonal element of A is zero +/- eps,
+            // it means A is almost diagonalized and the eigenvalues are
+            // in the diagonal of A
+            if (largest < 2 * eps) {
+                //eigenvalues are returned in a column matrix for convenience
+                return make_pair(A.diagonal(), V);
+            }
+
+            double phi = (A(q, q) - A(p, p)) / (2 * A(p, q));
+            double sign = (phi > 0) - (phi < 0);
+            double t = phi == 0 ? 1 : 1 / (phi + sign * sqrt(pow(phi, 2) + 1));
+            double cos = 1 / (sqrt(1 + pow(t, 2)));
+            double sin = t / (sqrt(1 + pow(t, 2)));
+
+            Matrix U = identity(A.mRows);
+
+
+            U(p, p) = U(q, q) = cos;
+            U(p, q) = sin;
+            U(q, p) = -sin;
+
+            A = U.transpose() * A * U;
+
+            V = V * U;
+        }
+    }
 };
 
 
