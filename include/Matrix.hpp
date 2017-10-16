@@ -718,21 +718,24 @@ public:
                 return make_pair(A.diagonal(), V);
             }
 
+            // else, perform a Jacobi rotation using this angle phi as reference
             double phi = (A(q, q) - A(p, p)) / (2 * A(p, q));
             double sign = (phi > 0) - (phi < 0);
             double t = phi == 0 ? 1 : 1 / (phi + sign * sqrt(pow(phi, 2) + 1));
             double cos = 1 / (sqrt(1 + pow(t, 2)));
             double sin = t / (sqrt(1 + pow(t, 2)));
 
+            // the matrix that will apply the rotation is basically an identity matrix...
             Matrix U = identity(A.mRows);
 
-
+            // ... with the exception of these values
             U(p, p) = U(q, q) = cos;
             U(p, q) = sin;
             U(q, p) = -sin;
 
+            // apply the rotation
             A = U.transpose() * A * U;
-
+            // update the corresponding eigenvectors
             V = V * U;
         }
     }
