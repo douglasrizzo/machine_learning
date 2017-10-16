@@ -243,11 +243,24 @@ void testMatrixFromCSV() {
     cout << m;
 }
 
+void testEigen() {
+    const double arr[] = {4, 2, 0,
+                          2, 5, 3,
+                          0, 3, 6};
+    Matrix coitada(3, 3, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0])));
+
+    pair<Matrix, Matrix> eigens = coitada.eigen();
+    Matrix val = eigens.first, vec = eigens.second;
+
+    cout << val << endl << vec;
+}
+
 void testMatrices() {
-    testOperations();
+//    testOperations();
 //    testInverseDeterminant();
 //    testAddRowColumn();
 //    testMatrixFromCSV();
+    testEigen();
 }
 
 void testLeastSquaresAlps() {
@@ -325,7 +338,7 @@ int main() {
 //  string white_path = "/home/dodo/repos/machine_learning/datasets/winequality-white/";
 //  testWine(red_path);
 //  testWine(white_path);
-//    testMatrices();
-    testLeastSquares();
+    testMatrices();
+//    testLeastSquares();
     return 0;
 }
