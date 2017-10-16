@@ -100,6 +100,22 @@ public:
         return result;
     }
 
+    bool isSquare() {
+        return mCols == mRows;
+    }
+
+    //! \return diagonal of the square matrix as a column vector
+    Matrix diagonal() {
+        if (!isSquare()) {
+            throw runtime_error("Can't get the diagonal, not a square matrix")
+        }
+        Matrix result(mRows, 1);
+        for (size_t i = 0; i < mRows; i++)
+            result(i, 0) = this->operator()(i, i);
+
+        return result;
+    }
+
     //! Returns the identity matrix
     //! \param size dimensions of the square matrix
     //! \return identity matrix
@@ -347,7 +363,7 @@ public:
     //! the matrix is singular, that is, its determinant is equal to 0
     //! \return inverse of the current matrix
     Matrix inverse() {
-        if (mRows != mCols)
+        if (!isSquare())
             throw runtime_error("Cannot invert a non-square matrix");
 
         double det = determinant();
@@ -360,9 +376,8 @@ public:
     };
 
     double determinant() {
-
-        if (mRows != mCols) {
-            throw runtime_error("Cannot invert a non-square matrix");
+        if (!isSquare()) {
+            throw runtime_error("Cannot calculate the determinant of a non-square matrix");
         }
 
         size_t n = mRows;
@@ -656,6 +671,13 @@ public:
         }
         return result;
     }
+
+    Matrix copy() {
+        Matrix result(mRows, mCols);
+        result.mData = mData;
+        return result;
+    }
+
 };
 
 
