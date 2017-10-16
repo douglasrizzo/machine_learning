@@ -17,7 +17,7 @@ public:
         REGULAR, WEIGHTED
     };
 private:
-    Matrix X, y, coefs;
+    Matrix X, y, coefs, residuals;
     RegressionType regressionType;
 public :
     LeastSquares(Matrix data, Matrix labels, RegressionType regType = REGULAR) : regressionType(regType) {
@@ -54,6 +54,9 @@ public :
         first_part = first_part.inverse();
         Matrix second_part = Xt * W * y;
         coefs = first_part * second_part;
+
+        residuals = y - (X * coefs);
+        residuals= residuals.transpose()*residuals;
     }
 
     Matrix predict(Matrix m) {
@@ -63,6 +66,10 @@ public :
 
     const Matrix &getCoefs() const {
         return coefs;
+    }
+
+    const Matrix &getResiduals() const {
+        return residuals;
     }
 };
 
