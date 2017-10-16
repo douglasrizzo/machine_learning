@@ -256,17 +256,17 @@ void testLeastSquaresAlps() {
     Matrix y = data.getColumn(1);
     LeastSquares l(X, y);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
     X.addColumn(1, X.getColumn(0).hadamard(X.getColumn(0)));
     l = LeastSquares(X, y);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
     X.removeColumn(1);
     l = LeastSquares(X, y, LeastSquares::WEIGHTED);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 }
 
 void testLeastSquaresBooks() {
@@ -276,19 +276,19 @@ void testLeastSquaresBooks() {
     X.removeColumn(2);
     LeastSquares l(X, y);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
     X.addColumn(2, X.getColumn(0).hadamard(X.getColumn(0)));
     X.addColumn(3, X.getColumn(1).hadamard(X.getColumn(1)));
     l = LeastSquares(X, y);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
     X.removeColumn(2);
     X.removeColumn(2);
     l = LeastSquares(X, y, LeastSquares::WEIGHTED);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 }
 
 void testLeastSquaresCensus() {
@@ -297,17 +297,17 @@ void testLeastSquaresCensus() {
     Matrix y = data.getColumn(1);
     LeastSquares l(X, y);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
     X.addColumn(1, X.getColumn(0).hadamard(X.getColumn(0)));
     l = LeastSquares(X, y);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
     X.removeColumn(1);
     l = LeastSquares(X, y, LeastSquares::WEIGHTED);
     l.fit();
-    cout << l.getCoefs();
+    cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 }
 
 void testLeastSquares() {
