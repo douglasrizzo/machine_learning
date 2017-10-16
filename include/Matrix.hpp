@@ -534,6 +534,24 @@ public:
         return result;
     }
 
+    //! Matrix subtraction operation
+    //! \param b another matrix
+    //! \return Result of the subtraction of both matrices
+    Matrix operator-(const Matrix &b) {
+        if (mRows != b.mRows || mCols != b.mCols)
+            throw runtime_error("Cannot add these matrices");
+
+        Matrix result(mRows, mCols);
+
+        for (size_t i = 0; i < mRows; i++) {
+            for (size_t j = 0; j < mCols; j++) {
+                result(i, j) = this->operator()(i, j) - b(i, j);
+            }
+        }
+
+        return result;
+    }
+
 
     //! Matrix multiplication operation
     //! \param b another matrix
