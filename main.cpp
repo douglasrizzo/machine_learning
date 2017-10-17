@@ -6,6 +6,7 @@
 #include "include/KNN.hpp"
 #include "include/Matrix.hpp"
 #include "include/LeastSquares.hpp"
+#include "include/PCA.hpp"
 
 using namespace std;
 
@@ -329,6 +330,41 @@ void testLeastSquares() {
     testLeastSquaresCensus();
 }
 
+void testPCAAlps() {
+    Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
+    PCA pca(data);
+    pca.fit();
+    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+}
+
+void testPCABooks() {
+    Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/books/training.csv");
+    PCA pca(data);
+    pca.fit();
+    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+}
+
+void testPCACensus() {
+    Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/us-census/training.csv");
+    PCA pca(data);
+    pca.fit();
+    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+}
+
+void testPCAHald() {
+    Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/hald/hald.csv");
+    PCA pca(data);
+    pca.fit();
+    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+}
+
+void testPCA() {
+    testPCAAlps();
+    testPCABooks();
+    testPCACensus();
+    testPCAHald();
+}
+
 int main() {
     cout.precision(12);
 //  testBooks();
@@ -338,7 +374,9 @@ int main() {
 //  string white_path = "/home/dodo/repos/machine_learning/datasets/winequality-white/";
 //  testWine(red_path);
 //  testWine(white_path);
-    testMatrices();
+//    testMatrices();
 //    testLeastSquares();
+    testPCA();
     return 0;
 }
+
