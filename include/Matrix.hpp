@@ -395,7 +395,7 @@ public:
 
     //! Returns the transpose of a matrix
     //! \return transpose of the current matrix
-    Matrix transpose() {
+    Matrix transpose() const {
         Matrix result(mCols, mRows);
 
         for (size_t i = 0; i < mRows; i++) {
@@ -484,6 +484,17 @@ public:
 
             result(i, 0) /= (mRows - 1);
         }
+
+        return result;
+    }
+
+    //!
+    //! \return
+    Matrix stdev() {
+        Matrix result = var();
+
+        for (size_t i = 0; i < mCols; i++)
+            result(i, 0) = sqrt(result(i, 0));
 
         return result;
     }
@@ -738,6 +749,18 @@ public:
             // update the corresponding eigenvectors
             V = V * U;
         }
+    }
+
+    Matrix standardize() {
+        Matrix result = copy(), means = mean(), stds = stdev();
+
+        for (size_t i = 0; i < mRows; i++) {
+            for (size_t j = 0; j < mCols; j++) {
+                result(i, j) = (this->operator()(i, j) - means(j, 0)) / stds(j, 0);
+            }
+        }
+
+        return result;
     }
 };
 
