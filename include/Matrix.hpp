@@ -703,6 +703,7 @@ public:
 
         // get the tolerance
         double eps = numeric_limits<double>::epsilon();
+        unsigned iterations = 0;
 
         // initiate the loop for numerical approximation of the eigenvalues
         while (true) {
@@ -724,10 +725,12 @@ public:
             // if the largest non-diagonal element of A is zero +/- eps,
             // it means A is almost diagonalized and the eigenvalues are
             // in the diagonal of A
-            if (largest < 2 * eps) {
+            if (largest < 2 * eps or iterations >= 1000) {
                 //eigenvalues are returned in a column matrix for convenience
                 return make_pair(A.diagonal(), V);
             }
+
+            iterations++;
 
             // else, perform a Jacobi rotation using this angle phi as reference
             double phi = (A(q, q) - A(p, p)) / (2 * A(p, q));
