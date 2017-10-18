@@ -62,7 +62,8 @@ public :
     }
 
     Matrix transform() {
-        return eigenvectors.transpose() * X.transpose();
+        Matrix finalData = eigenvectors.transpose() * X.minusMean().transpose();
+        return finalData.transpose();
     }
 
     const Matrix &getEigenvalues() const {
