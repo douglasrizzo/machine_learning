@@ -13,7 +13,7 @@ using namespace std;
 class PCA {
 
 private:
-    Matrix X, eigenvalues, eigenvectors, percentages;
+    Matrix X, eigenvalues, eigenvectors, percentages, cumPercentages;
 public :
     explicit PCA(Matrix data) {
         X = std::move(data);
@@ -54,8 +54,10 @@ public :
 
         // calculate the percentage of variance that each eigenvalue "explains"
         percentages = Matrix(eig.first.nRows(), eig.first.nCols());
+        cumPercentages = Matrix(eig.first.nRows(), eig.first.nCols());
         for (int i = 0; i < eigenvalues.nRows(); i++) {
             percentages(i, 0) = eigenvalues(i, 0) / sumVar;
+            cumPercentages(i, 0) = i == 0 ? percentages(i, 0) : percentages(i, 0) + cumPercentages(i - 1, 0);
         }
     }
 
@@ -73,6 +75,10 @@ public :
 
     const Matrix &getPercentages() const {
         return percentages;
+    }
+
+    const Matrix &getCumPercentages() const {
+        return cumPercentages;
     }
 };
 
