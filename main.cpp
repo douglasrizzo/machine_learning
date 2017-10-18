@@ -330,40 +330,59 @@ void testLeastSquares() {
     testLeastSquaresCensus();
 }
 
+void testPCALindsay() {
+    Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/lindsay.csv");
+    PCA pca(data);
+    pca.fit();
+//    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
+//         << pca.getCumPercentages().transpose() * 100 << endl;
+    cout << pca.getEigenvectors() << endl << pca.transform() << endl;
+}
+
 void testPCAAlps() {
     Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
     PCA pca(data);
     pca.fit();
-    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+//    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
+//         << pca.getCumPercentages().transpose() * 100 << endl;
+    cout << pca.getEigenvectors() << endl << pca.transform() << endl;
 }
 
 void testPCABooks() {
     Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/books/training.csv");
     PCA pca(data);
     pca.fit();
-    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+//    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
+//         << pca.getCumPercentages().transpose() * 100 << endl;
+    cout << pca.getEigenvectors() << endl << pca.transform() << endl;
 }
 
 void testPCACensus() {
     Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/us-census/training.csv");
     PCA pca(data);
     pca.fit();
-    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+//    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
+//         << pca.getCumPercentages().transpose() * 100 << endl;
+    cout << pca.getEigenvectors() << endl << pca.transform() << endl;
 }
 
 void testPCAHald() {
     Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/hald/hald.csv");
     PCA pca(data);
     pca.fit();
-    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() << endl;
+//    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
+//         << pca.getCumPercentages().transpose() * 100 << endl;
+    cout << pca.getEigenvectors() << endl << pca.transform() << endl;
 }
 
 void testPCA() {
+    testPCALindsay();
     testPCAAlps();
     testPCABooks();
     testPCACensus();
     testPCAHald();
 }
+
 
 int main() {
     cout.precision(12);
