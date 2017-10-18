@@ -20,8 +20,8 @@ public :
     }
 
     void fit() {
-        X = X.standardize(); // standardize columns to have 0 mean and 1 std
-        Matrix covariances = X.cov(); // get covariance matrix of the data
+        Matrix XMinusMean = X.minusMean(); // standardize columns to have 0 mean
+        Matrix covariances = XMinusMean.cov(); // get covariance matrix of the data
 
         // get the sum of variances, this'll be useful later
         double sumVar = 0;

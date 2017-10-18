@@ -762,6 +762,18 @@ public:
 
         return result;
     }
+
+    Matrix minusMean() {
+        Matrix result = copy(), means = mean();
+
+        for (size_t i = 0; i < mRows; i++) {
+            for (size_t j = 0; j < mCols; j++) {
+                result(i, j) = this->operator()(i, j) - means(j, 0);
+            }
+        }
+
+        return result;
+    }
 };
 
 
