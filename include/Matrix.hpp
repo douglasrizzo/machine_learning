@@ -578,6 +578,34 @@ public:
         return result;
     }
 
+  Matrix operator==(const double &value) {
+    Matrix result(mRows, mCols);
+
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        result(i, j) = this->operator()(i, j) == value;
+      }
+    }
+
+    return result;
+  }
+
+  bool operator==(const Matrix &other) {
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        if (this->operator()(i, j) != other(i, j))
+          return false;
+      }
+    }
+
+    return true;
+  }
+
+  Matrix operator!=(const double &value) {
+    // subtract 1 from everything: 0s become -1s, 1s become 0s
+    // negate everything: 0s remains 0s, -1s becomes 1s
+    return -((*this == value) - 1);
+  }
 
     //! Matrix multiplication operation
     //! \param b another matrix
