@@ -1039,7 +1039,10 @@ class Matrix {
 
     for (size_t i = 0; i < bin.mRows; i++) {
       if (bin(i, 0) == 1) {
-        columns ? result.addColumn(getColumn(i)) : result.addRow(getRow(i));
+        if (columns)
+          result.addColumn(getColumn(i));
+        else
+          result.addRow(getRow(i));
       }
     }
 
