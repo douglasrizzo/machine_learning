@@ -730,12 +730,14 @@ class Matrix {
           for (size_t j = 0; j < mCols; j++) {
             result(g, j) += this->operator()(i, j);
           }
+          break;
         }
       }
     }
 
-    for (size_t g = 0; g < groupCount.mCols; g++)
-      result(g, 0) /= groupCount(g, 1);
+    for (size_t i = 0; i < result.mRows; i++)
+      for (size_t j = 0; j < result.mCols; j++)
+        result(i, j) /= groupCount(i, 1);
 
     return result;
   }
