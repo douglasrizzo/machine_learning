@@ -753,8 +753,7 @@ class Matrix {
       }
     }
 
-    for (size_t i = 0; i < mCols; i++)
-      result(i, 0) /= mRows;
+    result /= mRows;
 
     return result;
   }
