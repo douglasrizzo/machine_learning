@@ -707,10 +707,12 @@ class Matrix {
     result.addColumn(zeros(result.mRows, 1), 1);
 
     for (size_t i = 0; i < mRows; i++)
-      for (size_t j = 0; j < mRows; j++)
+      for (size_t j = 0; j < mCols; j++)
         for (size_t g = 0; g < result.mRows; g++)
-          if (this->operator()(i, j) == result(g, 0))
+          if (this->operator()(i, j) == result(g, 0)) {
             result(g, 1)++;
+            break;
+          }
 
     return result;
   }
