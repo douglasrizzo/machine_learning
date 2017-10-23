@@ -920,7 +920,7 @@ class Matrix {
   //! Calculates the eigenvalues and eigenvectors of the matrix using the Jacobi eigenvalue algorithm
   //! \return a pair containing eigenvalues in a column vector in the first element of the pair
   //! and the correponding eigenvectors in the second element
-  pair<Matrix, Matrix> eigen() {
+  pair<Matrix, Matrix> eigen(bool sort = true) {
     // Jacobi eigenvalue algorithm as explained
     // by profs Marina Andretta and Franklina Toledo
 
@@ -955,7 +955,35 @@ class Matrix {
       // in the diagonal of A
       if (largest < 2 * eps or iterations >= 1000) {
         //eigenvalues are returned in a column matrix for convenience
-        return make_pair(A.diagonal(), V);
+
+        auto eig = make_pair(A.diagonal(), V);
+
+        if (sort)
+          return eig;
+
+        Matrix eigenvalues = Matrix(eig.first.nRows(), eig.first.nCols());
+        Matrix eigenvectors = Matrix(eig.second.nRows(), eig.second.nCols());
+
+        // keep the order of eigenvalues in this vector
+        vector<int> newOrder;
+        for (int i = 0; i < eigenvalues.nRows(); i++) {
+          int position = 0;
+          for (int j = 0; j < newOrder.size(); j++)
+            if (eig.first(i, 0) < eig.first(newOrder[j], 0))
+              position++;
+          newOrder.insert(newOrder.begin() + position, i);
+        }
+
+        // order eigenvalues and eigenvectors by the value of the eigenvalues
+        for (int i = 0; i < newOrder.size(); i++) {
+          eigenvalues(i, 0) = eig.first(newOrder[i], 0);
+
+          for (int j = 0; j < eigenvectors.nRows(); j++) {
+            eigenvectors(j, i) = eig.second(j, newOrder[i]);
+          }
+        }
+
+        return make_pair(eigenvalues, eigenvectors);
       }
 
       iterations++;

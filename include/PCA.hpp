@@ -30,31 +30,12 @@ public :
         }
 
         pair<Matrix, Matrix> eig = covariances.eigen(); // eigenvalues and eigenvectors of cov matrix
-        eigenvalues = Matrix(eig.first.nRows(), eig.first.nCols());
-        eigenvectors = Matrix(eig.second.nRows(), eig.second.nCols());
-
-        // keep the order of eigenvalues in this vector
-        vector<int> newOrder;
-        for (int i = 0; i < eigenvalues.nRows(); i++) {
-            int position = 0;
-            for (int j = 0; j < newOrder.size(); j++)
-                if (eig.first(i, 0) < eig.first(newOrder[j], 0))
-                    position++;
-            newOrder.insert(newOrder.begin() + position, i);
-        }
-
-        // order eigenvalues and eigenvectors by the value of the eigenvalues
-        for (int i = 0; i < newOrder.size(); i++) {
-            eigenvalues(i, 0) = eig.first(newOrder[i], 0);
-
-            for (int j = 0; j < eigenvectors.nRows(); j++) {
-                eigenvectors(j, i) = eig.second(j, newOrder[i]);
-            }
-        }
+        eigenvalues = eig.first;
+        eigenvectors = eig.second;
 
         // calculate the percentage of variance that each eigenvalue "explains"
-        percentages = Matrix(eig.first.nRows(), eig.first.nCols());
-        cumPercentages = Matrix(eig.first.nRows(), eig.first.nCols());
+        percentages = Matrix(eigenvalues.nRows(), eigenvalues.nCols());
+        cumPercentages = Matrix(eigenvalues.nRows(), eigenvalues.nCols());
         for (int i = 0; i < eigenvalues.nRows(); i++) {
             percentages(i, 0) = eigenvalues(i, 0) / sumVar;
             cumPercentages(i, 0) = i == 0 ? percentages(i, 0) : percentages(i, 0) + cumPercentages(i - 1, 0);
