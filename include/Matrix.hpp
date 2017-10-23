@@ -961,7 +961,7 @@ class Matrix {
 
         auto eig = make_pair(A.diagonal(), V);
 
-        if (sort)
+        if (!sort)
           return eig;
 
         Matrix eigenvalues = Matrix(eig.first.nRows(), eig.first.nCols());
