@@ -195,7 +195,7 @@ void testAddRowColumn() {
   cout << m;
   const double zerosColumn[] = {0, 0, 0};
   Matrix column(3, 1, vector<double>(zerosColumn, zerosColumn + sizeof(zerosColumn) / sizeof(zerosColumn[0])));
-  m.addColumn(1, column);
+  m.addColumn(column, 1);
   cout << m;
 //    m.addRow(0, vector<double>(zerosColumn, zerosColumn + sizeof(zerosColumn) / sizeof(zerosColumn[0])));
 //    cout << m;
@@ -272,7 +272,7 @@ void testLeastSquaresAlps() {
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
-  X.addColumn(1, X.getColumn(0).hadamard(X.getColumn(0)));
+  X.addColumn(X.getColumn(0).hadamard(X.getColumn(0)), 1);
   l = LeastSquares(X, y);
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
@@ -292,8 +292,8 @@ void testLeastSquaresBooks() {
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
-  X.addColumn(2, X.getColumn(0).hadamard(X.getColumn(0)));
-  X.addColumn(3, X.getColumn(1).hadamard(X.getColumn(1)));
+  X.addColumn(X.getColumn(0).hadamard(X.getColumn(0)), 2);
+  X.addColumn(X.getColumn(1).hadamard(X.getColumn(1)), 3);
   l = LeastSquares(X, y);
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
@@ -313,7 +313,7 @@ void testLeastSquaresCensus() {
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 
-  X.addColumn(1, X.getColumn(0).hadamard(X.getColumn(0)));
+  X.addColumn(X.getColumn(0).hadamard(X.getColumn(0)), 1);
   l = LeastSquares(X, y);
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
