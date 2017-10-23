@@ -24,6 +24,15 @@ class Matrix {
   size_t mCols;
   std::vector<double> mData;
 
+  void validateIndexes(size_t row, size_t col) const {
+    if (row < 0 or row >= mRows)
+      throw runtime_error(
+          "Invalid row index (" + to_string(row) + "): should be between 0 and " + to_string(mRows - 1));
+    if (col < 0 or col >= mCols)
+      throw runtime_error(
+          "Invalid column index (" + to_string(col) + "): should be between 0 and " + to_string(mCols - 1));
+  }
+
   //! Helper function that separates lines in a CSV file into tokens
   //! \param str stream containing the contents of the CSV file
   //! \return a vector with the flattened contents of the CSV converted to double
@@ -47,6 +56,8 @@ class Matrix {
   size_t nCols() { return mCols; }
 
   size_t nRows() { return mRows; }
+
+  //region Constructors
 
   //! Initializes an empty matrix
   Matrix() {
@@ -73,73 +84,11 @@ class Matrix {
       throw runtime_error("Matrix dimension incompatible with its initializing vector.");
     mData = data;
   }
+  //endregion
 
-  //! Returns a matrix filled with a single value
-  //! \param rows number of rows in the matrix
-  //! \param cols number of columns in the matrix
-  //! \param value value to be used for initialization
-  //! \return a matrix with all values set to <code>value</code>
-  static Matrix fill(size_t rows, size_t cols, double value) {
-    Matrix result(rows, cols);
+  //region Operators
 
-    for (size_t i = 0; i < rows; i++) {
-      for (size_t j = 0; j < cols; j++) {
-        result(i, j) = value;
-      }
-    }
-    return result;
-  }
-
-  //! Creates a square matrix with a fixed value on the diagonal
-  //! \param size dimensions of the square matrix
-  //! \param value value to be used in the diagonal
-  //! \return square matrix with a fixed value on the diagonal
-  static Matrix diagonal(size_t size, double value) {
-    Matrix result = zeros(size, size);
-    for (size_t i = 0; i < size; i++)
-      result(i, i) = value;
-
-    return result;
-  }
-
-  bool isSquare() {
-    return mCols == mRows;
-  }
-
-  //! \return diagonal of the square matrix as a column vector
-  Matrix diagonal() {
-    if (!isSquare()) {
-      throw runtime_error("Can't get the diagonal, not a square matrix");
-    }
-    Matrix result(mRows, 1);
-    for (size_t i = 0; i < mRows; i++)
-      result(i, 0) = this->operator()(i, i);
-
-    return result;
-  }
-
-  //! Returns the identity matrix
-  //! \param size dimensions of the square matrix
-  //! \return identity matrix
-  static Matrix identity(size_t size) {
-    return diagonal(size, 1);
-  }
-
-  //! Returns a matrix filled with ones
-  //! \param rows number of rows in the matrix
-  //! \param cols number of columns in the matrix
-  //! \return matrix filled with ones
-  static Matrix ones(size_t rows, size_t cols) {
-    return fill(rows, cols, 1);
-  }
-
-  //! Returns a matrix filled with zeros
-  //! \param rows number of rows in the matrix
-  //! \param cols number of columns in the matrix
-  //! \return matrix filled with zeros
-  static Matrix zeros(size_t rows, size_t cols) {
-    return fill(rows, cols, 0);
-  }
+  //region Scalar operators
 
   //! Scalar addition
   //! \param m a matrix
@@ -238,11 +187,190 @@ class Matrix {
     return result;
   }
 
+  Matrix operator+=(double value) {
+    for (double &i : mData)
+      i += value;
+    return *this;
+  }
+
+  Matrix operator-=(double value) {
+    for (double &i : mData)
+      i -= value;
+    return *this;
+  }
+
+  Matrix operator*=(double value) {
+    for (double &i : mData)
+      i *= value;
+    return *this;
+  }
+
+  Matrix operator/=(double value) {
+    for (double &i : mData)
+      i /= value;
+    return *this;
+  }
+  //endregion
+
+  //region Matrix operators
+
+  //! Matrix addition operation
+  //! \param b another matrix
+  //! \return Result of the addition of both matrices
+  Matrix operator+(const Matrix &b) {
+    if (mRows != b.mRows || mCols != b.mCols)
+      throw runtime_error("Cannot add these matrices");
+
+    Matrix result(mRows, mCols);
+
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        result(i, j) = this->operator()(i, j) + b(i, j);
+      }
+    }
+
+    return result;
+  }
+
+  //! Matrix subtraction operation
+  //! \param b another matrix
+  //! \return Result of the subtraction of both matrices
+  Matrix operator-(const Matrix &b) {
+    if (mRows != b.mRows || mCols != b.mCols)
+      throw runtime_error("Cannot add these matrices");
+
+    Matrix result(mRows, mCols);
+
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        result(i, j) = this->operator()(i, j) - b(i, j);
+      }
+    }
+
+    return result;
+  }
+
+  //! Matrix multiplication operation
+  //! \param b another matrix
+  //! \return Result of the multiplication of both matrices
+  Matrix operator*(const Matrix &b) {
+    if (mCols != b.mRows)
+      throw runtime_error(
+          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
+              to_string(this->mCols) + ", right hand " + to_string(b.mRows) + "x" + to_string(b.mCols));
+
+    Matrix result(mRows, b.mCols);
+
+    // two loops iterate through every cell of the new matrix
+    for (size_t i = 0; i < result.mRows; i++) {
+      for (size_t j = 0; j < result.mCols; j++) {
+        // here we calculate the value of a single cell in our new matrix
+        result(i, j) = 0;
+        for (size_t ii = 0; ii < mCols; ii++)
+          result(i, j) += this->operator()(i, ii) * b(ii, j);
+      }
+    }
+    return result;
+  }
+  Matrix &operator+=(const Matrix &other) {
+    for (size_t i = 0; i < other.mRows; i++) {
+      for (size_t j = 0; j < other.mCols; j++) {
+        this->operator()(i, j) += other(i, j);
+      }
+    }
+
+    return *this;
+  }
+
+  Matrix &operator-=(const Matrix &other) {
+    for (size_t i = 0; i < other.mRows; i++) {
+      for (size_t j = 0; j < other.mCols; j++) {
+        this->operator()(i, j) -= other(i, j);
+      }
+    }
+
+    return *this;
+  }
+
+  Matrix &operator*=(const Matrix &other) {
+    if (mCols != other.mRows)
+      throw runtime_error(
+          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
+              to_string(this->mCols) + ", right hand " + to_string(other.mRows) + "x" + to_string(other.mCols));
+
+    Matrix result(mRows, other.mCols);
+
+    // two loops iterate through every cell of the new matrix
+    for (size_t i = 0; i < result.mRows; i++) {
+      for (size_t j = 0; j < result.mCols; j++) {
+        // here we calculate the value of a single cell in our new matrix
+        result(i, j) = 0;
+        for (size_t ii = 0; ii < mCols; ii++)
+          result(i, j) += this->operator()(i, ii) * other(ii, j);
+      }
+    }
+
+    mRows = result.mRows;
+    mCols = result.mCols;
+    mData = result.mData;
+    return *this;
+  }
+  //endregion
+
+  //region Equality operators
+
+  Matrix operator==(const double &value) {
+    Matrix result(mRows, mCols);
+
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        result(i, j) = this->operator()(i, j) == value;
+      }
+    }
+
+    return result;
+  }
+
+  bool operator==(const Matrix &other) {
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        if (this->operator()(i, j) != other(i, j))
+          return false;
+      }
+    }
+
+    return true;
+  }
+
+  Matrix operator!=(const double &value) {
+    // subtract 1 from everything: 0s become -1s, 1s become 0s
+    // negate everything: 0s remains 0s, -1s becomes 1s
+    return -((*this == value) - 1);
+  }
+  //endregion
+
+  //! Matrix negative operation
+  //! \return The negative of the current matrix
+  Matrix operator-() {
+    Matrix result(this->mRows, this->mCols);
+
+    for (size_t i = 0; i < mCols; i++) {
+      for (size_t j = 0; j < mRows; j++) {
+        result(i, j) = -this->operator()(i, j);
+      }
+    }
+
+    return result;
+  }
+
+  //region Functors
+
   //! Functor used to access elements in the matrix
   //! \param i row index
   //! \param j column index
   //! \return element in position ij of the matrix
   double &operator()(size_t i, size_t j) {
+    validateIndexes(i, j);
     return mData[i * mCols + j];
   }
 
@@ -251,7 +379,77 @@ class Matrix {
   //! \param j column index
   //! \return element in position ij of the matrix
   double operator()(size_t i, size_t j) const {
+    validateIndexes(i, j);
     return mData[i * mCols + j];
+  }
+  //endregion
+  //endregion
+
+  //! Returns a matrix filled with a single value
+  //! \param rows number of rows in the matrix
+  //! \param cols number of columns in the matrix
+  //! \param value value to be used for initialization
+  //! \return a matrix with all values set to <code>value</code>
+  static Matrix fill(size_t rows, size_t cols, double value) {
+    Matrix result(rows, cols);
+
+    for (size_t i = 0; i < rows; i++) {
+      for (size_t j = 0; j < cols; j++) {
+        result(i, j) = value;
+      }
+    }
+    return result;
+  }
+
+  //! Creates a square matrix with a fixed value on the diagonal
+  //! \param size dimensions of the square matrix
+  //! \param value value to be used in the diagonal
+  //! \return square matrix with a fixed value on the diagonal
+  static Matrix diagonal(size_t size, double value) {
+    Matrix result = zeros(size, size);
+    for (size_t i = 0; i < size; i++)
+      result(i, i) = value;
+
+    return result;
+  }
+
+  bool isSquare() const {
+    return mCols == mRows;
+  }
+
+  //! \return diagonal of the square matrix as a column vector
+  Matrix diagonal() {
+    if (!isSquare()) {
+      throw runtime_error("Can't get the diagonal, not a square matrix");
+    }
+    Matrix result(mRows, 1);
+    for (size_t i = 0; i < mRows; i++)
+      result(i, 0) = this->operator()(i, i);
+
+    return result;
+  }
+
+  //! Returns the identity matrix
+  //! \param size dimensions of the square matrix
+  //! \return identity matrix
+  static Matrix identity(size_t size) {
+    return diagonal(size, 1);
+  }
+
+  //! Returns a matrix filled with ones
+  //! \param rows number of rows in the matrix
+  //! \param cols number of columns in the matrix
+  //! \return matrix filled with ones
+  static Matrix ones(size_t rows, size_t cols) {
+    return fill(rows, cols, 1);
+  }
+
+  //! Returns a matrix filled with zeros
+  //! \param rows number of rows in the matrix
+  //! \param cols number of columns in the matrix
+  //! \return matrix filled with zeros
+  static Matrix zeros(size_t rows, size_t cols) {
+    return fill(rows, cols, 0);
   }
 
   //! Executes the Hadamard, or entrywise multiplication between two matrices
@@ -276,7 +474,7 @@ class Matrix {
   //! \param row index of the row to be removed
   //! \param column index of the column to be removed
   //! \return submatrix of the current matrix, with one less row and column
-  Matrix submatrix(size_t row, size_t column) {
+  Matrix submatrix(size_t row, size_t column) const {
     Matrix result(mRows - 1, mCols - 1);
 
     size_t subi = 0;
@@ -299,7 +497,7 @@ class Matrix {
   //! \param row index of the row to be removed
   //! \param column index of the column to be removed
   //! \return minor of the current matrix
-  double getMinor(size_t row, size_t column) {
+  double getMinor(size_t row, size_t column) const {
 //        the minor of a 2x2 a b is d c
 //                           c d    b a
     if (mRows == 2 and mCols == 2) {
@@ -318,7 +516,7 @@ class Matrix {
   //! \param row index of the row where the cofactor will be calculated
   //! \param column index of the column where the cofactor will be calculated
   //! \return cofactor of the matrix at the given position
-  double cofactor(size_t row, size_t column) {
+  double cofactor(size_t row, size_t column) const {
     double minor;
 
     // special case for when our matrix is 2x2
@@ -338,7 +536,7 @@ class Matrix {
 
   //! Calculates the cofactor matrix
   //! \return Cofactor matrix of the current matrix
-  Matrix cofactorMatrix() {
+  Matrix cofactorMatrix() const {
     Matrix result(mRows, mCols);
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
@@ -350,14 +548,14 @@ class Matrix {
 
   //! Returns the adjugate of the current matrix, which is the transpose of its cofactor matrix
   //! \return Adjugate of the current matrix
-  Matrix adjugate() {
+  Matrix adjugate() const {
     return cofactorMatrix().transpose();
   }
 
   //! Calculates the inverse of the current matrix. Raises an error if
   //! the matrix is singular, that is, its determinant is equal to 0
   //! \return inverse of the current matrix
-  Matrix inverse() {
+  Matrix inverse() const {
     if (!isSquare())
       throw runtime_error("Cannot invert a non-square matrix");
 
@@ -370,7 +568,7 @@ class Matrix {
     return adjugate() / det;
   };
 
-  double determinant() {
+  double determinant() const {
     if (!isSquare()) {
       throw runtime_error("Cannot calculate the determinant of a non-square matrix");
     }
@@ -419,14 +617,17 @@ class Matrix {
   //! \param position index of the new column. The column at the current
   //! position and all columns succeeding it are pushed forward.
   void addColumn(Matrix values, size_t position) {
-    if (isEmpty()) {
-      *this = values;
-      return;
-    }
     if (!isEmpty() and values.nRows() != mRows)
       throw runtime_error("Wrong number of values passed for new column");
     if (values.nCols() != 1)
       throw runtime_error("Can't add multiple columns at once");
+
+    if (isEmpty()) {
+      mRows = values.mRows;
+      mCols = values.mCols;
+      mData = values.mData;
+      return;
+    }
 
     // this is how you stop a reverse for loop with unsigned integers
     for (size_t i = mRows - 1; i != (size_t) -1; i--)
@@ -440,19 +641,22 @@ class Matrix {
   //! \param position index of the new row. The row at the current
   //! position and all rows succeeding it are pushed forward.
   void addRow(Matrix values, size_t position) {
+    if (!isEmpty() and values.mRows != mCols)
+      throw runtime_error("Wrong number of values passed for new row");
+    if (values.mCols != 1)
+      throw runtime_error("Can't add multiple rows at once");
+
     if (isEmpty()) {
-      *this = values;
+      mRows = values.mCols;
+      mCols = values.mRows;
+      mData = values.mData;
       return;
     }
 
-    if (!isEmpty() and values.nRows() != mCols)
-      throw runtime_error("Wrong number of values passed for new row");
-    if (values.nCols() != 1)
-      throw runtime_error("Can't add multiple rows at once");
-
-    // this is how you stop a reverse for loop with unsigned integers
-    for (size_t i = mCols - 1; i != (size_t) -1; i--)
-      mData.insert(mData.begin() + (position * mCols + i), values(i, 0));
+    for (size_t i = 0; i != mCols; i++) {
+      size_t what = position * (mCols) + i;
+      mData.insert(mData.begin() + (position * (mCols - 1) + i), values(i, 0));
+    }
 
     mRows += 1;
   }
@@ -637,108 +841,6 @@ class Matrix {
     Matrix result(mCols, 1);
     for (size_t i = 0; i < mCols; i++)
       result(i, 0) = this->operator()(index, i);
-
-    return result;
-  }
-
-  //! Matrix addition operation
-  //! \param b another matrix
-  //! \return Result of the addition of both matrices
-  Matrix operator+(const Matrix &b) {
-    if (mRows != b.mRows || mCols != b.mCols)
-      throw runtime_error("Cannot add these matrices");
-
-    Matrix result(mRows, mCols);
-
-    for (size_t i = 0; i < mRows; i++) {
-      for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) + b(i, j);
-      }
-    }
-
-    return result;
-  }
-
-  //! Matrix subtraction operation
-  //! \param b another matrix
-  //! \return Result of the subtraction of both matrices
-  Matrix operator-(const Matrix &b) {
-    if (mRows != b.mRows || mCols != b.mCols)
-      throw runtime_error("Cannot add these matrices");
-
-    Matrix result(mRows, mCols);
-
-    for (size_t i = 0; i < mRows; i++) {
-      for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) - b(i, j);
-      }
-    }
-
-    return result;
-  }
-
-  Matrix operator==(const double &value) {
-    Matrix result(mRows, mCols);
-
-    for (size_t i = 0; i < mRows; i++) {
-      for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) == value;
-      }
-    }
-
-    return result;
-  }
-
-  bool operator==(const Matrix &other) {
-    for (size_t i = 0; i < mRows; i++) {
-      for (size_t j = 0; j < mCols; j++) {
-        if (this->operator()(i, j) != other(i, j))
-          return false;
-      }
-    }
-
-    return true;
-  }
-
-  Matrix operator!=(const double &value) {
-    // subtract 1 from everything: 0s become -1s, 1s become 0s
-    // negate everything: 0s remains 0s, -1s becomes 1s
-    return -((*this == value) - 1);
-  }
-
-  //! Matrix multiplication operation
-  //! \param b another matrix
-  //! \return Result of the multiplication of both matrices
-  Matrix operator*(const Matrix &b) {
-    if (mCols != b.mRows)
-      throw runtime_error(
-          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
-              to_string(this->mCols) + ", right hand " + to_string(b.mRows) + "x" + to_string(b.mCols));
-
-    Matrix result(mRows, b.mCols);
-
-    // two loops iterate through every cell of the new matrix
-    for (size_t i = 0; i < result.mRows; i++) {
-      for (size_t j = 0; j < result.mCols; j++) {
-        // here we calculate the value of a single cell in our new matrix
-        result(i, j) = 0;
-        for (size_t ii = 0; ii < mCols; ii++)
-          result(i, j) += this->operator()(i, ii) * b(ii, j);
-      }
-    }
-    return result;
-  }
-
-  //! Matrix negative operation
-  //! \return The negative of the current matrix
-  Matrix operator-() {
-    Matrix result(this->mRows, this->mCols);
-
-    for (size_t i = 0; i < mCols; i++) {
-      for (size_t j = 0; j < mRows; j++) {
-        result(i, j) = -this->operator()(i, j);
-      }
-    }
 
     return result;
   }
