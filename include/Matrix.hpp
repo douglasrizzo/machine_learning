@@ -944,8 +944,7 @@ class Matrix {
       for (size_t i = 0; i < A.mRows; i++) {
         for (size_t j = 0; j < A.mCols; j++) {
           // it can't be in the diagonal
-          if (i == j) continue;
-          if (abs(A(i, j)) > largest) {
+          if (i != j and abs(A(i, j)) > largest) {
             largest = abs(A(i, j));
             p = i;
             q = j;
