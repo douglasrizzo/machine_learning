@@ -758,25 +758,22 @@ class Matrix {
     return result;
   }
 
-  //! Calculates the covariance matrix of the current matrix. Columns are taken as features
-  //! \return covariance matrix
-  Matrix cov() {
+  Matrix scatter() {
     Matrix means = mean();
-
     Matrix result(mCols, mCols);
 
-    for (size_t i = 0; i < mCols; i++) {
-      for (size_t j = i; j < mCols; j++) {
-        double cov = 0;
-
-        for (size_t ii = 0; ii < mRows; ii++)
-          cov += (this->operator()(ii, i) - means(i, 0)) * (this->operator()(ii, j) - means(j, 0));
-
-        result(i, j) = result(j, i) = cov / (mRows - 1);
-      }
+    for (size_t i = 0; i < mRows; i++) {
+      Matrix rowDiff = getRow(i) - means;
+      result += rowDiff * rowDiff.transpose();
     }
 
     return result;
+  }
+
+  //! Calculates the covariance matrix of the current matrix. Columns are taken as features
+  //! \return covariance matrix
+  Matrix cov() {
+    return scatter() / (mRows - 1);
   }
 
   //! Calculates the variance of the columns of the matrix
