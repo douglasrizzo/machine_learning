@@ -638,9 +638,9 @@ class Matrix {
 
   //! Adds a row to the matrix at the given position. Addition is done inplace.
   //! \param values a column vector containing the values to be added in the new row
-  //! \param position index of the new row. The row at the current
+  //! \param index index of the new row. The row at the current
   //! position and all rows succeeding it are pushed forward.
-  void addRow(Matrix values, size_t position) {
+  void addRow(Matrix values, size_t index) {
     if (!isEmpty() and values.mRows != mCols)
       throw runtime_error("Wrong number of values passed for new row");
     if (values.mCols != 1)
@@ -654,8 +654,11 @@ class Matrix {
     }
 
     for (size_t i = 0; i != mCols; i++) {
-      size_t what = position * (mCols) + i;
-      mData.insert(mData.begin() + (position * (mCols - 1) + i), values(i, 0));
+      size_t exact_position = index * (mCols) + i;
+      if (exact_position < mData.size())
+        mData.insert(mData.begin() + exact_position, values(i, 0));
+      else
+        mData.push_back(values(i, 0));
     }
 
     mRows += 1;
