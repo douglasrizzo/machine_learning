@@ -26,6 +26,10 @@ class Matrix {
   size_t mCols;
   std::vector<double> mData;
 
+  //! Validates if indices are contained inside the matrix
+  //! \param row row index
+  //! \param col column index
+  //! \throws runtime error if at least one of the indices is out of bounds
   void validateIndexes(size_t row, size_t col) const {
     if (row < 0 or row >= mRows)
       throw runtime_error(
@@ -54,6 +58,11 @@ class Matrix {
     return result;
   }
 
+  //! Sorts eigenvalues by magnitude, sorting their corresponding eigenvectors in te same order
+  //! \param eigenvalues column vector containing eigenvalues
+  //! \param eigenvectors Matrix containing the eigenvectors in its columns.
+  //! It must have the same number of columns as <code>eigenvalues</code> has rows
+  //! \return
   static pair<Matrix, Matrix> eigsort(Matrix eigenvalues, Matrix eigenvectors) {
     if (eigenvalues.mRows != eigenvectors.mCols)
       throw runtime_error("Incompatible number of eigenvalues and eigenvectors");
@@ -617,6 +626,8 @@ class Matrix {
     return adjugate() / det;
   };
 
+  //! Calculates the determinant of the matrix
+  //! \return determinant of the matrix
   double determinant() const {
     if (!isSquare()) {
       throw runtime_error("Cannot calculate the determinant of a non-square matrix");
@@ -725,6 +736,8 @@ class Matrix {
     mCols -= 1;
   }
 
+  //! Returns only unique values from the matrix
+  //! \return column vector containing the unique values from the matrix
   Matrix unique() const {
     // include all data from the inner vector in a set
     set<double> s;
@@ -741,11 +754,15 @@ class Matrix {
     return Matrix(auxVec.size(), 1, auxVec);
   }
 
+  //! Sorts elements of the matrix inplace
   void sort() {
     // just sort the inner vector
     std::sort(mData.begin(), mData.end());
   }
 
+  //! Sorts the elements of a matrix
+  //! \param m the matrix whose elements will be sorted
+  //! \return a matrix with the same shape as <code>m</code>, with its elements sorted
   static Matrix sort(Matrix m) {
     // copy the inner vector of the matrix passed as argument
     // and return a new matrix with the sorted inner vector
@@ -754,6 +771,9 @@ class Matrix {
     return Matrix(m.mRows, m.mCols, data);
   }
 
+  //! Counts occurrences of elements in a matrix.
+  //! \return matrix with two columns. The first contains unique instances of the elements in the original matrix.
+  //! The second column contains occurrences of the elements in the first column.
   Matrix count() {
     Matrix result = unique();
     result.sort();
@@ -772,6 +792,11 @@ class Matrix {
     return result;
   }
 
+  //! Calculates means of a matrix, grouped by classes
+  //! \param groups a column vector containing group assignments
+  //! \return a matrix containing as many columns as there are unique groups.
+  //! Each column represents the mean of each group.
+  //! Columns are sorted by the group numbers in ascending order.
   Matrix mean(Matrix groups) {
     if (mRows != groups.mRows)
       throw runtime_error("Not enough groups for every element in the matrix");
@@ -815,6 +840,8 @@ class Matrix {
     return result;
   }
 
+  //! Calculates the scatter matrix. Columns are taken as features.
+  //! \return scatter matrix
   Matrix scatter() {
     Matrix means = mean();
     Matrix result(mCols, mCols);
@@ -827,7 +854,7 @@ class Matrix {
     return result;
   }
 
-  //! Calculates the covariance matrix of the current matrix. Columns are taken as features
+  //! Calculates the covariance matrix of the current matrix. Columns are taken as features.
   //! \return covariance matrix
   Matrix cov() {
     return scatter() / (mRows - 1);
@@ -849,8 +876,8 @@ class Matrix {
     return result;
   }
 
-  //!
-  //! \return
+  //! Calculates the standard deviation of the columns of the matrix
+  //! \return column vector containing standard deviations
   Matrix stdev() {
     Matrix result = var();
 
@@ -972,6 +999,8 @@ class Matrix {
     return result;
   }
 
+  //! Returns a copy of the matrix
+  //! \return copy of the current matrix
   Matrix copy() {
     Matrix result(mRows, mCols);
     result.mData = mData;
@@ -1048,6 +1077,9 @@ class Matrix {
     }
   }
 
+  //! Standardizes the columns of the matrix, subtracting each element of a column
+  //! by the column mean and dividing it by the standard deviation of the column.
+  //! \return a new matrix with the columns standardized as described
   Matrix standardize() {
     Matrix result = copy(), means = mean(), stds = stdev();
 
@@ -1074,14 +1106,24 @@ class Matrix {
     return result;
   }
 
+  //! Checks if the matrix contains a value
+  //! \param value the vaue to look for
+  //! \return true if the matrix contains the value, otherwise false
   bool contains(double value) {
     return std::find(mData.begin(), mData.end(), value) != mData.end();
   }
 
+  //! Checks if the matrix is empty or uninitialized
+  //! \return true if the matrix is empty or uninitialized, otherwise false
   bool isEmpty() {
     return mCols == 0 and mRows == 0;
   }
 
+  //! Selects a subset of either columns or rows of the matrix
+  //! \param bin a column vector containing only 0s and 1s, where indices with
+  //! 1s indicate the indices of the columns/rows that will be returned by the method
+  //! \param columns true if the filter will select the columns of the matrix, otherwise, rows will be selected
+  //! \return
   Matrix filter(const Matrix bin, bool columns = false) {
     size_t dimension = columns ? mCols : mRows;
 
@@ -1108,21 +1150,33 @@ class Matrix {
     return result;
   }
 
+  //! Selects a subset of rows of the matrix
+  //! \param bin a column vector containing only 0s and 1s, where indices with
+  //! 1s indicate the indices of the columns/rows that will be returned by the method
   Matrix getRows(const Matrix bin) {
     return filter(bin);
   }
 
+  //! Selects a subset of columns of the matrix
+  //! \param bin a column vector containing only 0s and 1s, where indices with
+  //! 1s indicate the indices of the columns/rows that will be returned by the method
   Matrix getColumns(const Matrix bin) {
     return filter(bin, true);
   }
 
+  //! Checks if the matrix is symmetric. A matrix is symmetric if it is equal to its transpose
+  //! \return true if it is symmetric, otherwise false
   bool isSymmetric() {
     return *this == transpose();
   }
 
+  //! Normalizes the column vectors of the matrix. Normalization is done by dividing
+  //! each element of a vector by the length of the vector.
+  //! \return Matrix with each column normalized by its length.
   Matrix normalize() {
     Matrix result(mRows, mCols, mData);
 
+    // Calculate length of the column vector
     for (size_t j = 0; j < mCols; j++) {
       double length = 0;
 #pragma omp parallel for reduction(+:length)
@@ -1130,6 +1184,8 @@ class Matrix {
         length += pow(result(i, j), 2);
       }
       length = sqrt(length);
+
+      // divide each element of the column by its length
 #pragma omp parallel for
       for (size_t i = 0; i < mRows; i++) {
         result(i, j) /= length;
