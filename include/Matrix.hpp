@@ -1234,12 +1234,16 @@ class Matrix {
     return eigsort(eigval, zz);
   }
 
+  //region Numerical Recipes
+
  private:
 
-  //! Given a matrix a[0..n-1][0..n-1], this routine replaces
-  //! it by a balanced matrix with identical eigenvalues.
+  //! Creates a balanced matrix with identical eigenvalues as the original.
   //! A symmetric matrix is already balanced and is unaffected
   //! by this procedure.
+  //! \return a tuple containing both the balanced matrix and a vector
+  //! of the scale with which each column was scaled
+  //! \author Numerical Recipes 3rd edition
   tuple<Matrix, vector<double>> balance() {
     const double RADIX = numeric_limits<double>::radix;
     bool done = false;
@@ -1291,6 +1295,8 @@ class Matrix {
 
   //! Forms the eigenvectors of a real nonsymmetric matrix by back transforming
   //! those of the corresponding balanced matrix determined by balance.
+  //! \param scale vector containing the scale with which each row was originally transformed
+  //! \author Numerical Recipes 3rd edition
   Matrix balbak(vector<double> scale) {
     Matrix result(mRows, mCols, mData);
 
@@ -1302,6 +1308,11 @@ class Matrix {
     return result;
   }
 
+  //! Swaps two values inside the matrix
+  //! \param row1 row of the first element
+  //! \param col1 column of the first element
+  //! \param row2 row of the second element
+  //! \param col2 column of the second element
   void swap(size_t row1, size_t col1, size_t row2, size_t col2) {
     double tmp = this->operator()(row1, col1);
     this->operator()(row1, col1) = this->operator()(row2, col2);
@@ -1313,6 +1324,9 @@ class Matrix {
   //! Recommended, but not required, is that this routine be preceded by balance. On output,
   //! the Hessenberg matrix is in elements a[i][j] with i  j+1. Elements with i > j+1 are to be
   //! thought of as zero, but are returned with random values.
+  //! \return a tuple containing the matrix in Hessenberg form and the initial
+  //! values of its eigenvectors, to be used by <code>hqr2</code>
+  //! \author Numerical Recipes 3rd edition
   tuple<Matrix, Matrix> elmhes() {
     Matrix result(mRows, mCols, mData);
 
@@ -1382,6 +1396,9 @@ class Matrix {
    * only the eigenvector corresponding to the eigenvalue with positive imaginary part is stored, with
    * real part in zz[0..n-1][i] and imaginary part in h.zz[0..n-1][i+1]. The eigenvectors are
    * not normalized.
+   * \param zz the initial values of the eigenvectors, returned from <code>elmhes</code>. They will be changed inplace.
+   * \return a vector containing the eigenvalues of the matrix
+   * \author Numerical Recipes 3rd edition
    */
   vector<complex<double>> hqr2(Matrix &zz) {
     int its;
