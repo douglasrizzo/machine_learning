@@ -13,7 +13,7 @@ using namespace std;
 
 class LDA {
  private:
-  Matrix X, y, withinSpread, betweenSpread;
+  Matrix X, y, eigenvalues, eigenvectors;
  public:
   LDA(Matrix data, Matrix classes) : X(std::move(data)), y(std::move(classes)) {
 
@@ -22,19 +22,29 @@ class LDA {
   void fit() {
     Matrix innerMean = X.mean(y); // means for each class
     Matrix grandMean = X.mean(); // mean of the entire data set
+    Matrix uniqueClasses = y.unique();
 
-    // calculate covariance matrices of each class
-    vector<Matrix> covariances;
-    for (int i = 0; i < y.unique().nRows(); i++) {
-      Matrix currentCov = X.getRows(y == i).cov();
-      covariances.push_back(currentCov);
+    Matrix Sw = Matrix::zeros(X.nCols(), X.nCols()); // within-class scatter matrix
+    Matrix Sb = Matrix::zeros(X.nCols(), X.nCols()); // between-class scatter matrix
+    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
+      Matrix classElements = X.getRows(y == i); // get class elements
+
+      Matrix scatterMatrix = classElements.scatter();
+      Sw += scatterMatrix;
+
+      Matrix meanDiff = innerMean.getRow(i) - grandMean;
+      Sb += classElements.nRows() * meanDiff * meanDiff.transpose();
     }
 
-    // calculate within-class spread
+    auto eigen = (Sw.inverse() * Sb).eigenNonSymmetric();
 
-    // calculate between-class spread
+    eigenvalues = eigen.first;
+    eigenvectors = eigen.second;
+  }
 
-    // fit the new line
+  Matrix transform() {
+    Matrix finalData = eigenvectors.transpose() * X.transpose();
+    return finalData.transpose();
   }
 
   Matrix predict(Matrix data) {
