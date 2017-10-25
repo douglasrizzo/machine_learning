@@ -52,6 +52,35 @@ class Matrix {
     return result;
   }
 
+  static pair<Matrix, Matrix> eigsort(Matrix eigenvalues, Matrix eigenvectors) {
+    if(eigenvalues.mRows!=eigenvectors.mCols)
+      throw runtime_error("Incompatible number of eigenvalues and eigenvectors");
+
+    Matrix eigval(eigenvalues.mRows, eigenvalues.mCols, eigenvalues.mData);
+    Matrix eigvec(eigenvectors.mRows, eigenvectors.mCols, eigenvectors.mData);
+
+    // keep the order of eigenvalues in this vector
+    vector<int> newOrder;
+    for (int i = 0; i < eigenvalues.nRows(); i++) {
+      int position = 0;
+      for (int j = 0; j < newOrder.size(); j++)
+        if (eigenvalues(i, 0) < eigenvalues(newOrder[j], 0))
+          position++;
+      newOrder.insert(newOrder.begin() + position, i);
+    }
+
+    // order eigenvalues and eigenvectors by the value of the eigenvalues
+    for (int i = 0; i < newOrder.size(); i++) {
+      eigval(i, 0) = eigenvalues(newOrder[i], 0);
+
+      for (int j = 0; j < eigenvectors.nRows(); j++) {
+        eigvec(j, i) = eigenvectors(j, newOrder[i]);
+      }
+    }
+
+    return make_pair(eigval, eigvec);
+  }
+
  public:
   size_t nCols() { return mCols; }
 
@@ -963,29 +992,7 @@ class Matrix {
         if (!sort)
           return eig;
 
-        Matrix eigenvalues = Matrix(eig.first.nRows(), eig.first.nCols());
-        Matrix eigenvectors = Matrix(eig.second.nRows(), eig.second.nCols());
-
-        // keep the order of eigenvalues in this vector
-        vector<int> newOrder;
-        for (int i = 0; i < eigenvalues.nRows(); i++) {
-          int position = 0;
-          for (int j = 0; j < newOrder.size(); j++)
-            if (eig.first(i, 0) < eig.first(newOrder[j], 0))
-              position++;
-          newOrder.insert(newOrder.begin() + position, i);
-        }
-
-        // order eigenvalues and eigenvectors by the value of the eigenvalues
-        for (int i = 0; i < newOrder.size(); i++) {
-          eigenvalues(i, 0) = eig.first(newOrder[i], 0);
-
-          for (int j = 0; j < eigenvectors.nRows(); j++) {
-            eigenvectors(j, i) = eig.second(j, newOrder[i]);
-          }
-        }
-
-        return make_pair(eigenvalues, eigenvectors);
+        return eigsort(eig.first, eig.second);
       }
 
       iterations++;
