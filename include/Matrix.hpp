@@ -1083,6 +1083,29 @@ class Matrix {
   Matrix getColumns(const Matrix bin) {
     return filter(bin, true);
   }
+
+  bool isSymmetric() {
+    return *this == transpose();
+  }
+
+  Matrix normalize() {
+    Matrix result(mRows, mCols, mData);
+
+    for (size_t j = 0; j < mCols; j++) {
+      double length = 0;
+#pragma omp parallel for reduction(+:length)
+      for (size_t i = 0; i < mRows; i++) {
+        length += pow(result(i, j), 2);
+      }
+      length = sqrt(length);
+#pragma omp parallel for
+      for (size_t i = 0; i < mRows; i++) {
+        result(i, j) /= length;
+      }
+    }
+
+    return result;
+  }
 };
 
 #endif //MACHINE_LEARNING_MATRIX_HPP
