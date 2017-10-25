@@ -36,7 +36,7 @@ class KNN {
 
     int largestDistanceIndex = 0;
     double largestCandidateDistance = distance == EUCLIDEAN ? euclidean(testie, data[0]) : hamming(testie, data[0]);;
-    for (int i = 0; i < data.size(); i ++) {
+    for (int i = 0; i < data.size(); i++) {
       // get the euclidean euclidean from the new element to the current element in our dataset
       double current_distance = distance == EUCLIDEAN ? euclidean(testie, data[i]) : hamming(testie, data[i]);
 
@@ -60,7 +60,7 @@ class KNN {
         // look, in the k candidates, the furthest one
         largestDistanceIndex = 0;
         largestCandidateDistance = chosen_distances[0];
-        for (int j = 1; j < k; j ++) {
+        for (int j = 1; j < k; j++) {
           if (largestCandidateDistance < chosen_distances[j]) {
             largestDistanceIndex = j;
             largestCandidateDistance = chosen_distances[j];
@@ -96,7 +96,7 @@ class KNN {
     this->data = std::move(data);
 
     sort(this->data.begin(), this->data.end(), [](const vector<double> &a, const vector<double> &b) {
-      for (int i = 0; i < a.size(); i ++) {
+      for (int i = 0; i < a.size(); i++) {
         if (a[i] < b[i])
           return true;
         if (a[i] > b[i])
@@ -116,7 +116,7 @@ class KNN {
   //! \return Euclidean distance between a and b
   double euclidean(vector<double> a, vector<double> b) {
     double d = 0;
-    for (int i = 0; i < a.size(); i ++) {
+    for (int i = 0; i < a.size(); i++) {
       // ignore our dependent variable column
       if (i == yColumn)
         continue;
@@ -132,7 +132,7 @@ class KNN {
   //! \return Euclidean distance between a and b
   double hamming(vector<double> a, vector<double> b) {
     double d = 0;
-    for (int i = 0; i < a.size(); i ++) {
+    for (int i = 0; i < a.size(); i++) {
       // ignore our dependent variable column
       if (i == yColumn)
         continue;
@@ -151,7 +151,7 @@ class KNN {
     double ySum = 0;
 
 #pragma omp parallel for reduction(+:ySum)
-    for (int j = 0; j < k; j ++) {
+    for (int j = 0; j < k; j++) {
       ySum += data[chosen_indices[j]][yColumn];
     }
 
@@ -171,11 +171,11 @@ class KNN {
     // sum the occurrences of each class
     class_votes[0] = 1;
     classes.push_back(data[chosen_indices[0]][yColumn]);
-    for (int j = 1; j < k; j ++) {
+    for (int j = 1; j < k; j++) {
       double current_class = data[chosen_indices[j]][yColumn];
-      for (int i = 0; i < classes.size(); i ++) {
+      for (int i = 0; i < classes.size(); i++) {
         if (classes[i] == current_class) {
-          class_votes[i] ++;
+          class_votes[i]++;
           break;
         }
       }
@@ -184,7 +184,7 @@ class KNN {
     // get the class with the most votes
     double winner = classes[0];
     int winner_votes = class_votes[0];
-    for (int j = 1; j < k; j ++) {
+    for (int j = 1; j < k; j++) {
       if (class_votes[j] > winner_votes) {
         winner = classes[j];
         winner_votes = class_votes[j];
@@ -201,7 +201,7 @@ class KNN {
     using clock = chrono::high_resolution_clock;
     chrono::time_point<chrono::system_clock> start = clock::now();
 
-    for (int i = 0; i < test.size(); i ++) {
+    for (int i = 0; i < test.size(); i++) {
       if (verbose and i % 100 == 0) {
         float tempo = ((chrono::duration<float>) (clock::now() - start)).count();
         float media = tempo / (i + 1);
@@ -218,7 +218,7 @@ class KNN {
     vector<double> y;
     unsigned long totalSize = test.size();
 
-    for (int i = 0; i < test.size(); i ++) {
+    for (int i = 0; i < test.size(); i++) {
       if (verbose and i % (totalSize / 100) == 0)
         cout << totalSize / (i + 1);
       y.push_back(regression(test[i]));
