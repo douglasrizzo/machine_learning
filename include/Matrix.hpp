@@ -14,6 +14,8 @@
 #include <iomanip>
 #include <cmath>
 #include <set>
+#include <complex>
+#include "nr3dodo.hpp"
 
 using namespace std;
 
@@ -1112,6 +1114,470 @@ class Matrix {
     }
 
     return result;
+  }
+
+  //region Numerical Recipes
+
+  pair<Matrix, Matrix> eigenNonSymmetric(bool hes = true) {
+    tuple<Matrix, vector<double>> values = balance();
+    Matrix balanced = get<0>(values);
+    vector<double> scale = get<1>(values);
+
+    Matrix zz = identity(balanced.mRows);
+
+    if (hes) {
+      tuple<Matrix, Matrix> hesTuple = balanced.elmhes();
+      balanced = get<0>(hesTuple);
+      zz = get<1>(hesTuple);
+    }
+
+    vector<complex<double>> wri = balanced.hqr2(zz);
+    zz = zz.balbak(scale);
+
+    Matrix eigval(1, wri.size());
+
+#pragma omp parallel for
+    for (size_t j = 0; j < wri.size(); j++)
+      eigval(0, j) = wri[j].real();
+
+    return eigsort(eigval, zz);
+  }
+
+ private:
+
+  //! Given a matrix a[0..n-1][0..n-1], this routine replaces
+  //! it by a balanced matrix with identical eigenvalues.
+  //! A symmetric matrix is already balanced and is unaffected
+  //! by this procedure.
+  tuple<Matrix, vector<double>> balance() {
+    const double RADIX = numeric_limits<double>::radix;
+    bool done = false;
+    double sqrdx = RADIX * RADIX;
+    vector<double> scale(mRows, 1.0);
+
+    Matrix result;
+    result.mRows = mRows;
+    result.mCols = mCols;
+    result.mData = mData;
+
+    while (!done) {
+      done = true;
+      for (size_t i = 0; i < mRows; i++) {
+        double r = 0.0, c = 0.0;
+        for (int j = 0; j < mRows; j++)
+          if (j != i) {
+            c += abs(result(j, i));
+            r += abs(result(i, j));
+          }
+        if (c != 0.0 && r != 0.0) {
+          double g = r / RADIX;
+          double f = 1.0;
+          double s = c + r;
+          while (c < g) {
+            f *= RADIX;
+            c *= sqrdx;
+          }
+          g = r * RADIX;
+          while (c > g) {
+            f /= RADIX;
+            c /= sqrdx;
+          }
+          if ((c + r) / f < 0.95 * s) {
+            done = false;
+            g = 1.0 / f;
+            scale[i] *= f;
+            for (size_t j = 0; j < mRows; j++)
+              result(i, j) *= g;
+            for (size_t j = 0; j < mRows; j++)
+              result(j, i) *= f;
+          }
+        }
+      }
+    }
+
+    return make_tuple(result, scale);
+  }
+
+  //! Forms the eigenvectors of a real nonsymmetric matrix by back transforming
+  //! those of the corresponding balanced matrix determined by balance.
+  Matrix balbak(vector<double> scale) {
+    Matrix result(mRows, mCols, mData);
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < mRows; i++)
+      for (size_t j = 0; j < mRows; j++)
+        result(i, j) *= scale[i];
+
+    return result;
+  }
+
+  void swap(size_t row1, size_t col1, size_t row2, size_t col2) {
+    double tmp = this->operator()(row1, col1);
+    this->operator()(row1, col1) = this->operator()(row2, col2);
+    this->operator()(row2, col2) = tmp;
+  }
+
+  //! Reduction to Hessenberg form by the elimination method. Replaces the real nonsymmetric
+  //! matrix a[0..n-1][0..n-1] by an upper Hessenberg matrix with identical eigenvalues.
+  //! Recommended, but not required, is that this routine be preceded by balance. On output,
+  //! the Hessenberg matrix is in elements a[i][j] with i  j+1. Elements with i > j+1 are to be
+  //! thought of as zero, but are returned with random values.
+  tuple<Matrix, Matrix> elmhes() {
+    Matrix result(mRows, mCols, mData);
+
+    vector<size_t> perm(mRows - 1);
+
+    for (size_t m = 1; m < mRows - 1; m++) {
+      double x = 0.0;
+      size_t i = m;
+      for (size_t j = m; j < mRows; j++) {
+        if (abs(result(j, m - 1)) > abs(x)) {
+          x = result(j, m - 1);
+          i = j;
+        }
+      }
+      perm[m] = i;
+      if (i != m) {
+        for (size_t j = m - 1; j < mRows; j++) {
+          result.swap(i, j, m, j);
+        }
+        for (size_t j = 0; j < mRows; j++) {
+          result.swap(j, i, j, m);
+        }
+      }
+      if (x != 0.0) {
+        for (i = m + 1; i < mRows; i++) {
+          double y = result(i, m - 1);
+          if (y != 0.0) {
+            y /= x;
+            result(i, m - 1) = y;
+            for (size_t j = m; j < mRows; j++)
+              result(i, j) -= y * result(m, j);
+            for (size_t j = 0; j < mRows; j++)
+              result(j, m) += y * result(j, i);
+          }
+        }
+      }
+    }
+
+    // accumulates the stabilized elementary similarity transformations used in the reduction
+    // to upper Hessenberg form by elmhes. The multipliers that were used in the reduction
+    // are obtained from the lower triangle (below the subdiagonal) of a. The transformations are
+    // permuted according to the permutations stored in perm.
+
+    Matrix zz = identity(mRows);
+    for (size_t mp = mRows - 2; mp > 0; mp--) {
+      for (size_t k = mp + 1; k < mRows; k++)
+        zz(k, mp) = this->operator()(k, mp - 1);
+      size_t i = perm[mp];
+      if (i != mp) {
+        for (size_t j = mp; j < mRows; j++) {
+          zz(mp, j) = zz(i, j);
+          zz(i, j) = 0.0;
+        }
+        zz(i, mp) = 1.0;
+      }
+    }
+
+    return make_tuple(result, zz);
+  }
+
+  /**
+   * Finds all eigenvalues of an upper Hessenberg matrix a[0..n-1][0..n-1]. On input a can be
+   * exactly as output from elmhes and eltran 11.6. On output, wri[0..n-1] contains the eigenvalues
+   * of a, while zz[0..n-1][0..n-1] is a matrix whose columns contain the corresponding
+   * eigenvectors. The eigenvalues are not sorted, except that complex conjugate pairs appear
+   * consecutively with the eigenvalue having the positive imaginary part first. For a complex eigenvalue,
+   * only the eigenvector corresponding to the eigenvalue with positive imaginary part is stored, with
+   * real part in zz[0..n-1][i] and imaginary part in h.zz[0..n-1][i+1]. The eigenvectors are
+   * not normalized.
+   */
+  vector<complex<double>> hqr2(Matrix &zz) {
+    int its;
+    size_t l, nn, j, i, m, mmin, k, na;
+    double z, y, x, w, v, u, t, s, r, q, p, anorm = 0.0, ra, sa, vr, vi;
+
+    Matrix result(mRows, mCols, mData);
+
+    vector<complex<double>> wri(mRows);
+
+    const double EPS = numeric_limits<double>::epsilon();
+
+    for (i = 0; i < result.mRows; i++) {
+      for (j = max(int(i - 1), 0); j < result.mRows; j++) {
+        anorm += abs(result(i, j));
+      }
+    }
+
+    nn = mRows - 1;
+    t = 0.0;
+    while (nn >= 0 and nn < size_t(-2)) {
+      its = 0;
+      do {
+        for (l = nn; l > 0; l--) {
+          s = abs(result(l - 1, l - 1)) + abs(result(l, l));
+          if (s == 0.0)
+            s = anorm;
+          if (abs(result(l, l - 1)) <= EPS * s) {
+            result(l, l - 1) = 0.0;
+            break;
+          }
+        }
+        x = result(nn, nn);
+        if (l == nn) {
+          wri[nn] = result(nn, nn) = x + t;
+          nn--;
+        } else {
+          y = result(nn - 1, nn - 1);
+          w = result(nn, nn - 1) * result(nn - 1, nn);
+          if (l == nn - 1) {
+            p = 0.5 * (y - x);
+            q = p * p + w;
+            z = sqrt(abs(q));
+            x += t;
+            result(nn, nn) = x;
+            result(nn - 1, nn - 1) = y + t;
+            if (q >= 0.0) {
+              z = p + sign(z, p);
+              wri[nn - 1] = wri[nn] = x + z;
+              if (z != 0.0)
+                wri[nn] = x - w / z;
+              x = result(nn, nn - 1);
+              s = abs(x) + abs(z);
+              p = x / s;
+              q = z / s;
+              r = sqrt(p * p + q * q);
+              p /= r;
+              q /= r;
+              for (j = nn - 1; j < result.mRows; j++) {
+                z = result(nn - 1, j);
+                result(nn - 1, j) = q * z + p * result(nn, j);
+                result(nn, j) = q * result(nn, j) - p * z;
+              }
+              for (i = 0; i <= nn; i++) {
+                z = result(i, nn - 1);
+                result(i, nn - 1) = q * z + p * result(i, nn);
+                result(i, nn) = q * result(i, nn) - p * z;
+              }
+              for (i = 0; i < result.mRows; i++) {
+                z = zz(i, nn - 1);
+                zz(i, nn - 1) = q * z + p * zz(i, nn);
+                zz(i, nn) = q * zz(i, nn) - p * z;
+              }
+            } else {
+              wri[nn] = complex<double>(x + p, -z);
+              wri[nn - 1] = conj(wri[nn]);
+            }
+            nn -= 2;
+          } else {
+            if (its == 30)
+              throw ("Too many iterations in hqr");
+            if (its == 10 || its == 20) {
+              t += x;
+              for (i = 0; i < nn + 1; i++)
+                result(i, i) -= x;
+              s = abs(result(nn, nn - 1)) + abs(result(nn - 1, nn - 2));
+              y = x = 0.75 * s;
+              w = -0.4375 * s * s;
+            }
+            ++its;
+            for (m = nn - 2; m >= l; m--) {
+              z = result(m, m);
+              r = x - z;
+              s = y - z;
+              p = (r * s - w) / result(m + 1, m) + result(m, m + 1);
+              q = result(m + 1, m + 1) - z - r - s;
+              r = result(m + 2, m + 1);
+              s = abs(p) + abs(q) + abs(r);
+              p /= s;
+              q /= s;
+              r /= s;
+              if (m == l)
+                break;
+              u = abs(result(m, m - 1)) * (abs(q) + abs(r));
+              v = abs(p) *
+                  (abs(result(m - 1, m - 1)) + abs(z) + abs(result(m + 1, m + 1)));
+              if (u <= EPS * v)
+                break;
+            }
+            for (i = m; i < nn - 1; i++) {
+              result(i + 2, i) = 0.0;
+              if (i != m)
+                result(i + 2, i - 1) = 0.0;
+            }
+            for (k = m; k < nn; k++) {
+              if (k != m) {
+                p = result(k, k - 1);
+                q = result(k + 1, k - 1);
+                r = 0.0;
+                if (k + 1 != nn)
+                  r = result(k + 2, k - 1);
+                if ((x = abs(p) + abs(q) + abs(r)) != 0.0) {
+                  p /= x;
+                  q /= x;
+                  r /= x;
+                }
+              }
+              if ((s = sign(sqrt(p * p + q * q + r * r), p)) != 0.0) {
+                if (k == m) {
+                  if (l != m)
+                    result(k, k - 1) = -result(k, k - 1);
+                } else
+                  result(k, k - 1) = -s * x;
+                p += s;
+                x = p / s;
+                y = q / s;
+                z = r / s;
+                q /= p;
+                r /= p;
+                for (j = k; j < result.mRows; j++) {
+                  p = result(k, j) + q * result(k + 1, j);
+                  if (k + 1 != nn) {
+                    p += r * result(k + 2, j);
+                    result(k + 2, j) -= p * z;
+                  }
+                  result(k + 1, j) -= p * y;
+                  result(k, j) -= p * x;
+                }
+                mmin = nn < k + 3 ? nn : k + 3;
+                for (i = 0; i < mmin + 1; i++) {
+                  p = x * result(i, k) + y * result(i, k + 1);
+                  if (k + 1 != nn) {
+                    p += z * result(i, k + 2);
+                    result(i, k + 2) -= p * r;
+                  }
+                  result(i, k + 1) -= p * q;
+                  result(i, k) -= p;
+                }
+                for (i = 0; i < result.mRows; i++) {
+                  p = x * zz(i, k) + y * zz(i, k + 1);
+                  if (k + 1 != nn) {
+                    p += z * zz(i, k + 2);
+                    zz(i, k + 2) -= p * r;
+                  }
+                  zz(i, k + 1) -= p * q;
+                  zz(i, k) -= p;
+                }
+              }
+            }
+          }
+        }
+      } while (l + 1 < nn and nn < size_t(-2));
+    }
+    if (anorm != 0.0) {
+      for (nn = result.mRows - 1; nn < size_t(-1); nn--) {
+        p = real(wri[nn]);
+        q = imag(wri[nn]);
+        na = nn - 1;
+        if (q == 0.0) {
+          m = nn;
+          result(nn, nn) = 1.0;
+          for (i = nn - 1; i < size_t(-1); i--) {
+            w = result(i, i) - p;
+            r = 0.0;
+            for (j = m; j <= nn; j++)
+              r += result(i, j) * result(j, nn);
+            if (imag(wri[i]) < 0.0) {
+              z = w;
+              s = r;
+            } else {
+              m = i;
+
+              if (imag(wri[i]) == 0.0) {
+                t = w;
+                if (t == 0.0)
+                  t = EPS * anorm;
+                result(i, nn) = -r / t;
+              } else {
+                x = result(i, i + 1);
+                y = result(i + 1, i);
+                q = SQR(real(wri[i]) - p) + SQR(imag(wri[i]));
+                t = (x * s - z * r) / q;
+                result(i, nn) = t;
+                if (abs(x) > abs(z))
+                  result(i + 1, nn) = (-r - w * t) / x;
+                else
+                  result(i + 1, nn) = (-s - y * t) / z;
+              }
+              t = abs(result(i, nn));
+              if (EPS * t * t > 1)
+                for (j = i; j <= nn; j++)
+                  result(j, nn) /= t;
+            }
+          }
+        } else if (q < 0.0) {
+          m = na;
+          if (abs(result(nn, na)) > abs(result(na, nn))) {
+            result(na, na) = q / result(nn, na);
+            result(na, nn) = -(result(nn, nn) - p) / result(nn, na);
+          } else {
+            complex<double> temp = complex<double>(0.0, -result(na, nn)) / complex<double>(result(na, na) - p, q);
+            result(na, na) = real(temp);
+            result(na, nn) = imag(temp);
+          }
+          result(nn, na) = 0.0;
+          result(nn, nn) = 1.0;
+          for (i = nn - 2; i >= 0; i--) {
+            w = result(i, i) - p;
+            ra = sa = 0.0;
+            for (j = m; j <= nn; j++) {
+              ra += result(i, j) * result(j, na);
+              sa += result(i, j) * result(j, nn);
+            }
+            if (imag(wri[i]) < 0.0) {
+              z = w;
+              r = ra;
+              s = sa;
+            } else {
+              m = i;
+              if (imag(wri[i]) == 0.0) {
+                complex<double> temp = complex<double>(-ra, -sa) / complex<double>(w, q);
+                result(i, na) = real(temp);
+                result(i, nn) = imag(temp);
+              } else {
+                x = result(i, i + 1);
+                y = result(i + 1, i);
+                vr = SQR(real(wri[i]) - p) + SQR(imag(wri[i])) - q * q;
+                vi = 2.0 * q * (real(wri[i]) - p);
+                if (vr == 0.0 && vi == 0.0)
+                  vr = EPS * anorm *
+                      (abs(w) + abs(q) + abs(x) + abs(y) + abs(z));
+                complex<double> temp =
+                    complex<double>(x * r - z * ra + q * sa, x * s - z * sa - q * ra) /
+                        complex<double>(vr, vi);
+                result(i, na) = real(temp);
+                result(i, nn) = imag(temp);
+                if (abs(x) > abs(z) + abs(q)) {
+                  result(i + 1, na) = (-ra - w * result(i, na) + q * result(i, nn)) / x;
+                  result(i + 1, nn) = (-sa - w * result(i, nn) - q * result(i, na)) / x;
+                } else {
+                  complex<double> temp = complex<double>(-r - y * result(i, na), -s - y * result(i, nn)) /
+                      complex<double>(z, q);
+                  result(i + 1, na) = real(temp);
+                  result(i + 1, nn) = imag(temp);
+                }
+              }
+            }
+            t = max(abs(result(i, na)), abs(result(i, nn)));
+            if (EPS * t * t > 1)
+              for (j = i; j <= nn; j++) {
+                result(j, na) /= t;
+                result(j, nn) /= t;
+              }
+          }
+        }
+      }
+      for (j = mRows - 1; j < size_t(-1); j--) {
+        for (i = 0; i < mRows; i++) {
+          z = 0.0;
+          for (k = 0; k <= j; k++)
+            z += zz(i, k) * result(k, j);
+          zz(i, j) = z;
+        }
+      }
+    }
+
+    return wri;
   }
 };
 
