@@ -55,7 +55,7 @@ class Matrix {
   }
 
   static pair<Matrix, Matrix> eigsort(Matrix eigenvalues, Matrix eigenvectors) {
-    if(eigenvalues.mRows!=eigenvectors.mCols)
+    if (eigenvalues.mRows != eigenvectors.mCols)
       throw runtime_error("Incompatible number of eigenvalues and eigenvectors");
 
     Matrix eigval(eigenvalues.mRows, eigenvalues.mCols, eigenvalues.mData);
@@ -363,11 +363,11 @@ class Matrix {
   }
 
   bool operator==(const Matrix &other) {
-    for (size_t i = 0; i < mRows; i++) {
-      for (size_t j = 0; j < mCols; j++) {
-        if (this->operator()(i, j) != other(i, j))
-          return false;
-      }
+    if (mData.size() != other.mData.size() || mRows != other.mRows || mCols != other.mCols)
+      return false;
+
+    for (int k = 0; k < mData.size(); k++) {
+      if (mData[k] != other.mData[k])return false;
     }
 
     return true;
@@ -422,13 +422,7 @@ class Matrix {
   //! \param value value to be used for initialization
   //! \return a matrix with all values set to <code>value</code>
   static Matrix fill(size_t rows, size_t cols, double value) {
-    Matrix result(rows, cols);
-
-    for (size_t i = 0; i < rows; i++) {
-      for (size_t j = 0; j < cols; j++) {
-        result(i, j) = value;
-      }
-    }
+    Matrix result(rows, cols, vector<double>(rows * cols, value));
     return result;
   }
 
@@ -1046,13 +1040,7 @@ class Matrix {
   }
 
   bool contains(double value) {
-    for (int i = 0; i < mRows; ++i) {
-      for (int j = 0; j < mCols; ++j) {
-        if (this->operator()(i, j) == value)
-          return true;
-      }
-    }
-    return false;
+    return std::find(mData.begin(), mData.end(), value) != mData.end();
   }
 
   bool isEmpty() {
