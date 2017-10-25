@@ -391,10 +391,42 @@ void testLDAIris() {
 
   LDA lda(data, y);
   lda.fit();
+
+  cout << lda.transform();
+}
+
+void testPCAIris() {
+  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+
+  Matrix y = data.getColumn(4);
+  data.removeColumn(4);
+
+  PCA pca(data);
+  pca.fit();
+
+  cout << pca.transform(2);
+}
+
+void testMDFIris() {
+  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+
+  Matrix y = data.getColumn(4);
+  data.removeColumn(4);
+
+  PCA pca(data);
+  pca.fit();
+  cout << pca.getCumPercentages();
+
+  LDA lda(pca.transform(2), y);
+  lda.fit();
+
+  cout << lda.transform();
 }
 
 void testLDA() {
-  testLDAIris();
+//  testLDAIris();
+  testPCAIris();
+//  testMDFIris();
 }
 
 int main() {
