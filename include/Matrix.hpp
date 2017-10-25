@@ -1007,76 +1007,6 @@ class Matrix {
     return result;
   }
 
-  //! Calculates the eigenvalues and eigenvectors of the matrix using the Jacobi eigenvalue algorithm
-  //! \return a pair containing eigenvalues in a column vector in the first element of the pair
-  //! and the correponding eigenvectors in the second element
-  pair<Matrix, Matrix> eigen(bool sort = true) {
-    // Jacobi eigenvalue algorithm as explained
-    // by profs Marina Andretta and Franklina Toledo
-
-    // copy the current matrix
-    Matrix A = copy();
-    // initialize the eigenvector matrix
-    Matrix V = identity(A.mCols);
-
-    // get the tolerance
-    double eps = numeric_limits<double>::epsilon();
-    unsigned iterations = 0;
-
-    // initiate the loop for numerical approximation of the eigenvalues
-    while (true) {
-      // find the element in the matrix with the largest modulo
-      size_t p, q;
-      double largest = 0;
-      for (size_t i = 0; i < A.mRows; i++) {
-        for (size_t j = 0; j < A.mCols; j++) {
-          // it can't be in the diagonal
-          if (i != j and abs(A(i, j)) > largest) {
-            largest = abs(A(i, j));
-            p = i;
-            q = j;
-          }
-        }
-      }
-
-      // if the largest non-diagonal element of A is zero +/- eps,
-      // it means A is almost diagonalized and the eigenvalues are
-      // in the diagonal of A
-      if (largest < 2 * eps or iterations >= 1000) {
-        //eigenvalues are returned in a column matrix for convenience
-
-        auto eig = make_pair(A.diagonal(), V);
-
-        if (!sort)
-          return eig;
-
-        return eigsort(eig.first, eig.second);
-      }
-
-      iterations++;
-
-      // else, perform a Jacobi rotation using this angle phi as reference
-      double phi = (A(q, q) - A(p, p)) / (2 * A(p, q));
-      double sign = (phi > 0) - (phi < 0);
-      double t = phi == 0 ? 1 : 1 / (phi + sign * sqrt(pow(phi, 2) + 1));
-      double cos = 1 / (sqrt(1 + pow(t, 2)));
-      double sin = t / (sqrt(1 + pow(t, 2)));
-
-      // the matrix that will apply the rotation is basically an identity matrix...
-      Matrix U = identity(A.mRows);
-
-      // ... with the exception of these values
-      U(p, p) = U(q, q) = cos;
-      U(p, q) = sin;
-      U(q, p) = -sin;
-
-      // apply the rotation
-      A = U.transpose() * A * U;
-      // update the corresponding eigenvectors
-      V = V * U;
-    }
-  }
-
   //! Standardizes the columns of the matrix, subtracting each element of a column
   //! by the column mean and dividing it by the standard deviation of the column.
   //! \return a new matrix with the columns standardized as described
@@ -1195,9 +1125,91 @@ class Matrix {
     return result;
   }
 
-  //region Numerical Recipes
+  //! Calculates the eigenvalues and eigenvectors of a matrix
+  //! \param sort whether to sort the eigenvalues and eigenvectors
+  //! \return a pair containing eigenvalues in a column vector in the first element of the pair
+  //! and the correponding eigenvectors in the second element
+  pair<Matrix, Matrix> eigen(bool sort = true) {
+    return isSymmetric() ? eigenSymmetric(sort): eigenNonSymmetric();
+  };
 
-  pair<Matrix, Matrix> eigenNonSymmetric(bool hes = true) {
+  //! Calculates the eigenvalues and eigenvectors of a symmetric matrix using the Jacobi eigenvalue algorithm
+  //! \return a pair containing eigenvalues in a column vector in the first element of the pair
+  //! and the correponding eigenvectors in the second element
+  pair<Matrix, Matrix> eigenSymmetric(bool sort = true) {
+    // Jacobi eigenvalue algorithm as explained
+    // by profs Marina Andretta and Franklina Toledo
+
+    // copy the current matrix
+    Matrix A = copy();
+    // initialize the eigenvector matrix
+    Matrix V = identity(A.mCols);
+
+    // get the tolerance
+    double eps = numeric_limits<double>::epsilon();
+    unsigned iterations = 0;
+
+    // initiate the loop for numerical approximation of the eigenvalues
+    while (true) {
+      // find the element in the matrix with the largest modulo
+      size_t p, q;
+      double largest = 0;
+      for (size_t i = 0; i < A.mRows; i++) {
+        for (size_t j = 0; j < A.mCols; j++) {
+          // it can't be in the diagonal
+          if (i != j and abs(A(i, j)) > largest) {
+            largest = abs(A(i, j));
+            p = i;
+            q = j;
+          }
+        }
+      }
+
+      // if the largest non-diagonal element of A is zero +/- eps,
+      // it means A is almost diagonalized and the eigenvalues are
+      // in the diagonal of A
+      if (largest < 2 * eps or iterations >= 1000) {
+        //eigenvalues are returned in a column matrix for convenience
+
+        auto eig = make_pair(A.diagonal(), V);
+
+        if (!sort)
+          return eig;
+
+        return eigsort(eig.first, eig.second);
+      }
+
+      iterations++;
+
+      // else, perform a Jacobi rotation using this angle phi as reference
+      double phi = (A(q, q) - A(p, p)) / (2 * A(p, q));
+      double sign = (phi > 0) - (phi < 0);
+      double t = phi == 0 ? 1 : 1 / (phi + sign * sqrt(pow(phi, 2) + 1));
+      double cos = 1 / (sqrt(1 + pow(t, 2)));
+      double sin = t / (sqrt(1 + pow(t, 2)));
+
+      // the matrix that will apply the rotation is basically an identity matrix...
+      Matrix U = identity(A.mRows);
+
+      // ... with the exception of these values
+      U(p, p) = U(q, q) = cos;
+      U(p, q) = sin;
+      U(q, p) = -sin;
+
+      // apply the rotation
+      A = U.transpose() * A * U;
+      // update the corresponding eigenvectors
+      V = V * U;
+    }
+  }
+
+  //! Calculates the eigenvalues and eigenvectors of a on-symmetric matrix
+  //! \param sort whether to sort the eigenvalues and eigenvectors
+  //! \param calculate the eigenvalues and eigenvectors of a Hessenberg matrix with
+  //! identical eigenvalues and eigenvectors instead
+  //! \return a pair containing eigenvalues in a column vector in the first element of the pair
+  //! and the correponding eigenvectors in the second element
+  pair<Matrix, Matrix> eigenNonSymmetric(bool sort=true, bool hes = true) {
     tuple<Matrix, vector<double>> values = balance();
     Matrix balanced = get<0>(values);
     vector<double> scale = get<1>(values);

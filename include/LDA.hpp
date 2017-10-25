@@ -36,7 +36,7 @@ class LDA {
       Sb += classElements.nRows() * meanDiff * meanDiff.transpose();
     }
 
-    auto eigen = (Sw.inverse() * Sb).eigenNonSymmetric();
+    auto eigen = (Sw.inverse() * Sb).eigen();
 
     eigenvalues = eigen.first;
     eigenvectors = eigen.second;
