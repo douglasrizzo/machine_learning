@@ -10,5 +10,5 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-set(SOURCE_FILES main.cpp include/KNN.hpp include/LeastSquares.hpp include/Matrix.hpp include/PCA.hpp include/LDA.hpp include/nr3dodo.hpp)
+set(SOURCE_FILES main.cpp include/KNN.hpp include/LeastSquares.hpp include/Matrix.hpp include/PCA.hpp include/LDA.hpp include/nr3.h include/eigen_unsym.h include/MersenneTwister.hpp)
 add_executable(machine_learning ${SOURCE_FILES})

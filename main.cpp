@@ -417,7 +417,7 @@ void testMDFIris() {
   pca.fit();
   cout << pca.getCumPercentages();
 
-  LDA lda(pca.transform(2), y);
+  LDA lda(pca.transform(), y);
   lda.fit();
 
   cout << lda.transform();
