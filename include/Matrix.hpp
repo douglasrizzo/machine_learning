@@ -72,8 +72,8 @@ class Matrix {
     Matrix eigvec(eigenvectors.mRows, eigenvectors.mCols, eigenvectors.mData);
 
     // keep the order of eigenvalues in this vector
-    vector<int> newOrder;
-    for (int i = 0; i < eigenvalues.nRows(); i++) {
+    vector<size_t> newOrder;
+    for (size_t i = 0; i < eigenvalues.nRows(); i++) {
       int position = 0;
       for (int j = 0; j < newOrder.size(); j++)
         if (eigenvalues(i, 0) < eigenvalues(newOrder[j], 0))
@@ -1130,14 +1130,14 @@ class Matrix {
   //! \param sort whether to sort the eigenvalues and eigenvectors
   //! \return a pair containing eigenvalues in a column vector in the first element of the pair
   //! and the correponding eigenvectors in the second element
-  pair<Matrix, Matrix> eigen(bool sort = true) {
-    return isSymmetric() ? eigenSymmetric(sort): eigenNonSymmetric();
+  pair<Matrix, Matrix> eigen() {
+    return isSymmetric() ? eigenSymmetric() : eigenNonSymmetric();
   };
 
   //! Calculates the eigenvalues and eigenvectors of a symmetric matrix using the Jacobi eigenvalue algorithm
   //! \return a pair containing eigenvalues in a column vector in the first element of the pair
   //! and the correponding eigenvectors in the second element
-  pair<Matrix, Matrix> eigenSymmetric(bool sort = true) {
+  pair<Matrix, Matrix> eigenSymmetric() {
     // Jacobi eigenvalue algorithm as explained
     // by profs Marina Andretta and Franklina Toledo
 
@@ -1171,13 +1171,7 @@ class Matrix {
       // in the diagonal of A
       if (largest < 2 * eps or iterations >= 1000) {
         //eigenvalues are returned in a column matrix for convenience
-
-        auto eig = make_pair(A.diagonal(), V);
-
-        if (!sort)
-          return eig;
-
-        return eigsort(eig.first, eig.second);
+        return eigsort(A.diagonal(), V);
       }
 
       iterations++;
