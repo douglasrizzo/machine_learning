@@ -65,8 +65,8 @@ class Matrix {
   //! It must have the same number of columns as <code>eigenvalues</code> has rows
   //! \return
   static pair<Matrix, Matrix> eigsort(Matrix eigenvalues, Matrix eigenvectors) {
-    if (eigenvalues.mRows != eigenvectors.mCols)
-      throw runtime_error("Incompatible number of eigenvalues and eigenvectors");
+//    if (eigenvalues.mCols != eigenvectors.mRows)
+//      throw runtime_error("Incompatible number of eigenvalues and eigenvectors");
 
     Matrix eigval(eigenvalues.mRows, eigenvalues.mCols, eigenvalues.mData);
     Matrix eigvec(eigenvectors.mRows, eigenvectors.mCols, eigenvectors.mData);
