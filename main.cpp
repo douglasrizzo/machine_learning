@@ -8,6 +8,7 @@
 #include "include/LeastSquares.hpp"
 #include "include/PCA.hpp"
 #include "include/LDA.hpp"
+#include "include/KMeans.hpp"
 
 using namespace std;
 
@@ -425,8 +426,27 @@ void testMDFIris() {
 
 void testLDA() {
 //  testLDAIris();
-  testPCAIris();
-//  testMDFIris();
+//  testPCAIris();
+  testMDFIris();
+}
+
+void testKMeansToyDataset() {
+  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/kmeans-toy.csv");
+
+  KMeans kmeans;
+  kmeans.fit(data, 3);
+}
+
+void testKMeansIris() {
+  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+  data.removeColumn(4);
+  KMeans kmeans;
+  kmeans.fit(data, 3);
+}
+
+void testKMeans() {
+  testKMeansToyDataset();
+  testKMeansIris();
 }
 
 int main() {
@@ -441,7 +461,8 @@ int main() {
 //    testMatrices();
 //    testLeastSquares();
 //    testPCA();
-  testLDA();
+//  testLDA();
+  testKMeans();
   return 0;
 }
 
