@@ -191,11 +191,11 @@ void testAddRowColumn() {
   const double arr[] = {1, 2,
                         3, 4,
                         5, 6};
-  Matrix m(3, 2, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0])));
+  Matrix<double> m(3, 2, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0])));
 
   cout << m;
   const double zerosColumn[] = {0, 0, 0};
-  Matrix column(3, 1, vector<double>(zerosColumn, zerosColumn + sizeof(zerosColumn) / sizeof(zerosColumn[0])));
+  Matrix<double> column(3, 1, vector<double>(zerosColumn, zerosColumn + sizeof(zerosColumn) / sizeof(zerosColumn[0])));
   m.addColumn(column, 1);
   cout << m;
 //    m.addRow(0, vector<double>(zerosColumn, zerosColumn + sizeof(zerosColumn) / sizeof(zerosColumn[0])));
@@ -206,16 +206,16 @@ void testInverseDeterminant() {
   const double arr1[] = {3, 5, 2,
                          8, 4, 8,
                          2, 4, 7};
-  Matrix test_d1(3, 3, vector<double>(arr1, arr1 + sizeof(arr1) / sizeof(arr1[0])));
+  Matrix<double> test_d1(3, 3, vector<double>(arr1, arr1 + sizeof(arr1) / sizeof(arr1[0])));
   const double arr2[] = {9, 5, 2, 5,
                          9, 5, 3, 7,
                          6, 5, 4, 8,
                          1, 5, 3, 7};
-  Matrix test_d2(4, 4, vector<double>(arr2, arr2 + sizeof(arr2) / sizeof(arr2[0])));
+  Matrix<double> test_d2(4, 4, vector<double>(arr2, arr2 + sizeof(arr2) / sizeof(arr2[0])));
   const double arr3[] = {3, 6, 2,
                          8, 6, 5,
                          9, 1, 6};
-  Matrix test_d3(3, 3, vector<double>(arr3, arr3 + sizeof(arr3) / sizeof(arr3[0])));
+  Matrix<double> test_d3(3, 3, vector<double>(arr3, arr3 + sizeof(arr3) / sizeof(arr3[0])));
 
   double d1 = test_d1.determinant(), d2 = test_d2.determinant(), d3 = test_d3.determinant();
   cout << d1 << endl;
@@ -230,7 +230,7 @@ void testOperations() {
   const double arr[] = {1, 2,
                         3, 4,
                         5, 6};
-  Matrix m(3, 2, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0]))),
+  Matrix<double> m(3, 2, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0]))),
       t = m.transpose(), mt = m * t, tm = t * m, mm = m + m, tt = t + t;
   cout << m;
   cout << t;
@@ -241,7 +241,7 @@ void testOperations() {
 }
 
 void testMatrixFromCSV() {
-  Matrix m = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
+  Matrix<double> m = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
   cout << m;
 }
 
@@ -249,10 +249,10 @@ void testEigen() {
   const double arr[] = {4, 2, 0,
                         2, 5, 3,
                         0, 3, 6};
-  Matrix coitada(3, 3, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0])));
+  Matrix<double> coitada(3, 3, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0])));
 
-  pair<Matrix, Matrix> eigens = coitada.eigen();
-  Matrix val = eigens.first, vec = eigens.second;
+  pair<Matrix<double>, Matrix<double>> eigens = coitada.eigen();
+  Matrix<double> val = eigens.first, vec = eigens.second;
 
   cout << val << endl << vec;
 }
@@ -266,9 +266,9 @@ void testMatrices() {
 }
 
 void testLeastSquaresAlps() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
-  Matrix X = data.getColumn(0);
-  Matrix y = data.getColumn(1);
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
+  Matrix<double> X = data.getColumn(0);
+  Matrix<double> y = data.getColumn(1);
   LeastSquares l(X, y);
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
@@ -285,9 +285,9 @@ void testLeastSquaresAlps() {
 }
 
 void testLeastSquaresBooks() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/books/training.csv");
-  Matrix y = data.getColumn(2);
-  Matrix X = data;
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/books/training.csv");
+  Matrix<double> y = data.getColumn(2);
+  Matrix<double> X = data;
   X.removeColumn(2);
   LeastSquares l(X, y);
   l.fit();
@@ -307,9 +307,9 @@ void testLeastSquaresBooks() {
 }
 
 void testLeastSquaresCensus() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/us-census/training.csv");
-  Matrix X = data.getColumn(0);
-  Matrix y = data.getColumn(1);
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/us-census/training.csv");
+  Matrix<double> X = data.getColumn(0);
+  Matrix<double> y = data.getColumn(1);
   LeastSquares l(X, y);
   l.fit();
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
@@ -332,7 +332,7 @@ void testLeastSquares() {
 }
 
 void testPCALindsay() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/lindsay.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/lindsay.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -341,7 +341,7 @@ void testPCALindsay() {
 }
 
 void testPCAAlps() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/alpswater/alpswater.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -350,7 +350,7 @@ void testPCAAlps() {
 }
 
 void testPCABooks() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/books/training.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/books/training.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -359,7 +359,7 @@ void testPCABooks() {
 }
 
 void testPCACensus() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/us-census/training.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/us-census/training.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -368,7 +368,7 @@ void testPCACensus() {
 }
 
 void testPCAHald() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/hald/hald.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/hald/hald.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -385,9 +385,9 @@ void testPCA() {
 }
 
 void testLDAIris() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
 
-  Matrix y = data.getColumn(4);
+  Matrix<double> y = data.getColumn(4);
   data.removeColumn(4);
 
   LDA lda(data, y);
@@ -397,9 +397,9 @@ void testLDAIris() {
 }
 
 void testPCAIris() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
 
-  Matrix y = data.getColumn(4);
+  Matrix <double> y = data.getColumn(4);
   data.removeColumn(4);
 
   PCA pca(data);
@@ -409,9 +409,9 @@ void testPCAIris() {
 }
 
 void testMDFIris() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
 
-  Matrix y = data.getColumn(4);
+  Matrix<double> y = data.getColumn(4);
   data.removeColumn(4);
 
   PCA pca(data);
@@ -431,22 +431,67 @@ void testLDA() {
 }
 
 void testKMeansToyDataset() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/kmeans-toy.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/kmeans-toy.csv");
 
   KMeans kmeans;
-  kmeans.fit(data, 3);
+  kmeans.fit(data, 3, 100, 1, 2, KMeans::RANDOM);
+  cout << kmeans.getY();
 }
 
 void testKMeansIris() {
-  Matrix data = Matrix::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
+  Matrix<double> data = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/iris/original.csv");
   data.removeColumn(4);
   KMeans kmeans;
   kmeans.fit(data, 3);
+  cout << kmeans.getY();
+}
+
+void testGiantToyDatasets() {
+  KMeans kmeans;
+  ofstream myfile;
+
+  Matrix<double> sset = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/s-set.csv");
+  kmeans.fit(sset, 15, 100, 100, 2, KMeans::SAMPLE, true);
+  myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/sset-clusters.txt");
+  myfile << kmeans.getY();
+  myfile.close();
+
+  Matrix<double> birch1 = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch1.csv");
+  kmeans.fit(birch1, 100, 1, 100, 2, KMeans::SAMPLE, true);
+  myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch1-clusters.txt");
+  myfile << kmeans.getY();
+  myfile.close();
+
+  Matrix<double> birch2 = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch2.csv");
+  kmeans.fit(birch2, 100, 1, 100, 2, KMeans::SAMPLE, true);
+  myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch2-clusters.txt");
+  myfile << kmeans.getY();
+  myfile.close();
+
+  Matrix<double> birch3 = Matrix<double>::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch3.csv");
+  kmeans.fit(birch3, 100, 1, 100, 2, KMeans::SAMPLE, true);
+  myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch3-clusters.txt");
+  myfile << kmeans.getY();
+  myfile.close();
 }
 
 void testKMeans() {
-  testKMeansToyDataset();
-  testKMeansIris();
+//  testKMeansToyDataset();
+//  testKMeansIris();
+  testGiantToyDatasets();
+}
+
+void sanityCheck() {
+  const double arr[] = {9, 1, 1, 2,
+                        9, 2, 3, 4,
+                        9, 3, 5, 2,
+                        9, 4, 7, 4};
+  const double y[] = {0, 1, 0, 1};
+  Matrix<double> m1(4, 4, vector<double>(arr, arr + sizeof(arr) / sizeof(arr[0])));
+  Matrix<double> groups(4, 1, vector<double>(y, y + sizeof(y) / sizeof(y[0])));
+
+  cout << m1.mean();
+  cout << m1.mean(groups);
 }
 
 int main() {
@@ -458,11 +503,12 @@ int main() {
 //  string white_path = "/home/dodo/repos/machine_learning/datasets/winequality-white/";
 //  testWine(red_path);
 //  testWine(white_path);
-//    testMatrices();
-//    testLeastSquares();
-//    testPCA();
+//  testMatrices();
+//  testLeastSquares();
+//  testPCA();
 //  testLDA();
   testKMeans();
+//  sanityCheck();
   return 0;
 }
 
