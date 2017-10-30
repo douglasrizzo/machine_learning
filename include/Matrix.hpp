@@ -1232,6 +1232,59 @@ class Matrix {
 
     return make_pair(eigenvalues, eigenvectors);
   }
+
+  Matrix WithinClassScatter(Matrix y) {
+    Matrix Sw = zeros(mCols, mCols);
+    Matrix uniqueClasses = y.unique();
+
+    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
+      Matrix classElements = getRows(y == i); // get class elements
+
+      Matrix scatterMatrix = classElements.scatter();
+      Sw += scatterMatrix;
+    }
+
+    return Sw;
+  }
+
+  Matrix BetweenClassScatter(Matrix y) {
+    Matrix innerMean = mean(y); // means for each class
+    Matrix grandMean = mean(); // mean of the entire data set
+    Matrix Sb = zeros(mCols, mCols);
+    Matrix uniqueClasses = y.unique();
+
+    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
+      Matrix classElements = getRows(y == i); // get class elements
+      Matrix meanDiff = innerMean.getRow(i) - grandMean;
+      Sb += classElements.nRows() * meanDiff * meanDiff.transpose();
+    }
+
+    return Sb;
+  }
+
+  T sum() {
+    T sum_of_elems = 0;
+    for (T &n : mData)
+      sum_of_elems += n;
+
+    return sum_of_elems;
+  }
+
+  bool isColumn() {
+    return mCols == 1;
+  }
+
+  bool isRow() {
+    return mRows == 1;
+  }
+
+  T min() {
+    return *std::min_element(std::begin(mData), std::end(mData));
+  }
+
+  T max() {
+    return *std::max_element(std::begin(mData), std::end(mData));
+  }
 };
 
 #endif //MACHINE_LEARNING_MATRIX_HPP

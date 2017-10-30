@@ -20,21 +20,8 @@ class LDA {
   }
 
   void fit() {
-    Matrix innerMean = X.mean(y); // means for each class
-    Matrix grandMean = X.mean(); // mean of the entire data set
-    Matrix uniqueClasses = y.unique();
-
-    Matrix Sw = Matrix::zeros(X.nCols(), X.nCols()); // within-class scatter matrix
-    Matrix Sb = Matrix::zeros(X.nCols(), X.nCols()); // between-class scatter matrix
-    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
-      Matrix classElements = X.getRows(y == i); // get class elements
-
-      Matrix scatterMatrix = classElements.scatter();
-      Sw += scatterMatrix;
-
-      Matrix meanDiff = innerMean.getRow(i) - grandMean;
-      Sb += classElements.nRows() * meanDiff * meanDiff.transpose();
-    }
+    MatrixD Sw = X.WithinClassScatter(y);
+    MatrixD Sb = X.BetweenClassScatter(y);
 
     auto eigen = (Sw.inverse() * Sb).eigen();
 
