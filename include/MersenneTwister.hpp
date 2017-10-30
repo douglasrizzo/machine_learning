@@ -12,19 +12,21 @@
 #include <algorithm>
 
 using namespace std;
-using clock = chrono::high_resolution_clock;
 
 class MersenneTwister {
+  using clock = chrono::high_resolution_clock;
  private:
   mt19937_64 myMersenne;
   uniform_real_distribution<double> doubleDist;
   uniform_int_distribution<int> intDist;
+  normal_distribution<double> normalDist;
  public:
   MersenneTwister() {
     auto seed = clock::now().time_since_epoch().count();
     myMersenne = mt19937_64(seed);
     doubleDist = uniform_real_distribution<double>(0, 1);
     intDist = uniform_int_distribution<int>(0, 1);
+    normalDist = normal_distribution<double>(0, 1);
   }
 
 //! Pseudo-random number generator using the Mersenne Twister method
@@ -69,16 +71,26 @@ class MersenneTwister {
     return i_random() * max;
   }
 
-  vector<int> randomValues(int minValue, int maxValue, int numValues, bool replacement = true) {
-    vector<int> myvector(maxValue - minValue);
+  vector<int> randomValues(int maxValue, unsigned int numValues, bool replacement = true) {
+    return randomValues(0, maxValue, numValues, replacement);
+  }
 
+  vector<int> randomValues(int minValue, int maxValue, unsigned int numValues, bool replacement = true) {
+    vector<int> myvector(maxValue - minValue);
     if (replacement)
-      for (int i = 0; i < myvector.size(); i++)
-        myvector[i] = i_random(minValue, maxValue);
+      for (int &i : myvector)
+        i = i_random(minValue, maxValue);
     else {
-      std::iota(myvector.begin(), myvector.end(), 3);
+      iota(myvector.begin(), myvector.end(), minValue);
       shuffle(myvector.begin(), myvector.end(), myMersenne);
+      myvector = vector<int>(&myvector[0], &myvector[numValues]);
     }
+
+    return myvector;
+  }
+
+  double n_random() {
+    return normalDist(myMersenne);
   }
 };
 
