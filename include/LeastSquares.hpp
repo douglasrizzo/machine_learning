@@ -17,12 +17,12 @@ class LeastSquares {
     REGULAR, WEIGHTED
   };
  private:
-  Matrix X, y, coefs, residuals;
+  MatrixD X, y, coefs, residuals;
   RegressionType regressionType;
  public :
-  LeastSquares(Matrix data, Matrix labels, RegressionType regType = REGULAR) : regressionType(regType) {
+  LeastSquares(MatrixD data, MatrixD labels, RegressionType regType = REGULAR) : regressionType(regType) {
     X = std::move(data);
-    X.addColumn(Matrix::ones(X.nRows(), 1), 0);
+    X.addColumn(MatrixD::ones(X.nRows(), 1), 0);
     y = std::move(labels);
   }
 
@@ -42,33 +42,33 @@ class LeastSquares {
     // where W is a Square matrix with the weights in the diagonal
     // if W = I, weighted least squares behaves just like ordinary least squares
 
-    Matrix W;
+    MatrixD W;
     if (regressionType == WEIGHTED) {
-      Matrix vars = X.transpose().var();
+      MatrixD vars = X.transpose().var();
       W = vars.asDiagonal();
     } else
-      W = Matrix::identity(X.nRows());
+      W = MatrixD::identity(X.nRows());
 
-    Matrix Xt = X.transpose();
-    Matrix first_part = Xt * W * X;
+    MatrixD Xt = X.transpose();
+    MatrixD first_part = Xt * W * X;
     first_part = first_part.inverse();
-    Matrix second_part = Xt * W * y;
+    MatrixD second_part = Xt * W * y;
     coefs = first_part * second_part;
 
     residuals = y - (X * coefs);
     residuals = residuals.transpose() * residuals;
   }
 
-  Matrix predict(Matrix m) {
-    m.addColumn(Matrix::ones(1, X.nCols()), 0);
+  MatrixD predict(MatrixD m) {
+    m.addColumn(MatrixD::ones(1, X.nCols()), 0);
     return m.transpose() * coefs;
   }
 
-  const Matrix &getCoefs() const {
+  const MatrixD &getCoefs() const {
     return coefs;
   }
 
-  const Matrix &getResiduals() const {
+  const MatrixD &getResiduals() const {
     return residuals;
   }
 };

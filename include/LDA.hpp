@@ -13,9 +13,9 @@ using namespace std;
 
 class LDA {
  private:
-  Matrix X, y, eigenvalues, eigenvectors;
+  MatrixD X, y, eigenvalues, eigenvectors;
  public:
-  LDA(Matrix data, Matrix classes) : X(std::move(data)), y(std::move(classes)) {
+  LDA(MatrixD data, MatrixD classes) : X(std::move(data)), y(std::move(classes)) {
 
   }
 
@@ -29,13 +29,13 @@ class LDA {
     eigenvectors = eigen.second;
   }
 
-  Matrix transform() {
-    Matrix finalData = eigenvectors.transpose() * X.transpose();
+  MatrixD transform() {
+    MatrixD finalData = eigenvectors.transpose() * X.transpose();
     return finalData.transpose();
   }
 
-  Matrix predict(Matrix data) {
-    return Matrix::fill(data.nRows(), 1, -1);
+  MatrixD predict(MatrixD data) {
+    return MatrixD::fill(data.nRows(), 1, -1);
   }
 };
 

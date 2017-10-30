@@ -12,15 +12,15 @@ using namespace std;
 class PCA {
 
  private:
-  Matrix X, eigenvalues, eigenvectors, percentages, cumPercentages;
+  MatrixD X, eigenvalues, eigenvectors, percentages, cumPercentages;
  public :
-  explicit PCA(Matrix data) {
+  explicit PCA(MatrixD data) {
     X = std::move(data);
   }
 
   void fit() {
-    Matrix XMinusMean = X.minusMean(); // standardize columns to have 0 mean
-    Matrix covariances = XMinusMean.cov(); // get covariance matrix of the data
+    MatrixD XMinusMean = X.minusMean(); // standardize columns to have 0 mean
+    MatrixD covariances = XMinusMean.cov(); // get covariance matrix of the data
 
     // get the sum of variances, this'll be useful later
     double sumVar = 0;
@@ -28,48 +28,48 @@ class PCA {
       sumVar += covariances(i, i);
     }
 
-    pair<Matrix, Matrix> eig = covariances.eigen(); // eigenvalues and eigenvectors of cov matrix
+    pair<MatrixD, MatrixD> eig = covariances.eigen(); // eigenvalues and eigenvectors of cov matrix
     eigenvalues = eig.first;
     eigenvectors = eig.second;
 
     // calculate the percentage of variance that each eigenvalue "explains"
-    percentages = Matrix(eigenvalues.nRows(), eigenvalues.nCols());
-    cumPercentages = Matrix(eigenvalues.nRows(), eigenvalues.nCols());
+    percentages = MatrixD(eigenvalues.nRows(), eigenvalues.nCols());
+    cumPercentages = MatrixD(eigenvalues.nRows(), eigenvalues.nCols());
     for (int i = 0; i < eigenvalues.nRows(); i++) {
       percentages(i, 0) = eigenvalues(i, 0) / sumVar;
       cumPercentages(i, 0) = i == 0 ? percentages(i, 0) : percentages(i, 0) + cumPercentages(i - 1, 0);
     }
   }
 
-  Matrix transform() {
-    Matrix finalData = eigenvectors.transpose() * X.minusMean().transpose();
+  MatrixD transform() {
+    MatrixD finalData = eigenvectors.transpose() * X.minusMean().transpose();
     return finalData.transpose();
   }
 
-  Matrix transform(int numComponents) {
-    Matrix filter = Matrix::zeros(eigenvalues.nRows(), 1);
+  MatrixD transform(int numComponents) {
+    MatrixD filter = MatrixD::zeros(eigenvalues.nRows(), 1);
 
     for (int i = 0; i < numComponents; i++) {
       filter(i, 0) = 1;
     }
 
-    Matrix finalData = eigenvectors.getColumns(filter).transpose() * X.minusMean().transpose();
+    MatrixD finalData = eigenvectors.getColumns(filter).transpose() * X.minusMean().transpose();
     return finalData.transpose();
   }
 
-  const Matrix &getEigenvalues() const {
+  const MatrixD &getEigenvalues() const {
     return eigenvalues;
   }
 
-  const Matrix &getEigenvectors() const {
+  const MatrixD &getEigenvectors() const {
     return eigenvectors;
   }
 
-  const Matrix &getPercentages() const {
+  const MatrixD &getPercentages() const {
     return percentages;
   }
 
-  const Matrix &getCumPercentages() const {
+  const MatrixD &getCumPercentages() const {
     return cumPercentages;
   }
 };

@@ -21,11 +21,16 @@
 using namespace std;
 
 //! Matrix implementation, with a series of linear algebra functions
+//! @tparam T The arithmetic type the matrix will store
+template<
+    typename T,
+    typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+>
 class Matrix {
  private:
   size_t mRows;
   size_t mCols;
-  std::vector<double> mData;
+  std::vector<T> mData;
 
   //! Validates if indices are contained inside the matrix
   //! \param row row index
@@ -43,17 +48,24 @@ class Matrix {
   //! Helper function that separates lines in a CSV file into tokens
   //! \param str stream containing the contents of the CSV file
   //! \return a vector with the flattened contents of the CSV converted to double
-  static std::vector<double> getNextLineAndSplitIntoTokens(std::istream &str) {
-    std::vector<double> result;
+  static std::vector<T> getNextLineAndSplitIntoTokens(std::istream &str) {
+    std::vector<T> result;
     std::string line;
     std::getline(str, line);
 
     std::stringstream lineStream(line);
     std::string cell;
 
+    int lineCount = 1;
     while (std::getline(lineStream, cell, ',')) {
-      double value = stod(cell);
-      result.push_back(value);
+      try {
+        double value = stod(cell);
+        result.push_back(value);
+      }
+      catch (exception ex) {
+        cout << ex.what() << " " << cell << " " << lineCount << endl;
+        throw ex;
+      }
     }
 
     return result;
@@ -82,11 +94,11 @@ class Matrix {
     }
 
     // order eigenvalues and eigenvectors by the value of the eigenvalues
-    for (int i = 0; i < newOrder.size(); i++) {
+    for (size_t i = 0; i < newOrder.size(); i++) {
       eigval(i, 0) = eigenvalues(newOrder[i], 0);
 
       for (int j = 0; j < eigenvectors.nRows(); j++) {
-        eigvec(j, i) = eigenvectors(j, newOrder[i]);
+        eigvec(static_cast<size_t>(j), i) = eigenvectors(j, newOrder[i]);
       }
     }
 
@@ -118,7 +130,7 @@ class Matrix {
   //! \param rows number of rows in the matrix
   //! \param cols number of columns in the matrix
   //! \param data a vector containing <code>rows * cols</code> elements to populate the matrix
-  Matrix(size_t rows, size_t cols, const vector<double> &data)
+  Matrix(size_t rows, size_t cols, const vector<T> &data)
       : mRows(rows),
         mCols(cols) {
     if (data.size() != rows * cols)
@@ -312,7 +324,7 @@ class Matrix {
 
     Matrix result(mRows, b.mCols);
 
-#pragma omp parallel for collapse(2)
+//#pragma omp parallel for collapse(2)
     // two loops iterate through every cell of the new matrix
     for (size_t i = 0; i < result.mRows; i++) {
       for (size_t j = 0; j < result.mCols; j++) {
@@ -324,6 +336,7 @@ class Matrix {
     }
     return result;
   }
+
   Matrix &operator+=(const Matrix &other) {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
@@ -403,6 +416,12 @@ class Matrix {
     // negate everything: 0s remains 0s, -1s becomes 1s
     return -((*this == value) - 1);
   }
+
+  bool operator!=(const Matrix &other) {
+    // subtract 1 from everything: 0s become -1s, 1s become 0s
+    // negate everything: 0s remains 0s, -1s becomes 1s
+    return !(*this == other);
+  }
   //endregion
 
   //! Matrix negative operation
@@ -448,7 +467,7 @@ class Matrix {
   //! \param value value to be used for initialization
   //! \return a matrix with all values set to <code>value</code>
   static Matrix fill(size_t rows, size_t cols, double value) {
-    Matrix result(rows, cols, vector<double>(rows * cols, value));
+    Matrix result(rows, cols, vector<T>(rows * cols, value));
     return result;
   }
 
@@ -741,8 +760,8 @@ class Matrix {
   //! \return column vector containing the unique values from the matrix
   Matrix unique() const {
     // include all data from the inner vector in a set
-    set<double> s;
-    vector<double> auxVec;
+    set<T> s;
+    vector<T> auxVec;
     unsigned long size = mData.size();
 
     for (unsigned i = 0; i < size; ++i)
@@ -767,7 +786,7 @@ class Matrix {
   static Matrix sort(Matrix m) {
     // copy the inner vector of the matrix passed as argument
     // and return a new matrix with the sorted inner vector
-    vector<double> data = m.mData;
+    vector<T> data = m.mData;
     std::sort(data.begin(), data.end());
     return Matrix(m.mRows, m.mCols, data);
   }
@@ -781,7 +800,6 @@ class Matrix {
 
     result.addColumn(zeros(result.mRows, 1), 1);
 
-#pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++)
       for (size_t j = 0; j < mCols; j++)
         for (size_t g = 0; g < result.mRows; g++)
@@ -805,7 +823,6 @@ class Matrix {
     Matrix groupCount = groups.count();
     Matrix result = zeros(groupCount.mRows, mCols);
 
-#pragma omp parallel for
     for (size_t i = 0; i < mRows; i++) {
       for (size_t g = 0; g < groupCount.mRows; g++) {
         if (groups(i, 0) == groupCount(g, 0)) {
@@ -817,7 +834,6 @@ class Matrix {
       }
     }
 
-#pragma omp parallel for collapse(2)
     for (size_t i = 0; i < result.mRows; i++)
       for (size_t j = 0; j < result.mCols; j++)
         result(i, j) /= groupCount(i, 1);
@@ -957,8 +973,8 @@ class Matrix {
   //! \param path path of the CSV file
   //! \return a matrix constructed from the contents of the CSV file
   static Matrix fromCSV(const string &path) {
-    vector<vector<double>> outer;
-    vector<double> innerVector;
+    vector<vector<T>> outer;
+    vector<T> innerVector;
 
     ifstream arquivo(path);
     if (!arquivo.good())
@@ -1012,7 +1028,7 @@ class Matrix {
   //! by the column mean and dividing it by the standard deviation of the column.
   //! \return a new matrix with the columns standardized as described
   Matrix standardize() {
-    Matrix result = copy(), means = mean(), stds = stdev();
+    Matrix result(mRows, mCols), means = mean(), stds = stdev();
 
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
@@ -1025,7 +1041,7 @@ class Matrix {
   }
 
   Matrix minusMean() {
-    Matrix result = copy(), means = mean();
+    Matrix result(mRows, mCols), means = mean();
 
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
@@ -1040,7 +1056,7 @@ class Matrix {
   //! Checks if the matrix contains a value
   //! \param value the vaue to look for
   //! \return true if the matrix contains the value, otherwise false
-  bool contains(double value) {
+  bool contains(T value) {
     return std::find(mData.begin(), mData.end(), value) != mData.end();
   }
 
@@ -1109,7 +1125,7 @@ class Matrix {
 
     // Calculate length of the column vector
     for (size_t j = 0; j < mCols; j++) {
-      double length = 0;
+      T length = 0;
 #pragma omp parallel for reduction(+:length)
       for (size_t i = 0; i < mRows; i++) {
         length += pow(result(i, j), 2);
@@ -1117,7 +1133,6 @@ class Matrix {
       length = sqrt(length);
 
       // divide each element of the column by its length
-#pragma omp parallel for
       for (size_t i = 0; i < mRows; i++) {
         result(i, j) /= length;
       }
@@ -1154,7 +1169,7 @@ class Matrix {
     while (true) {
       // find the element in the matrix with the largest modulo
       size_t p, q;
-      double largest = 0;
+      T largest = 0;
       for (size_t i = 0; i < A.mRows; i++) {
         for (size_t j = 0; j < A.mCols; j++) {
           // it can't be in the diagonal
@@ -1286,5 +1301,9 @@ class Matrix {
     return *std::max_element(std::begin(mData), std::end(mData));
   }
 };
+
+typedef Matrix<double> MatrixD;
+typedef Matrix<int> MatrixI;
+typedef Matrix<float> MatrixF;
 
 #endif //MACHINE_LEARNING_MATRIX_HPP
