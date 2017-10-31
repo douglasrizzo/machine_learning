@@ -26,7 +26,10 @@ class LDA {
    * @param classes Column vector containing the classes each row element in <code>data</code> belongs to
    */
   LDA(MatrixD data, MatrixD classes) : X(std::move(data)), y(std::move(classes)) {
-
+    if(data.nRows()!=classes.nRows())
+      throw invalid_argument("data and classes must have the same number of rows");
+    if(classes.nCols()!=1)
+      throw invalid_argument("classes must me a column vector");
   }
 
   void fit() {

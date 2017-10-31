@@ -38,10 +38,10 @@ class Matrix {
   //! \throws runtime error if at least one of the indices is out of bounds
   void validateIndexes(size_t row, size_t col) const {
     if (row < 0 or row >= mRows)
-      throw runtime_error(
+      throw invalid_argument(
           "Invalid row index (" + to_string(row) + "): should be between 0 and " + to_string(mRows - 1));
     if (col < 0 or col >= mCols)
-      throw runtime_error(
+      throw invalid_argument(
           "Invalid column index (" + to_string(col) + "): should be between 0 and " + to_string(mCols - 1));
   }
 
@@ -134,7 +134,7 @@ class Matrix {
       : mRows(rows),
         mCols(cols) {
     if (data.size() != rows * cols)
-      throw runtime_error("Matrix dimension incompatible with its initializing vector.");
+      throw invalid_argument("Matrix dimension incompatible with its initializing vector.");
     mData = data;
   }
   //endregion
@@ -280,7 +280,7 @@ class Matrix {
   //! \return Result of the addition of both matrices
   Matrix operator+(const Matrix &b) {
     if (mRows != b.mRows || mCols != b.mCols)
-      throw runtime_error("Cannot add these matrices");
+      throw invalid_argument("Cannot add these matrices");
 
     Matrix result(mRows, mCols);
 
@@ -299,7 +299,7 @@ class Matrix {
   //! \return Result of the subtraction of both matrices
   Matrix operator-(const Matrix &b) {
     if (mRows != b.mRows || mCols != b.mCols)
-      throw runtime_error("Cannot add these matrices");
+      throw invalid_argument("Cannot subtract these matrices");
 
     Matrix result(mRows, mCols);
 
@@ -318,7 +318,7 @@ class Matrix {
   //! \return Result of the multiplication of both matrices
   Matrix operator*(const Matrix &b) {
     if (mCols != b.mRows)
-      throw runtime_error(
+      throw invalid_argument(
           "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
               to_string(this->mCols) + ", right hand " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
@@ -361,7 +361,7 @@ class Matrix {
 
   Matrix &operator*=(const Matrix &other) {
     if (mCols != other.mRows)
-      throw runtime_error(
+      throw invalid_argument(
           "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
               to_string(this->mCols) + ", right hand " + to_string(other.mRows) + "x" + to_string(other.mCols));
 
@@ -530,7 +530,7 @@ class Matrix {
   //! \return result of the Hadamard multiplication of the two matrices
   Matrix hadamard(const Matrix &b) {
     if (mCols != b.mCols || mRows != b.mRows)
-      throw runtime_error("Matrices have different dimentions");
+      throw invalid_argument("Matrices have different dimensions");
 
     Matrix result(mRows, mCols);
 
@@ -700,9 +700,9 @@ class Matrix {
   //! position and all columns succeeding it are pushed forward.
   void addColumn(Matrix values, size_t position) {
     if (!isEmpty() and values.nRows() != mRows)
-      throw runtime_error("Wrong number of values passed for new column");
+      throw invalid_argument("Wrong number of values passed for new column");
     if (values.nCols() != 1)
-      throw runtime_error("Can't add multiple columns at once");
+      throw invalid_argument("Can't add multiple columns at once");
 
     if (isEmpty()) {
       mRows = values.mRows;
@@ -724,9 +724,9 @@ class Matrix {
   //! position and all rows succeeding it are pushed forward.
   void addRow(Matrix values, size_t index) {
     if (!isEmpty() and values.mRows != mCols)
-      throw runtime_error("Wrong number of values passed for new row");
+      throw invalid_argument("Wrong number of values passed for new row");
     if (values.mCols != 1)
-      throw runtime_error("Can't add multiple rows at once");
+      throw invalid_argument("Can't add multiple rows at once");
 
     if (isEmpty()) {
       mRows = values.mCols;
@@ -818,7 +818,7 @@ class Matrix {
   //! Columns are sorted by the group numbers in ascending order.
   Matrix mean(Matrix groups) {
     if (mRows != groups.mRows)
-      throw runtime_error("Not enough groups for every element in the matrix");
+      throw invalid_argument("Not enough groups for every element in the matrix");
 
     Matrix groupCount = groups.count();
     Matrix result = zeros(groupCount.mRows, mCols);
@@ -910,7 +910,7 @@ class Matrix {
   //! \param cols new number of columns
   void reshape(size_t rows, size_t cols) {
     if (mData.size() != rows * cols)
-      throw runtime_error(
+      throw invalid_argument(
           "Invalid shape (" + to_string(rows) + "x" +
               to_string(cols) + " = " + to_string(rows * cols) +
               ") for a matrix with" + to_string(mData.size()) + " elements");
@@ -924,7 +924,7 @@ class Matrix {
   //! \return column vector containing the values in the given column of the original matrix
   Matrix getColumn(size_t index) {
     if (index >= mCols)
-      throw runtime_error("Column index out of bounds");
+      throw invalid_argument("Column index out of bounds");
 
     Matrix result(mRows, 1);
 #pragma omp parallel for
@@ -939,7 +939,7 @@ class Matrix {
   //! \return column vector containing the values in the given row of the original matrix
   Matrix getRow(size_t index) {
     if (index >= mRows)
-      throw runtime_error("Row index out of bounds");
+      throw invalid_argument("Row index out of bounds");
 
     Matrix result(mCols, 1);
 #pragma omp parallel for
@@ -978,7 +978,7 @@ class Matrix {
 
     ifstream arquivo(path);
     if (!arquivo.good())
-      throw runtime_error("File '" + path + "' doesn't exist");
+      throw invalid_argument("File '" + path + "' doesn't exist");
 
     unsigned long numCols = 0;
 
@@ -1075,13 +1075,13 @@ class Matrix {
     size_t dimension = columns ? mCols : mRows;
 
     if (bin.mCols != 1)
-      throw runtime_error("Binary filter must have only one column");
+      throw invalid_argument("Binary filter must have only one column");
     if (bin.mRows != dimension)
-      throw runtime_error("Binary filter has the wrong number of row entries");
+      throw invalid_argument("Binary filter has the wrong number of row entries");
 
     Matrix uniqueBin = bin.unique();
     if (uniqueBin.mRows != 2 or !(uniqueBin.contains(1) and uniqueBin.contains(0)))
-      throw runtime_error("Binary filter must be composed of only 0s and 1s");
+      throw invalid_argument("Binary filter must be composed of only 0s and 1s");
 
     Matrix result;
 
