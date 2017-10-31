@@ -1,6 +1,8 @@
-//
-// Created by dodo on 18/10/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Linear discriminant analysis algorithm
+ * @date   2017-10-18
+ */
 
 #ifndef MACHINE_LEARNING_LDA_HPP
 #define MACHINE_LEARNING_LDA_HPP
@@ -11,10 +13,18 @@
 
 using namespace std;
 
+/**
+ * Linear discriminant analysis algorithm
+ */
 class LDA {
  private:
   MatrixD X, y, eigenvalues, eigenvectors;
  public:
+  /**
+   * Linear discriminant analysis algorithm
+   * @param data The matrix whose linear discriminants will be found
+   * @param classes Column vector containing the classes each row element in <code>data</code> belongs to
+   */
   LDA(MatrixD data, MatrixD classes) : X(std::move(data)), y(std::move(classes)) {
 
   }

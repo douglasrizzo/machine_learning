@@ -1,6 +1,9 @@
-//
-// Created by dodo on 16/10/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Principal component analysis algorithm
+ * @date   2017-10-16
+ */
+
 
 #ifndef MACHINE_LEARNING_PCA_HPP
 #define MACHINE_LEARNING_PCA_HPP
@@ -14,10 +17,19 @@ class PCA {
  private:
   MatrixD X, eigenvalues, eigenvectors, percentages, cumPercentages;
  public :
+
+  /**
+   * Principal component analysis algorithm
+   * @param data the matrix whose principal components will be found
+   */
   explicit PCA(MatrixD data) {
     X = std::move(data);
   }
 
+
+  /**
+   * Finds the principal components of a Matrix. Eigenvectors and eigenvalues are found via the Jacobi eigenvalue algorithm
+   */
   void fit() {
     MatrixD XMinusMean = X.minusMean(); // standardize columns to have 0 mean
     MatrixD covariances = XMinusMean.cov(); // get covariance matrix of the data

@@ -117,6 +117,9 @@ class KMeans {
     return result;
   }
 
+  /**
+   * @return Sum of squared errors between elements and their centroids
+   */
   double SSE() {
     return euclidean(X, centroids, false).sum();
   }
@@ -124,6 +127,11 @@ class KMeans {
  public:
   KMeans() {}
 
+  /**
+   * Assigns elements of a data set to clusters
+   * @param data a Matrix containing elements in rows and features in columns
+   * @return column vector with the index of clusters each element is assigned to
+   */
   MatrixD predict(MatrixD data) {
     MatrixD distances = minkowski(X, centroids, distance, true);
 //    Matrix distances = euclidean(X, centroids, false);
@@ -143,6 +151,16 @@ class KMeans {
     return results;
   }
 
+  /**
+   * Find the k centroids that best fit the data.
+   * @param data a Matrix containing the data
+   * @param k number of clusters to be generated
+   * @param iters number of maximum assignment/adjustment iterations
+   * @param inits number of algorithm reinitialization
+   * @param distance L norm of the distance measure to be used (1 for Manhattan, 2 for Euclidean etc.)
+   * @param initMethod centroid initialization method
+   * @param verbose whether to output progress or not
+   */
   void fit(MatrixD data,
            unsigned int k,
            unsigned int iters = 100,
@@ -176,7 +194,9 @@ class KMeans {
 
       for (int currentIteration = 0; currentIteration < iters; currentIteration++) {
         if (verbose)
-          cout << currentInit << '/' << inits << ' ' << currentIteration << '/' << iters << endl;
+          cout << currentInit << '/' << inits + 1 << '\t'
+               << currentIteration << '/' << iters + 1 << '\t'
+               << SSE() << endl;
 
         MatrixD yCurr = predict(X); // assignment
 
