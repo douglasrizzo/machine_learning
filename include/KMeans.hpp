@@ -6,6 +6,7 @@
 #define MACHINE_LEARNING_KMEANS_HPP
 
 #include "Matrix.hpp"
+#include "Metrics.hpp"
 #include "MersenneTwister.hpp"
 
 class KMeans {
@@ -17,111 +18,11 @@ class KMeans {
   double distance, sse;
   InitializationMethod initMethod;
 
-  static MatrixD minkowski(MatrixD m, double p, bool root = true) {
-    MatrixD distances = MatrixD::zeros(m.nRows(), m.nRows());
-
-    for (size_t i = 0; i < m.nRows(); i++) {
-      for (size_t j = i + 1; j < m.nRows(); j++) {
-        for (size_t k = 0; k < m.nCols(); k++) {
-          distances(i, j) += pow(abs(m(i, k) - m(j, k)), p);
-        }
-        if (root)
-          distances(i, j) = pow(distances(i, j), 1 / p);
-      }
-    }
-
-    return distances;
-  }
-
-  static MatrixD minkowski(MatrixD a, MatrixD b, double p, bool root = true) {
-    if (a.nCols() != b.nCols())
-      throw runtime_error("Matrices have different number of dimensions");
-
-    MatrixD distances = MatrixD::zeros(a.nRows(), b.nRows());
-
-    for (size_t i = 0; i < a.nRows(); i++) {
-      for (size_t j = 0; j < b.nRows(); j++) {
-        for (size_t k = 0; k < a.nCols(); k++) {
-          double x1 = a(i, k), x2 = b(j, k);
-          double term = pow(abs(x1 - x2), p);
-          distances(i, j) += term;
-        }
-
-        if (root)
-          distances(i, j) = pow(distances(i, j), 1 / p);
-      }
-    }
-
-    return distances;
-  }
-
-  static MatrixD chebyshev(MatrixD a, MatrixD b) {
-    if (a.nCols() != b.nCols())
-      throw runtime_error("Matrices have different number of dimensions");
-
-    MatrixD distances = MatrixD::zeros(a.nRows(), b.nRows());
-
-    for (size_t i = 0; i < a.nRows(); i++) {
-      for (size_t j = 0; j < b.nRows(); j++) {
-        for (size_t k = 0; k < a.nCols(); k++) {
-          double x1 = a(i, k), x2 = b(j, k);
-          double term = abs(x1 - x2);
-          distances(i, j) = max(distances(i, j), term);
-        }
-      }
-    }
-
-    return distances;
-  }
-
-  static MatrixD chebyshev(MatrixD a) {
-    MatrixD distances = MatrixD::zeros(a.nRows(), a.nRows());
-
-    for (size_t i = 0; i < a.nRows(); i++) {
-      for (size_t j = i + 1; j < a.nRows(); j++) {
-        for (size_t k = 0; k < a.nCols(); k++) {
-          double x1 = a(i, k), x2 = a(j, k);
-          double term = abs(x1 - x2);
-          distances(i, j) = distances(j, i) = max(distances(i, j), term);
-        }
-      }
-    }
-
-    return distances;
-  }
-
-  static MatrixD euclidean(MatrixD m, bool root = true) {
-    return minkowski(m, 2, root);
-  }
-
-  static MatrixD manhattan(MatrixD m, bool root = true) {
-    return minkowski(m, 1, root);
-  }
-
-  static MatrixD euclidean(MatrixD a, MatrixD b, bool root = true) {
-    return minkowski(a, b, 2, root);
-  }
-
-  static MatrixD manhattan(MatrixD a, MatrixD b, bool root = true) {
-    return minkowski(a, b, 1, root);
-  }
-
-  static MatrixD normalizeToSmallestInt(MatrixD m) {
-    if (!m.isColumn())
-      throw runtime_error("Nor a column vector");
-
-    MatrixD result(m.nRows(), 1);
-    MatrixD u = m.unique();
-    u.sort();
-
-    return result;
-  }
-
   /**
    * @return Sum of squared errors between elements and their centroids
    */
   double SSE() {
-    return euclidean(X, centroids, false).sum();
+    return Metrics::euclidean(X, centroids, false).sum();
   }
 
  public:
@@ -133,9 +34,11 @@ class KMeans {
    * @return column vector with the index of clusters each element is assigned to
    */
   MatrixD predict(MatrixD data) {
-    MatrixD distances = minkowski(X, centroids, distance, true);
-//    Matrix distances = euclidean(X, centroids, false);
-    MatrixD results = MatrixD::zeros(X.nRows(), 1);
+    if (centroids.nCols() != data.nCols())
+      throw invalid_argument("Data elements and cluster centroids don't have the same number of dimensions.");
+
+    MatrixD distances = Metrics::minkowski(data, centroids, distance, false);
+    MatrixD results = MatrixD::zeros(data.nRows(), 1);
 
     for (size_t i = 0; i < distances.nRows(); i++) {
       for (size_t j = 1; j < distances.nCols(); j++) {
