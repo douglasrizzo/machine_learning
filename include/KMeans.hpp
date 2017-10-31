@@ -15,7 +15,6 @@ class KMeans {
   MatrixD X, y, centroids;
   unsigned int k, totalIterations;
   double distance, sse;
-  int verbosity;
   InitializationMethod initMethod;
 
   static MatrixD minkowski(MatrixD m, double p, bool root = true) {
