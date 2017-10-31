@@ -18,7 +18,7 @@ using namespace std;
  */
 class LDA {
  private:
-  MatrixD X, y, eigenvalues, eigenvectors;
+  MatrixD X, y, eigenvalues, eigenvectors, transformedData;
  public:
   /**
    * Linear discriminant analysis algorithm
@@ -40,15 +40,16 @@ class LDA {
 
     eigenvalues = eigen.first;
     eigenvectors = eigen.second;
+
+    transformedData = (eigenvectors.transpose() * X.transpose()).transpose();
   }
 
+  /**
+   * Transforms the data matrix using the eigenvectors found by <code>fit()</code>
+   * @return
+   */
   MatrixD transform() {
-    MatrixD finalData = eigenvectors.transpose() * X.transpose();
-    return finalData.transpose();
-  }
-
-  MatrixD predict(MatrixD data) {
-    return MatrixD::fill(data.nRows(), 1, -1);
+    return transformedData;
   }
 };
 
