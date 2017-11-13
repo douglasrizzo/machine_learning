@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['getcentroids',['getCentroids',['../classKMeans.html#a223929c0ae8b8ec509168d1f4b12f72a',1,'KMeans']]],
+  ['getcoefs',['getCoefs',['../classLeastSquares.html#a21c7210acf16440ab297f3a0baaea3b9',1,'LeastSquares']]],
+  ['getcolumn',['getColumn',['../classMatrix.html#a082035d168d0375e36e09a75d3fd25a2',1,'Matrix']]],
+  ['getcolumns',['getColumns',['../classMatrix.html#a4a4ea74d824b5fa0e16ccb06cae29a51',1,'Matrix']]],
+  ['getcumpercentages',['getCumPercentages',['../classPCA.html#a7057cdb533b88465ce5504bd686b6e07',1,'PCA']]],
+  ['getdata',['getData',['../classKNN.html#a23047ca4c0f50928338a4f144813a2d7',1,'KNN']]],
+  ['getdistance',['getDistance',['../classKMeans.html#ae581460885edac35a6ad80b489bcca5e',1,'KMeans::getDistance()'],['../classKNN.html#acdc8bab8ed92ee9a3773911e7380ed79',1,'KNN::getDistance()']]],
+  ['geteigenvalues',['getEigenvalues',['../classPCA.html#abde6f882db9bd11cc794a628114940b8',1,'PCA']]],
+  ['geteigenvectors',['getEigenvectors',['../classPCA.html#a72637994971755dd01f284fa024c0712',1,'PCA']]],
+  ['getk',['getK',['../classKMeans.html#a86917fa387a3295460403c28a60193a5',1,'KMeans::getK()'],['../classKNN.html#ab75eeb8c49d02717c39838d62e242d3b',1,'KNN::getK()']]],
+  ['getknn',['getKNN',['../classKNN.html#a8da118acb216b19197eaa1a6d6dcdf84',1,'KNN']]],
+  ['getminor',['getMinor',['../classMatrix.html#a2c13e07f1c7de419255194d344c27d99',1,'Matrix']]],
+  ['getnextlineandsplitintotokens',['getNextLineAndSplitIntoTokens',['../classMatrix.html#af627ccb18de641808d2f3314a7c9c9d5',1,'Matrix']]],
+  ['getpercentages',['getPercentages',['../classPCA.html#a45bddaf6f7fe247bef1f4686dffb28e4',1,'PCA']]],
+  ['getregressiontype',['getRegressionType',['../classLeastSquares.html#a8b9ac2271b5720cc3aa5c1a6a746a2b8',1,'LeastSquares']]],
+  ['getresiduals',['getResiduals',['../classLeastSquares.html#a5dbfb8d55d95a6ad8ea5cbd751a89257',1,'LeastSquares']]],
+  ['getrow',['getRow',['../classMatrix.html#af978e19d62fb06e0347af34c753f4efb',1,'Matrix']]],
+  ['getrows',['getRows',['../classMatrix.html#a9baf11348f7b7ceaceab7e0cbb78afd0',1,'Matrix']]],
+  ['getsse',['getSse',['../classKMeans.html#a945e1cdc344c6362a12d91b294b747a5',1,'KMeans']]],
+  ['gettotaliterations',['getTotalIterations',['../classKMeans.html#a67619110fe70036b515c040cc41abc74',1,'KMeans']]],
+  ['gety',['getY',['../classKMeans.html#ab0bdb69d7ac959b6cd43b70923bc091f',1,'KMeans']]],
+  ['getycolumn',['getYColumn',['../classKNN.html#ac8a26cc0c27cd1d28d820cd8fbf94977',1,'KNN']]]
+];

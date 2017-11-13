@@ -1,0 +1,9 @@
+digraph "NRmatrix&lt; T &gt;"
+{
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node0 [label="{NRmatrix\< T \>\n|- nn\l- mm\l- v\l|+ NRmatrix()\l+ NRmatrix()\l+ NRmatrix()\l+ NRmatrix()\l+ NRmatrix()\l+ operator=()\l+ operator[]()\l+ operator[]()\l+ nrows()\l+ ncols()\l+ resize()\l+ assign()\l+ ~NRmatrix()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node0 -> Node1 [dir="back",color="orange",fontsize="10",style="solid",label=" \< Doub \>" ,fontname="Helvetica"];
+  Node1 [label="{NRmatrix\< Doub \>\n|- nn\l- mm\l- v\l|+ NRmatrix()\l+ NRmatrix()\l+ NRmatrix()\l+ NRmatrix()\l+ NRmatrix()\l+ operator=()\l+ operator[]()\l+ operator[]()\l+ nrows()\l+ ncols()\l+ resize()\l+ assign()\l+ ~NRmatrix()\l}",height=0.2,width=0.4,color="black",URL="$classNRmatrix.html"];
+}
