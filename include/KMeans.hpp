@@ -1,6 +1,8 @@
-//
-// Created by dodo on 25/10/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Implementaion of the k-means algorithm
+ * @date   2017-10-25
+ */
 
 #ifndef MACHINE_LEARNING_KMEANS_HPP
 #define MACHINE_LEARNING_KMEANS_HPP
@@ -9,6 +11,9 @@
 #include "Metrics.hpp"
 #include "MersenneTwister.hpp"
 
+/**
+ * Implementaion of the k-means algorithm
+ */
 class KMeans {
  public:
   enum InitializationMethod { RANDOM, SAMPLE };

@@ -92,6 +92,14 @@ class MersenneTwister {
   double n_random() {
     return normalDist(myMersenne);
   }
+
+  vector<double> vecFromNormal(int n) {
+    vector<double> myvector(n);
+    for (double &i : myvector)
+      i = n_random();
+
+    return myvector;
+  }
 };
 
 #endif //MACHINE_LEARNING_MERSENNETWISTER_HPP

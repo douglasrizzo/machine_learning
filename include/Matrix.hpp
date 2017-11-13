@@ -8,6 +8,7 @@
 #define MACHINE_LEARNING_MATRIX_HPP
 
 #include <vector>
+#include <functional>
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
@@ -15,8 +16,8 @@
 #include <cmath>
 #include <set>
 #include <complex>
-#include "nr3.h"
-#include "eigen_unsym.h"
+#include "nr3/nr3.h"
+#include "nr3/eigen_unsym.h"
 
 using namespace std;
 
@@ -1299,6 +1300,12 @@ class Matrix {
 
   T max() {
     return *std::max_element(std::begin(mData), std::end(mData));
+  }
+
+  Matrix<T> apply(function<T(T)> f) {
+    Matrix<T> result(mRows, mCols, vector<T>(mRows * mCols, 0));
+    std::transform(mData.begin(), mData.end(), result.mData.begin(), f);
+    return result;
   }
 };
 
