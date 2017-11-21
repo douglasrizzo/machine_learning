@@ -1042,7 +1042,25 @@ class Matrix {
   //! by the column mean and dividing it by the standard deviation of the column.
   //! \return a new matrix with the columns standardized as described
   Matrix standardize() {
-    Matrix result(mRows, mCols), means = mean(), stds = stdev();
+    return standardize(mean(), stdev());
+  }
+
+  //! Standardizes the columns of the matrix, subtracting each element of a column
+  //! by the <code>mean</code> argument and dividing it by the <code>stds</code> argument.
+  //! \param means a column matrix containing the elements that will subtract each column of the original matrix
+  //! \param stds a column matrix containing the elements that will divide each column of the original matrix
+  //! \return a new matrix with the columns standardized as described
+  Matrix standardize(Matrix means, Matrix stds) {
+    if (!means.isColumn())
+      throw invalid_argument("Argument \"mean\" must have exactly one column");
+    if (!stds.isColumn())
+      throw invalid_argument("Argument \"stds\" must have exactly one column");
+    if (means.mRows != mCols)
+      throw invalid_argument("Number of mean values is different than number of features");
+    if (stds.mRows != mCols)
+      throw invalid_argument("Number of std. dev. values is different than number of features");
+
+    Matrix result(mRows, mCols);
 
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
@@ -1318,6 +1336,22 @@ class Matrix {
   Matrix<T> apply(function<T(T)> f) {
     Matrix<T> result(mRows, mCols, vector<T>(mRows * mCols, 0));
     std::transform(mData.begin(), mData.end(), result.mData.begin(), f);
+    return result;
+  }
+
+  Matrix oneHot() {
+    Matrix result;
+    Matrix uniqueValues = unique();
+    Matrix oneHotUnique = identity(uniqueValues.mRows);
+
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t ii = 0; ii < uniqueValues.mRows; ++ii) {
+        if (getRow(i) == uniqueValues.getRow(ii)) {
+          result.addRow(oneHotUnique.getRow(oneHotUnique.mRows - ii - 1));
+        }
+      }
+    }
+
     return result;
   }
 };
