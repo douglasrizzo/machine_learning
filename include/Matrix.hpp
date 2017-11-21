@@ -138,6 +138,14 @@ class Matrix {
       throw invalid_argument("Matrix dimension incompatible with its initializing vector.");
     mData = data;
   }
+
+  template<std::size_t N>
+  Matrix(size_t rows, size_t cols, T (&data)[N]) {
+    if (N != rows * cols)
+      throw invalid_argument("Matrix dimension incompatible with its initializing vector.");
+    vector<T> v(data, data + N);
+    Matrix(rows, cols, v);
+  }
   //endregion
 
   //region Operators
