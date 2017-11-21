@@ -281,14 +281,15 @@ class Matrix {
   //! \return Result of the addition of both matrices
   Matrix operator+(const Matrix &b) {
     if (mRows != b.mRows || mCols != b.mCols)
-      throw invalid_argument("Cannot add these matrices");
+      throw invalid_argument("Cannot add these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+                                 + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, mCols);
 
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) + b(i, j);
+        result(i, j) = operator()(i, j) + b(i, j);
       }
     }
 
@@ -300,14 +301,16 @@ class Matrix {
   //! \return Result of the subtraction of both matrices
   Matrix operator-(const Matrix &b) {
     if (mRows != b.mRows || mCols != b.mCols)
-      throw invalid_argument("Cannot subtract these matrices");
+      throw invalid_argument(
+          "Cannot subtract these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+              + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, mCols);
 
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) - b(i, j);
+        result(i, j) = operator()(i, j) - b(i, j);
       }
     }
 
@@ -320,8 +323,8 @@ class Matrix {
   Matrix operator*(const Matrix &b) {
     if (mCols != b.mRows)
       throw invalid_argument(
-          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
-              to_string(this->mCols) + ", right hand " + to_string(b.mRows) + "x" + to_string(b.mCols));
+          "Cannot multiply these matrices: L = " + to_string(this->mRows) + "x" +
+              to_string(this->mCols) + ", R = " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, b.mCols);
 
@@ -363,8 +366,8 @@ class Matrix {
   Matrix &operator*=(const Matrix &other) {
     if (mCols != other.mRows)
       throw invalid_argument(
-          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
-              to_string(this->mCols) + ", right hand " + to_string(other.mRows) + "x" + to_string(other.mCols));
+          "Cannot multiply these matrices: L " + to_string(mRows) + "x" +
+              to_string(mCols) + ", R " + to_string(other.mRows) + "x" + to_string(other.mCols));
 
     Matrix result(mRows, other.mCols);
 
@@ -531,7 +534,9 @@ class Matrix {
   //! \return result of the Hadamard multiplication of the two matrices
   Matrix hadamard(const Matrix &b) {
     if (mCols != b.mCols || mRows != b.mRows)
-      throw invalid_argument("Matrices have different dimensions");
+      throw invalid_argument(
+          "Cannot multiply these matrices element-wise: L = " + to_string(mRows) + "x" +
+              to_string(mCols) + ", R = " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, mCols);
 
