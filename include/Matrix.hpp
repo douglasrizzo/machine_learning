@@ -343,7 +343,7 @@ class Matrix {
         // here we calculate the value of a single cell in our new matrix
         result(i, j) = 0;
         for (size_t ii = 0; ii < mCols; ii++)
-          result(i, j) += this->operator()(i, ii) * b(ii, j);
+          result(i, j) += operator()(i, ii) * b(ii, j);
       }
     }
     return result;
@@ -353,7 +353,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
       for (size_t j = 0; j < other.mCols; j++) {
-        this->operator()(i, j) += other(i, j);
+        operator()(i, j) += other(i, j);
       }
     }
 
@@ -364,7 +364,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
       for (size_t j = 0; j < other.mCols; j++) {
-        this->operator()(i, j) -= other(i, j);
+        operator()(i, j) -= other(i, j);
       }
     }
 
@@ -386,7 +386,7 @@ class Matrix {
         // here we calculate the value of a single cell in our new matrix
         result(i, j) = 0;
         for (size_t ii = 0; ii < mCols; ii++)
-          result(i, j) += this->operator()(i, ii) * other(ii, j);
+          result(i, j) += operator()(i, ii) * other(ii, j);
       }
     }
 
@@ -405,7 +405,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) == value;
+        result(i, j) = operator()(i, j) == value;
       }
     }
 
@@ -444,7 +444,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mCols; i++) {
       for (size_t j = 0; j < mRows; j++) {
-        result(i, j) = -this->operator()(i, j);
+        result(i, j) = -operator()(i, j);
       }
     }
 
@@ -509,7 +509,7 @@ class Matrix {
 
 #pragma omp parallel
     for (size_t i = 0; i < mRows; i++)
-      result(i, 0) = this->operator()(i, i);
+      result(i, 0) = operator()(i, i);
 
     return result;
   }
@@ -551,7 +551,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) * b(i, j);
+        result(i, j) = operator()(i, j) * b(i, j);
       }
     }
 
@@ -573,7 +573,7 @@ class Matrix {
       if (i == row) continue;
       for (size_t j = 0; j < mCols; j++) {
         if (j == column) continue;
-        result(subi, subj) = this->operator()(i, j);
+        result(subi, subj) = operator()(i, j);
         subj++;
       }
       subi++;
@@ -592,10 +592,10 @@ class Matrix {
 //                           c d    b a
     if (mRows == 2 and mCols == 2) {
       Matrix result(2, 2);
-      result(0, 0) = this->operator()(1, 1);
-      result(0, 1) = this->operator()(1, 0);
-      result(1, 0) = this->operator()(0, 1);
-      result(1, 1) = this->operator()(0, 0);
+      result(0, 0) = operator()(1, 1);
+      result(0, 1) = operator()(1, 0);
+      result(1, 0) = operator()(0, 1);
+      result(1, 1) = operator()(0, 0);
       return result.determinant();
     }
 
@@ -612,13 +612,13 @@ class Matrix {
     // special case for when our matrix is 2x2
     if (mRows == 2 and mCols == 2) {
       if (row == 0 and column == 0)
-        minor = this->operator()(1, 1);
+        minor = operator()(1, 1);
       else if (row == 1 and column == 1)
-        minor = this->operator()(0, 0);
+        minor = operator()(0, 0);
       else if (row == 0 and column == 1)
-        minor = this->operator()(1, 0);
+        minor = operator()(1, 0);
       else if (row == 1 and column == 0)
-        minor = this->operator()(0, 1);
+        minor = operator()(0, 1);
     } else
       minor = this->getMinor(row, column);
     return (row + column) % 2 == 0 ? minor : -minor;
@@ -670,12 +670,12 @@ class Matrix {
     size_t n = mRows;
     double d = 0;
     if (n == 2) {
-      return ((this->operator()(0, 0) * this->operator()(1, 1)) -
-          (this->operator()(1, 0) * this->operator()(0, 1)));
+      return ((operator()(0, 0) * operator()(1, 1)) -
+          (operator()(1, 0) * operator()(0, 1)));
     } else {
 #pragma omp parallel for reduction (+:d)
       for (size_t c = 0; c < n; c++) {
-        d += pow(-1, c) * this->operator()(0, c) * submatrix(0, c).determinant();
+        d += pow(-1, c) * operator()(0, c) * submatrix(0, c).determinant();
       }
       return d;
     }
@@ -689,7 +689,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(j, i) = this->operator()(i, j);
+        result(j, i) = operator()(i, j);
       }
     }
 
@@ -817,7 +817,7 @@ class Matrix {
     for (size_t i = 0; i < mRows; i++)
       for (size_t j = 0; j < mCols; j++)
         for (size_t g = 0; g < result.mRows; g++)
-          if (this->operator()(i, j) == result(g, 0)) {
+          if (operator()(i, j) == result(g, 0)) {
             result(g, 1)++;
             break;
           }
@@ -841,7 +841,7 @@ class Matrix {
       for (size_t g = 0; g < groupCount.mRows; g++) {
         if (groups(i, 0) == groupCount(g, 0)) {
           for (size_t j = 0; j < mCols; j++) {
-            result(g, j) += this->operator()(i, j);
+            result(g, j) += operator()(i, j);
           }
           break;
         }
@@ -862,7 +862,7 @@ class Matrix {
 
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(j, 0) += this->operator()(i, j);
+        result(j, 0) += operator()(i, j);
       }
     }
 
@@ -899,7 +899,7 @@ class Matrix {
 
     for (size_t i = 0; i < mCols; i++) {
       for (size_t ii = 0; ii < mRows; ii++)
-        result(i, 0) += pow((this->operator()(ii, i) - means(i, 0)), 2);
+        result(i, 0) += pow((operator()(ii, i) - means(i, 0)), 2);
 
       result(i, 0) /= (mRows - 1);
     }
@@ -943,7 +943,7 @@ class Matrix {
     Matrix result(mRows, 1);
 #pragma omp parallel for
     for (size_t i = 0; i < mRows; i++)
-      result(i, 0) = this->operator()(i, index);
+      result(i, 0) = operator()(i, index);
 
     return result;
   }
@@ -958,7 +958,7 @@ class Matrix {
     Matrix result(mCols, 1);
 #pragma omp parallel for
     for (size_t i = 0; i < mCols; i++)
-      result(i, 0) = this->operator()(index, i);
+      result(i, 0) = operator()(index, i);
 
     return result;
   }
@@ -1025,7 +1025,7 @@ class Matrix {
 
 #pragma omp parallel for
     for (size_t i = 0; i < dimension; i++) {
-      result(i, i) = mCols > 1 ? this->operator()(0, i) : this->operator()(i, 0);
+      result(i, i) = mCols > 1 ? operator()(0, i) : operator()(i, 0);
     }
     return result;
   }
@@ -1047,7 +1047,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = (this->operator()(i, j) - means(j, 0)) / stds(j, 0);
+        result(i, j) = (operator()(i, j) - means(j, 0)) / stds(j, 0);
       }
     }
 
@@ -1060,7 +1060,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) - means(j, 0);
+        result(i, j) = operator()(i, j) - means(j, 0);
       }
     }
 
@@ -1240,7 +1240,7 @@ class Matrix {
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        unholyConvertion[i][j] = this->operator()(i, j);
+        unholyConvertion[i][j] = operator()(i, j);
       }
     }
 
