@@ -415,8 +415,8 @@ class Matrix {
 
   //region Equality operators
 
-  Matrix operator==(const double &value) {
-    Matrix result(mRows, mCols);
+  Matrix<int> operator==(const T &value) {
+    Matrix<int> result(mRows, mCols);
 
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
