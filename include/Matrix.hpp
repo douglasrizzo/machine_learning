@@ -741,11 +741,21 @@ class Matrix {
       return;
     }
 
-    // this is how you stop a reverse for loop with unsigned integers
-    for (size_t i = mRows - 1; i != (size_t) -1; i--)
-      mData.insert(mData.begin() + (i * mCols + position), values(i, 0));
+    vector<T> newData(mData.size() + values.mRows);
 
+    size_t newData_mCols = mCols + 1;
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < newData_mCols; j++) {
+        if (j == position)
+          newData[i * newData_mCols + j] = values(i, 0);
+        else {
+          int a = j > position;
+          newData[i * newData_mCols + j] = operator()(i, j - (j > position));
+        }
+      }
+    }
     mCols += 1;
+    mData = newData;
   }
 
   //! Adds a row to the matrix at the given position. Addition is done inplace.
