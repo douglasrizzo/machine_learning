@@ -217,23 +217,77 @@ class MLP {
     }
   }
 
-  MatrixD predict(MatrixD X, bool standardize = false) {
+  MatrixD predict(MatrixD
+                  X,
+                  bool standardize = false,
+                  bool softmax = false,
+                  bool binary = false,
+                  bool summarize = false) {
     if (standardize)
       X = X.standardize(dataMean, dataDev);
 
-    // even when there are no hidden layers, there must be at least one of each of the following
-    int n = hiddenConfig.size() < 1 ? 1 : hiddenConfig.size();
+// even when there are no hidden layers, there must be at least one of each of the following
+    size_t nLayers = W.size();
 
     MatrixD currentInput = X;
-    for (int i = 0; i < n; i++) {
-      // add the bias column to the input of the current layer
+    for (int i = 0; i < nLayers; i++) {
+// add the bias column to the input of the current layer
       currentInput.addColumn(MatrixD::ones(currentInput.nRows(), 1), 0);
       MatrixD S = currentInput * W[i];
       currentInput = S.apply(sigmoid);
     }
 
+    if (softmax)
+      return MLP::softmax(currentInput);
+    if (binary)
+      return MLP::binarize(currentInput);
+    if (summarize)
+      return MLP::summarize(currentInput);
+
     return currentInput;
   }
+
+  static MatrixD binarize(MatrixD m) {
+    for (size_t i = 0; i < m.nRows(); i++) {
+      size_t largest = 0;
+      for (size_t j = 0; j < m.nCols(); j++)
+        if (m(i, j) > m(i, largest)) largest = j;
+
+      for (size_t j = 0; j < m.nCols(); j++) {
+        m(i, j) = j == largest;
+      }
+    }
+    return m;
+  }
+
+  static MatrixD summarize(MatrixD m) {
+    MatrixD classes(m.nRows(), 1);
+
+    for (size_t i = 0; i < m.nRows(); i++) {
+      size_t largest = 0;
+      for (size_t j = 0; j < m.nCols(); j++)
+        if (m(i, j) < m(i, largest)) largest = j;
+
+      classes(i, 0) = largest;
+    }
+
+    return classes;
+  }
+
+  static MatrixD softmax(MatrixD m) {
+    m = m.apply(static_cast<double (*)(double)>(exp));
+    for (size_t i = 0; i < m.nRows(); i++) {
+      double sum = 0;
+
+      for (size_t j = 0; j < m.nCols(); j++)
+        sum += m(i, j);
+
+      for (size_t j = 0; j < m.nCols(); j++)
+        m(i, j) /= sum;
+    }
+    return m;
+  }
+
 };
 
 #endif //MACHINE_LEARNING_MLP_HPP
