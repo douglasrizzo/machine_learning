@@ -358,6 +358,9 @@ class Matrix {
   }
 
   Matrix &operator+=(const Matrix &other) {
+    if (mRows != other.mRows || mCols != other.mCols)
+      throw invalid_argument("Cannot add these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+                                 + to_string(other.mRows) + "x" + to_string(other.mCols));
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
       for (size_t j = 0; j < other.mCols; j++) {
@@ -369,6 +372,11 @@ class Matrix {
   }
 
   Matrix &operator-=(const Matrix &other) {
+    if (mRows != other.mRows || mCols != other.mCols)
+      throw invalid_argument(
+          "Cannot subtract these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+              + to_string(other.mRows) + "x" + to_string(other.mCols));
+
 #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
       for (size_t j = 0; j < other.mCols; j++) {
