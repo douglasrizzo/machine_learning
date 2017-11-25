@@ -473,7 +473,7 @@ class Matrix {
   //! \param i row index
   //! \param j column index
   //! \return element in position ij of the matrix
-  double &operator()(size_t i, size_t j) {
+  T &operator()(size_t i, size_t j) {
     validateIndexes(i, j);
     return mData[i * mCols + j];
   }
@@ -482,7 +482,7 @@ class Matrix {
   //! \param i row index
   //! \param j column index
   //! \return element in position ij of the matrix
-  double operator()(size_t i, size_t j) const {
+  T operator()(size_t i, size_t j) const {
     validateIndexes(i, j);
     return mData[i * mCols + j];
   }
