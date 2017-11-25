@@ -107,15 +107,24 @@ class Matrix {
   }
 
  public:
-  size_t nCols() { return mCols; }
 
-  size_t nRows() { return mRows; }
+  enum Axis { ALL, ROWS, COLUMNS };
+
+  size_t nCols() const { return mCols; }
+
+  size_t nRows() const { return mRows; }
 
   //region Constructors
 
   //! Initializes an empty matrix
   Matrix() {
     mRows = mCols = 0;
+  }
+
+  //! Initializes a square matrix
+  //! \param dimension number of rows and columns
+  Matrix(size_t dimension) {
+    Matrix(dimension, dimension);
   }
 
   //! Initializes a matrix with a predetermined number of rows and columns
@@ -336,7 +345,6 @@ class Matrix {
 
     Matrix result(mRows, b.mCols);
 
-//#pragma omp parallel for collapse(2)
     // two loops iterate through every cell of the new matrix
     for (size_t i = 0; i < result.mRows; i++) {
       for (size_t j = 0; j < result.mCols; j++) {
@@ -775,13 +783,13 @@ class Matrix {
   Matrix unique() const {
     // include all data from the inner vector in a set
     set<T> s;
-    vector<T> auxVec;
     unsigned long size = mData.size();
 
     for (unsigned i = 0; i < size; ++i)
       s.insert(mData[i]);
 
     // include all the data from the set back into a vector
+    vector<T> auxVec;
     auxVec.assign(s.begin(), s.end());
 
     // return a column matrix with the unique elements
