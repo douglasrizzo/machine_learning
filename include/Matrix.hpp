@@ -1370,10 +1370,38 @@ class Matrix {
 
     return result;
   }
+
+  void setRow(size_t index, Matrix<T> row) {
+    if (mRows < index)
+      throw invalid_argument("Invalid row index, matrix is not that large");
+    if (mCols != row.mCols)
+      throw invalid_argument("Incompatible number of columns");
+    if (row.mRows > 1)
+      throw invalid_argument("Row matrix contains more than one row");
+
+    for (size_t col = 0; col < mCols; col++)
+      operator()(index, col) = row(0, col);
+  }
+
+  void setColumn(size_t index, Matrix<T> column) {
+    if (mCols < index)
+      throw invalid_argument("Invalid row column, matrix is not that large");
+    if (mRows != column.mRows)
+      throw invalid_argument("Incompatible number of rows");
+    if (column.mCols > 1)
+      throw invalid_argument("Column matrix contains more than one column");
+
+    for (size_t row = 0; row < mCols; row++)
+      operator()(row, index) = column(row, 0);
+  }
+
+  bool isBinary() const {
+    Matrix<T> uniqueBin = unique();
+    return uniqueBin.mRows <= 2 && uniqueBin.contains(1) or uniqueBin.contains(0);
+  }
 };
 
 typedef Matrix<double> MatrixD;
 typedef Matrix<int> MatrixI;
-typedef Matrix<float> MatrixF;
 
 #endif //MACHINE_LEARNING_MATRIX_HPP
