@@ -1129,22 +1129,18 @@ class Matrix {
   //! 1s indicate the indices of the columns/rows that will be returned by the method
   //! \param columns true if the filter will select the columns of the matrix, otherwise, rows will be selected
   //! \return
-  Matrix filter(const Matrix bin, bool columns = false) {
+  Matrix filter(const Matrix<int> bin, bool columns = false) {
     size_t dimension = columns ? mCols : mRows;
 
-    if (bin.mCols != 1)
+    if (bin.nCols() != 1)
       throw invalid_argument("Binary filter must have only one column");
-    if (bin.mRows != dimension)
+    if (bin.nRows() != dimension)
       throw invalid_argument("Binary filter has the wrong number of row entries");
-
-    Matrix uniqueBin = bin.unique();
-    if (uniqueBin.mRows != 2 or !(uniqueBin.contains(1) and uniqueBin.contains(0)))
-      throw invalid_argument("Binary filter must be composed of only 0s and 1s");
 
     Matrix result;
 
-    for (size_t i = 0; i < bin.mRows; i++) {
-      if (bin(i, 0) == 1) {
+    for (size_t i = 0; i < bin.nRows(); i++) {
+      if (bin(i, 0)) {
         if (columns)
           result.addColumn(getColumn(i));
         else
@@ -1158,14 +1154,14 @@ class Matrix {
   //! Selects a subset of rows of the matrix
   //! \param bin a column vector containing only 0s and 1s, where indices with
   //! 1s indicate the indices of the columns/rows that will be returned by the method
-  Matrix getRows(const Matrix bin) {
+  Matrix getRows(const Matrix<int> bin) {
     return filter(bin);
   }
 
   //! Selects a subset of columns of the matrix
   //! \param bin a column vector containing only 0s and 1s, where indices with
   //! 1s indicate the indices of the columns/rows that will be returned by the method
-  Matrix getColumns(const Matrix bin) {
+  Matrix getColumns(const Matrix<int> bin) {
     return filter(bin, true);
   }
 
