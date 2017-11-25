@@ -19,5 +19,5 @@ add_definitions(${GCC_ERROR_RETURN_TYPE})
 #add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 #add_definitions(${GCC_COVERAGE_LINK_FLAGS})
 
-set(SOURCE_FILES main.cpp include/KNN.hpp include/LeastSquares.hpp include/Matrix.hpp include/PCA.hpp include/LDA.hpp include/nr3/nr3.h include/nr3/eigen_unsym.h include/MersenneTwister.hpp include/KMeans.hpp include/Metrics.hpp include/MLP.hpp)
+set(SOURCE_FILES main.cpp include/KNN.hpp include/LeastSquares.hpp include/Matrix.hpp include/PCA.hpp include/LDA.hpp include/nr3/nr3.h include/nr3/eigen_unsym.h include/MersenneTwister.hpp include/KMeans.hpp include/Metrics.hpp include/MLP.hpp include/ClassifierUtils.hpp)
 add_executable(machine_learning ${SOURCE_FILES})
