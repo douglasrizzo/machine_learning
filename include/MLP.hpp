@@ -44,6 +44,12 @@ class MLP {
     return result;
   }
 
+  static MatrixD initUniform(size_t in, size_t out) {
+    MersenneTwister twister;
+    MatrixD result(in, out, twister.vecFromUniform(in * out));
+    return result;
+  }
+
  public:
 
   enum ActivationFunction { SIGMOID, TANH };
