@@ -93,10 +93,18 @@ class MersenneTwister {
     return normalDist(myMersenne);
   }
 
-  vector<double> vecFromNormal(int n) {
+  vector<double> vecFromNormal(size_t n) {
     vector<double> myvector(n);
     for (double &i : myvector)
       i = n_random();
+
+    return myvector;
+  }
+
+  vector<double> vecFromUniform(size_t n) {
+    vector<double> myvector(n);
+    for (double &i : myvector)
+      i = d_random();
 
     return myvector;
   }
