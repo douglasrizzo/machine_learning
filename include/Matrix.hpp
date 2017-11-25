@@ -760,9 +760,9 @@ class Matrix {
 
   //! Adds a row to the matrix at the given position. Addition is done inplace.
   //! \param values a column vector containing the values to be added in the new row
-  //! \param index index of the new row. The row at the current
+  //! \param position index of the new row. The row at the current
   //! position and all rows succeeding it are pushed forward.
-  void addRow(Matrix values, size_t index) {
+  void addRow(Matrix values, size_t position) {
     if (!isEmpty() and values.mRows != mCols)
       throw invalid_argument("Wrong number of values passed for new row");
     if (values.mCols != 1)
@@ -775,15 +775,21 @@ class Matrix {
       return;
     }
 
-    for (size_t i = 0; i != mCols; i++) {
-      size_t exact_position = index * (mCols) + i;
-      if (exact_position < mData.size())
-        mData.insert(mData.begin() + exact_position, values(i, 0));
-      else
-        mData.push_back(values(i, 0));
-    }
+    // TODO addColumn with same logic was wrong, must check this one
+
+    vector<T> newData(mData.size() + values.mRows);
 
     mRows += 1;
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        if (i == position)
+          newData[i * mCols + j] = values(j, 0);
+        else
+          newData[i * mCols + j] = operator()(i - (i > position), j);
+      }
+    }
+
+    mData = newData;
   }
 
   //! Removes a column from the matrix. Removal is done inplace.
