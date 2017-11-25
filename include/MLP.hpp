@@ -33,15 +33,14 @@ class MLP {
   }
 
   static double tanhDerivative(double x) {
-    double t = tanh(x);
-    return 1 - pow(t, 2);
+    return 1 - pow(tanh(x), 2);
   }
 
   //endregion
 
   static MatrixD initNormal(size_t in, size_t out) {
     MersenneTwister twister;
-    MatrixD result(in, out, twister.vecFromNormal(static_cast<int>(in * out)));
+    MatrixD result(in, out, twister.vecFromNormal(in * out));
     return result;
   }
 
