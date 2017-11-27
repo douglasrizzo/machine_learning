@@ -337,23 +337,24 @@ class Matrix {
   //! Matrix multiplication operation
   //! \param b another matrix
   //! \return Result of the multiplication of both matrices
-  Matrix operator*(const Matrix &b) {
+  Matrix operator*(const Matrix &b) const {
     if (mCols != b.mRows)
       throw invalid_argument(
           "Cannot multiply these matrices: L = " + to_string(this->mRows) + "x" +
               to_string(this->mCols) + ", R = " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
-    Matrix result(mRows, b.mCols);
+    Matrix result = Matrix::zeros(mRows, b.mCols);
 
     // two loops iterate through every cell of the new matrix
+#pragma omp parallel for if(result.mRows * result.mCols > 250)
     for (size_t i = 0; i < result.mRows; i++) {
       for (size_t j = 0; j < result.mCols; j++) {
         // here we calculate the value of a single cell in our new matrix
-        result(i, j) = 0;
-        for (size_t ii = 0; ii < mCols; ii++)
-          result(i, j) += operator()(i, ii) * b(ii, j);
+        for (size_t k = 0; k < mCols; k++)
+          result(i, j) += operator()(i, k) * b(k, j);
       }
     }
+
     return result;
   }
 
