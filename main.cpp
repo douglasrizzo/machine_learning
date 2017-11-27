@@ -469,29 +469,29 @@ void testGiantToyDatasets() {
   KMeans kmeans;
   ofstream myfile;
 
-  MatrixD
-      sset = MatrixD::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/s-set.csv");
+  MatrixD sset = MatrixD::fromCSV(
+      "/home/dodo/repos/machine_learning/datasets/synth-clustering/s-set.csv");
   kmeans.fit(sset, 15, 100, 100, 2, KMeans::SAMPLE, true);
   myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/sset-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
-  MatrixD
-      birch1 = MatrixD::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch1.csv");
+  MatrixD birch1 = MatrixD::fromCSV(
+      "/home/dodo/repos/machine_learning/datasets/synth-clustering/birch1.csv");
   kmeans.fit(birch1, 100, 1, 100, 2, KMeans::SAMPLE, true);
   myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch1-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
-  MatrixD
-      birch2 = MatrixD::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch2.csv");
+  MatrixD birch2 = MatrixD::fromCSV(
+      "/home/dodo/repos/machine_learning/datasets/synth-clustering/birch2.csv");
   kmeans.fit(birch2, 100, 1, 100, 2, KMeans::SAMPLE, true);
   myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch2-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
-  MatrixD
-      birch3 = MatrixD::fromCSV("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch3.csv");
+  MatrixD birch3 = MatrixD::fromCSV(
+      "/home/dodo/repos/machine_learning/datasets/synth-clustering/birch3.csv");
   kmeans.fit(birch3, 100, 1, 100, 2, KMeans::SAMPLE, true);
   myfile.open("/home/dodo/repos/machine_learning/datasets/synth-clustering/birch3-clusters.txt");
   myfile << kmeans.getY();
