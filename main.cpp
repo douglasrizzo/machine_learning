@@ -10,8 +10,10 @@
 #include "include/LDA.hpp"
 #include "include/KMeans.hpp"
 #include "include/MLP.hpp"
+#include "include/ClassifierUtils.hpp"
 
 using namespace std;
+using myClock = chrono::high_resolution_clock;
 
 std::vector<double> getNextLineAndSplitIntoTokens(std::istream &str) {
   std::vector<double> result;
@@ -90,9 +92,8 @@ vector<vector<double>> csvToVector(string path,
         }
       }
     }
-
-    return outer;
   }
+  return outer;
 }
 
 void testBooks() {
@@ -239,6 +240,22 @@ void testOperations() {
   cout << tm;
   cout << mm;
   cout << tt;
+}
+
+void testBigOperations() {
+  // good for testing OpenMP implementation
+  MersenneTwister twister;
+  vector<size_t> sizes = {10, 50, 100, 250, 500, 1000};
+
+  for (auto s: sizes) {
+    MatrixD a(s, s, twister.vecFromNormal(s * s));
+    MatrixD b(s, s, twister.vecFromNormal(s * s));
+
+    chrono::time_point<chrono::system_clock> start = myClock::now();
+    a * b;
+    chrono::duration<float> execution_time = myClock::now() - start;
+    cout << s << '\t' << execution_time.count() << endl;
+  }
 }
 
 void testMatrixFromCSV() {
@@ -628,6 +645,7 @@ int main() {
 //  testLDA();
 //  testKMeans();
   testMLP();
+//  testBigOperations();
 //  sanityCheck();
   return 0;
 }

@@ -347,13 +347,10 @@ class Matrix {
 
     // two loops iterate through every cell of the new matrix
 #pragma omp parallel for if(result.mRows * result.mCols > 250)
-    for (size_t i = 0; i < result.mRows; i++) {
-      for (size_t j = 0; j < result.mCols; j++) {
-        // here we calculate the value of a single cell in our new matrix
+    for (size_t i = 0; i < result.mRows; i++)
+      for (size_t j = 0; j < result.mCols; j++)
         for (size_t k = 0; k < mCols; k++)
           result(i, j) += operator()(i, k) * b(k, j);
-      }
-    }
 
     return result;
   }
