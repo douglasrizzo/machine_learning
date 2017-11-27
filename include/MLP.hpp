@@ -6,16 +6,17 @@
 #define MACHINE_LEARNING_MLP_HPP
 
 #include <vector>
+#include <chrono>
 #include "Matrix.hpp"
 #include "MersenneTwister.hpp"
 
 using namespace std;
+using myClock = chrono::high_resolution_clock;
 
 class MLP {
  private:
   MatrixD data, classes, dataMean, dataDev;
   vector<MatrixD> W;
-  vector<size_t> hiddenConfig;
 
   //region Activation functions
 
@@ -53,6 +54,8 @@ class MLP {
  public:
 
   enum ActivationFunction { SIGMOID, TANH };
+  enum WeightInitialization { NORMAL, UNIFORM };
+  enum OutputFormat { ACTIVATION, SOFTMAX, ONEHOT, SUMMARY };
 
   MLP() {
   }
@@ -61,9 +64,11 @@ class MLP {
            MatrixD y,
            vector<size_t> hiddenConfig,
            int maxIters,
+           size_t batchSize = 0,
            double learningRate = 0.01,
            double errorThreshold = 0.0001,
            ActivationFunction func = SIGMOID,
+           WeightInitialization weightInit = UNIFORM,
            bool standardize = true,
            bool verbose = true) {
     size_t outputEncodingSize = y.unique().nRows();
@@ -84,16 +89,18 @@ class MLP {
       // number of outputs
       nOut = i == w.size() - 1 ? outputEncodingSize : hiddenConfig[i];
 
-      w[i] = initUniform(nIn, nOut); // initialize layer with random numbers from a distribution
+      // initialize layer with random numbers from a distribution
+      w[i] = weightInit == UNIFORM ? initUniform(nIn, nOut) : initNormal(nIn, nOut);
     }
 
-    fit(X, y, w, maxIters, learningRate, errorThreshold, func, standardize);
+    fit(X, y, w, maxIters, batchSize, learningRate, errorThreshold, func, standardize, verbose);
   }
 
   void fit(MatrixD X,
            MatrixD y,
            vector<MatrixD> hiddenLayers,
            int maxIters,
+           size_t batchSize = 0,
            double learningRate = 0.01,
            double errorThreshold = 0.0001,
            ActivationFunction func = SIGMOID,
@@ -129,8 +136,10 @@ class MLP {
       dataMean = X.mean();
       dataDev = X.stdev();
       data = X.standardize(dataMean, dataDev);
-    } else
+    } else {
       data = X;
+      dataMean = dataDev = MatrixD();
+    }
 
     function<double(double)> activationFunction, activationDerivative;
     if (func == SIGMOID) {
@@ -142,7 +151,7 @@ class MLP {
     }
 
     double previousLoss;
-
+    chrono::time_point<chrono::system_clock> start = myClock::now();
     // training iterations
     for (int iter = 0; iter < maxIters; iter++) {
       // matrices used in forward pass
@@ -155,7 +164,14 @@ class MLP {
       // D contains the loss signals for each layer
       vector<MatrixD> D(nLayers);
 
-      MatrixD currentInput = data;
+      MatrixD currentInput;
+      if (batchSize > 0) {
+        MersenneTwister t;
+        MatrixI indices(batchSize, 1, t.randomValues(0, data.nRows(), batchSize, false));
+        currentInput = data.getRows(indices);
+      } else
+        currentInput = data;
+
       //forward pass
       for (int i = 0; i < nLayers; i++) {
         // add the bias column to the input of the current layer
@@ -186,8 +202,19 @@ class MLP {
         previousLoss = loss;
 
       if (verbose) {
+        chrono::duration<float> execution_time = myClock::now() - start;
+
+        float totalSecondsFloat = (execution_time.count() / (iter + 1)) * maxIters;
+        int totalSeconds = (int) totalSecondsFloat;
+        int milliseconds = (int) (totalSecondsFloat * 1000) % 1000;
+        int seconds = totalSeconds % 60;
+        int minutes = (totalSeconds / 60) % 60;
+        int hours = (totalSeconds / (60 * 60)) % 24;
+
         char errorChar = loss == previousLoss ? '=' : loss > previousLoss ? '+' : '-';
-        cout << "it " << iter + 1 << ", loss: " << loss << ' ' << errorChar << endl;
+        cout << "it " << iter + 1 << "/" << maxIters << ", loss: " << loss << ' '
+             << errorChar << " time est. " << hours << ":" << minutes << ":"
+             << seconds << "." << milliseconds << endl;
       }
       if (loss < errorThreshold) {
         break;
@@ -219,11 +246,8 @@ class MLP {
 
   MatrixD predict(MatrixD
                   X,
-                  bool standardize = false,
-                  bool softmax = false,
-                  bool binary = false,
-                  bool summarize = false) {
-    if (standardize)
+                  OutputFormat of = ACTIVATION) {
+    if (!dataMean.isEmpty() && !dataDev.isEmpty())
       X = X.standardize(dataMean, dataDev);
 
 // even when there are no hidden layers, there must be at least one of each of the following
@@ -237,11 +261,11 @@ class MLP {
       currentInput = S.apply(sigmoid);
     }
 
-    if (softmax)
+    if (of == SOFTMAX)
       return MLP::softmax(currentInput);
-    if (binary)
+    if (of == ONEHOT)
       return MLP::binarize(currentInput);
-    if (summarize)
+    if (of == SUMMARY)
       return MLP::summarize(currentInput);
 
     return currentInput;
