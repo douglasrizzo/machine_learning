@@ -301,11 +301,20 @@ class MLP {
       // D contains the loss signals for each layer
       vector<MatrixD> D(nLayers);
 
+      Matrix<int> filter;
+
       MatrixD currentInput;
       if (batchSize > 0) {
         MersenneTwister t;
         MatrixI indices(batchSize, 1, t.randomValues(0, data.nRows(), batchSize, false));
-        currentInput = data.getRows(indices);
+
+        filter = MatrixI::zeros(data.nRows(), 1);
+
+        for (size_t i = 0; i < indices.nRows(); i++) {
+          filter(indices(i, 0), 0) = 1;
+        }
+
+        currentInput = data.getRows(filter);
       } else
         currentInput = data;
 
@@ -323,7 +332,7 @@ class MLP {
 
       // backpropagation
       // last layer error signal
-      D[nLayers - 1] = (Z[nLayers - 1] - classes).transpose();
+      D[nLayers - 1] = (Z[nLayers - 1] - (filter.isEmpty() ? classes : classes.getRows(filter))).transpose();
 
       // calculate loss
       double loss = 0;
@@ -338,8 +347,7 @@ class MLP {
       if (iter == 0)
         previousLoss = loss;
 
-      // in case there is nothing wrong with our loss, continue backpropagation
-      // loss signals for the intermediate layers
+      // error signals for the intermediate layers
       for (int i = nLayers - 2; i >= 0; i--) {
         MatrixD W_noBias = W[i + 1].transpose();
         W_noBias.removeColumn(0);
@@ -353,12 +361,17 @@ class MLP {
 
       // weight updates
       for (size_t i = 0; i < nLayers; i++) {
-        MatrixD input = i == 0 ? data : Z[i - 1];
-        input.addColumn(MatrixD::ones(input.nRows(), 1), 0);
-        //      bxm                       mxb         bxm
-        //               scalar       mxn     nxb
-        MatrixD dW = -learningRate * (D[i] * input).transpose();
-        // bxm
+        MatrixD input;
+        if (i == 0)
+          if (filter.isEmpty())
+            input = data;
+          else
+            input = data.getRows(filter);
+        else
+          input = Z[i - 1];
+
+        input.addColumn(MatrixD::ones(input.nRows(), 1), 0); // add the bias once again
+        MatrixD dW = -lr * (D[i] * input).transpose();
         W[i] += dW;
       }
 
