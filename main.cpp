@@ -542,7 +542,11 @@ void testMLPXor() {
 
   MatrixD yPred;
 
-  mlp.fit(dataMatrix, yMatrix, hidden, 1000000, 0, 0.3, 0.0000001, MLP::SIGMOID, MLP::UNIFORM, false);
+  unsigned iters = 1000000, batch = 0;
+  double learningRate = 1, minError = .0000001;
+  bool standardize = false, adaptive = true;
+
+  mlp.fit(dataMatrix, yMatrix, hidden, iters, batch, learningRate, minError, MLP::SIGMOID, adaptive, standardize);
   yPred = mlp.predict(dataMatrix, MLP::SUMMARY);
   cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yMatrix, yPred) << endl
        << "accuracy: " << ClassifierUtils::accuracy(yMatrix, yPred) << endl
@@ -563,29 +567,75 @@ void testMLPIris() {
   MatrixD yPred;
   MLP mlp;
 
-//  mlp.fit(trainData, yTrain, vector<size_t>({3}), 10000, 0, 0.3, 0.0001, MLP::SIGMOID, true, false);
-//  yPred = mlp.predict(testData, MLP::SUMMARY);
-//  cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTrue, yPred) << endl
-//       << "accuracy: " << ClassifierUtils::accuracy(yTrue, yPred) << endl;
-//
-//  mlp.fit(trainData, yTrain, vector<size_t>({4}), 10000, 0, 0.3, 0.0001, MLP::SIGMOID, true, false);
-//  yPred = mlp.predict(testData, MLP::SUMMARY);
-//  cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTrue, yPred) << endl
-//       << "accuracy: " << ClassifierUtils::accuracy(yTrue, yPred) << endl;
+  unsigned iters = 40000, batch = 37;
+  double learningRate = 1, minError = 0;
+  bool standardize = false, adaptive = false;
+  MLP::WeightInitialization wInit = MLP::GLOROT;
 
-  mlp.fit(trainData, yTrain, vector<size_t>({3, 3}), 10000, 0, 1, 0.0001, MLP::SIGMOID, MLP::UNIFORM, true, true);
+  mlp.fit(trainData,
+          yTrain,
+          vector<size_t>({3}),
+          iters,
+          batch,
+          learningRate,
+          minError,
+          MLP::SIGMOID,
+          wInit,
+          adaptive,
+          standardize);
   yPred = mlp.predict(testData, MLP::SUMMARY);
   cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTrue, yPred) << endl
        << "accuracy: " << ClassifierUtils::accuracy(yTrue, yPred) << endl;
 
-  mlp.fit(trainData, yTrain, vector<size_t>({4, 4}), 10000, 0, 1, 0.0001, MLP::SIGMOID, MLP::UNIFORM, true, false);
+  mlp.fit(trainData,
+          yTrain,
+          vector<size_t>({4}),
+          iters,
+          batch,
+          learningRate,
+          minError,
+          MLP::SIGMOID,
+          wInit,
+          adaptive,
+          standardize);
+  yPred = mlp.predict(testData, MLP::SUMMARY);
+  cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTrue, yPred) << endl
+       << "accuracy: " << ClassifierUtils::accuracy(yTrue, yPred) << endl;
+
+  mlp.fit(trainData,
+          yTrain,
+          vector<size_t>({3, 3}),
+          iters,
+          batch,
+          learningRate,
+          minError,
+          MLP::SIGMOID,
+          wInit,
+          adaptive,
+          standardize);
+  yPred = mlp.predict(testData, MLP::SUMMARY);
+  cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTrue, yPred) << endl
+       << "accuracy: " << ClassifierUtils::accuracy(yTrue, yPred) << endl;
+
+  mlp.fit(trainData,
+          yTrain,
+          vector<size_t>({4, 4}),
+          iters,
+          batch,
+          learningRate,
+          minError,
+          MLP::SIGMOID,
+          wInit,
+          adaptive,
+          standardize);
   yPred = mlp.predict(testData, MLP::SUMMARY);
   cout << yPred << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTrue, yPred) << endl
        << "accuracy: " << ClassifierUtils::accuracy(yTrue, yPred) << endl;
 }
 
 void testMLPDigits() {
-  string dataPath = "/home/dodo/repos/machine_learning/datasets/digits/";
+  string dataPath = "/home/dodo/repos/machine_learning/datasets/digits/oneseights/";
+//  string dataPath = "/home/dodo/repos/machine_learning/datasets/digits/";
 
   MatrixD data = MatrixD::fromCSV(dataPath + "train.csv");
   MatrixD y = MatrixD::fromCSV(dataPath + "train_labels.csv");
@@ -595,39 +645,61 @@ void testMLPDigits() {
 
   MLP mlp;
 
-  unsigned iters = 10000, batch = 0;
-  double learningRate = 1, minError = .001;
-  bool standardize = false;
+  unsigned iters = 10000, batch = 25;
+  double learningRate = 1, minError = 0;
+  bool standardize = false, adaptive = true;
+  MLP::WeightInitialization wInit = MLP::UNIFORM;
 
+//  mlp.fit(data,
+//          y,
+//          vector<size_t>({192}),
+//          iters,
+//          batch,
+//          learningRate,
+//          minError,
+//          MLP::SIGMOID,
+//          MLP::UNIFORM,
+//          adaptive,
+//          standardize);
+//  yPred = mlp.predict(testData, MLP::SUMMARY);
+//  cout << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTest, yPred) << endl
+//       << "accuracy: " << ClassifierUtils::accuracy(yTest, yPred) << endl;
+
+//  mlp.fit(data,
+//          y,
+//          vector<size_t>({128}),
+//          iters,
+//          batch,
+//          learningRate,
+//          minError,
+//          MLP::SIGMOID,
+//          MLP::UNIFORM,
+//          adaptive,
+//          standardize);
+//  yPred = mlp.predict(testData, MLP::SUMMARY);
+//  cout << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTest, yPred) << endl
+//       << "accuracy: " << ClassifierUtils::accuracy(yTest, yPred) << endl;
+//
   mlp.fit(data,
           y,
-          vector<size_t>({256}),
+          vector<size_t>({256, 256}),
           iters,
           batch,
           learningRate,
           minError,
           MLP::SIGMOID,
-          MLP::UNIFORM,
+          wInit,
+          adaptive,
           standardize);
   yPred = mlp.predict(testData, MLP::SUMMARY);
   cout << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTest, yPred) << endl
        << "accuracy: " << ClassifierUtils::accuracy(yTest, yPred) << endl;
-  
-//  mlp.fit(data, y, vector<size_t>({128}), iters, batch, learningRate, minError, MLP::SIGMOID,MLP::UNIFORM, false);
-//  yPred = mlp.predict(testData,  MLP::SUMMARY);
-//  cout << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTest, yPred) << endl
-//       << "accuracy: " << ClassifierUtils::accuracy(yTest, yPred) << endl;
-//
-//  mlp.fit(data, y, vector<size_t>({96, 96, 96}), iters, batch, learningRate, minError, MLP::SIGMOID,MLP::UNIFORM, false);
-//  mlp.predict(testData, MLP::SUMMARY);
-//  cout << "confusion matrix: \n" << ClassifierUtils::confusionMatrix(yTest, yPred) << endl
-//       << "accuracy: " << ClassifierUtils::accuracy(yTest, yPred) << endl;
 }
 
 void testMLP() {
 //  testMLPXor();
-//  testMLPIris();
   testMLPDigits();
+//  testMLPIris();
 }
 
 int main() {
