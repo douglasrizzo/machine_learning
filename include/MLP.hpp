@@ -66,16 +66,97 @@ class MLP {
     return result;
   }
 
+  //! Initialize a matrix according to a normal distribution N(mean; stddev)
+  //! @param in number of rows
+  //! @param out number of columns
+  //! @param mean mean of the normal distribution
+  //! @param stddev standard deviation of the normal distribution
+  //! @return a matrix of doubles, initialized according to the distribution
+  static MatrixD initNormal(size_t in, size_t out, double mean, double stddev) {
+    MersenneTwister twister;
+    MatrixD result(in, out, twister.vecFromNormal(in * out, mean, stddev));
+    return result;
+  }
+
+  //! Initialize a matrix according to the uniform distribution U(0;1)
+  //! @param in number of rows
+  //! @param out number of columns
+  //! @return a matrix of doubles, initialized according to the distribution
   static MatrixD initUniform(size_t in, size_t out) {
     MersenneTwister twister;
     MatrixD result(in, out, twister.vecFromUniform(in * out));
     return result;
   }
 
+  //! Initialize a matrix according to the uniform distribution U(min; max)
+  //! @param in number of rows
+  //! @param out number of columns
+  //! @param min minimum value
+  //! @param max maximum value
+  //! @return a matrix of doubles, initialized according to the distribution
+  static MatrixD initUniform(size_t in, size_t out, double min, double max) {
+    MersenneTwister twister;
+    MatrixD result(in, out, twister.vecFromUniform(in * out, min, max));
+    return result;
+  }
+
+  string prettyTime(float secondsFloat) const {
+    int totalSeconds = (int) secondsFloat;
+    int milliseconds = (int) (secondsFloat * 1000) % 1000;
+    int seconds = totalSeconds % 60;
+    int minutes = (totalSeconds / 60) % 60;
+    int hours = (totalSeconds / (60 * 60)) % 24;
+
+    string formattedTime = to_string(hours) + ":" + to_string(minutes) + ":"
+        + to_string(seconds) + "." + to_string(milliseconds);
+    return formattedTime;
+  }
+
+  static MatrixD binarize(MatrixD m) {
+    for (size_t i = 0; i < m.nRows(); i++) {
+      size_t largest = 0;
+      for (size_t j = 0; j < m.nCols(); j++)
+        if (m(i, j) > m(i, largest)) largest = j;
+
+      for (size_t j = 0; j < m.nCols(); j++) {
+        m(i, j) = j == largest;
+      }
+    }
+    return m;
+  }
+
+  MatrixD summarize(MatrixD m) {
+    MatrixD result(m.nRows(), 1);
+
+    for (size_t i = 0; i < m.nRows(); i++) {
+      size_t largest = 0;
+      for (size_t j = 0; j < m.nCols(); j++)
+        if (m(i, j) > m(i, largest)) largest = j;
+
+      result(i, 0) = originalClasses(largest, 0);
+    }
+
+    return result;
+  }
+
+  static MatrixD softmax(MatrixD m) {
+    m = m.apply(static_cast<double (*)(double)>(exp));
+    for (size_t i = 0; i < m.nRows(); i++) {
+      double sum = 0;
+
+      for (size_t j = 0; j < m.nCols(); j++)
+        sum += m(i, j);
+
+      for (size_t j = 0; j < m.nCols(); j++)
+        m(i, j) /= sum;
+    }
+    return m;
+  }
+
  public:
 
   enum ActivationFunction { SIGMOID, TANH };
-  enum WeightInitialization { NORMAL, UNIFORM };
+  enum WeightInitialization { NORMAL, UNIFORM, GLOROT };
   enum OutputFormat { ACTIVATION, SOFTMAX, ONEHOT, SUMMARY };
 
   MLP() {
@@ -125,7 +206,13 @@ class MLP {
       nOut = i == w.size() - 1 ? outputEncodingSize : hiddenConfig[i];
 
       // initialize layer with random numbers from a distribution
-      w[i] = weightInit == UNIFORM ? initUniform(nIn, nOut) : initNormal(nIn, nOut);
+      if (weightInit == UNIFORM) {
+        w[i] = initUniform(nIn, nOut);
+      } else if (weightInit == NORMAL) {
+        w[i] = initNormal(nIn, nOut);
+      } else if (weightInit == GLOROT) {
+        w[i] = initUniform(nIn, nOut, -sqrt(nIn), sqrt(nIn));
+      }
     }
 
     fit(X, y, w, maxIters, batchSize, learningRate, errorThreshold, func, adaptiveLR, standardize, verbose);
@@ -323,48 +410,6 @@ class MLP {
 
     return currentInput;
   }
-
-  static MatrixD binarize(MatrixD m) {
-    for (size_t i = 0; i < m.nRows(); i++) {
-      size_t largest = 0;
-      for (size_t j = 0; j < m.nCols(); j++)
-        if (m(i, j) > m(i, largest)) largest = j;
-
-      for (size_t j = 0; j < m.nCols(); j++) {
-        m(i, j) = j == largest;
-      }
-    }
-    return m;
-  }
-
-  static MatrixD summarize(MatrixD m) {
-    MatrixD classes(m.nRows(), 1);
-
-    for (size_t i = 0; i < m.nRows(); i++) {
-      size_t largest = 0;
-      for (size_t j = 0; j < m.nCols(); j++)
-        if (m(i, j) < m(i, largest)) largest = j;
-
-      classes(i, 0) = largest;
-    }
-
-    return classes;
-  }
-
-  static MatrixD softmax(MatrixD m) {
-    m = m.apply(static_cast<double (*)(double)>(exp));
-    for (size_t i = 0; i < m.nRows(); i++) {
-      double sum = 0;
-
-      for (size_t j = 0; j < m.nCols(); j++)
-        sum += m(i, j);
-
-      for (size_t j = 0; j < m.nCols(); j++)
-        m(i, j) /= sum;
-    }
-    return m;
-  }
-
 };
 
 #endif //MACHINE_LEARNING_MLP_HPP
