@@ -337,17 +337,7 @@ class MLP {
       D[nLayers - 1] = (Z[nLayers - 1] - (filter.isEmpty() ? classes : classes.getRows(filter))).transpose();
 
       // calculate loss
-      double loss = 0;
-      for (size_t i = 0; i < data.nRows(); i++) {
-        double thisError = 0;
-        for (size_t j = 0; j < outputEncodingSize; j++) {
-          loss += pow(classes(i, j) - Z[nLayers - 1](i, j), 2);
-        }
-      }
-      loss /= (2 * data.nRows());
-
-      if (iter == 0)
-        previousLoss = loss;
+      double loss = (D[nLayers - 1]).apply(pow2).sum() / (2 * batchSize > 0 ? batchSize : data.nRows());
 
       // error signals for the intermediate layers
       for (int i = nLayers - 2; i >= 0; i--) {
