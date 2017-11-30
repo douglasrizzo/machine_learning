@@ -59,7 +59,7 @@ class PCA {
   }
 
   MatrixD transform(int numComponents) {
-    MatrixI filter = MatrixI::fill(eigenvalues.nRows(), 1, 0);
+    MatrixI filter = MatrixI::zeros(eigenvalues.nRows(), 1);
 
 
     for (int i = 0; i < numComponents; i++) {
