@@ -1,12 +1,15 @@
-//
-// Created by dodo on 01/11/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Multilayer perceptron
+ * @date   2017-11-1
+ */
 
 #ifndef MACHINE_LEARNING_MLP_HPP
 #define MACHINE_LEARNING_MLP_HPP
 
 #include <vector>
 #include <chrono>
+#include <iostream>
 #include "Matrix.hpp"
 #include "MersenneTwister.hpp"
 
@@ -20,25 +23,43 @@ class MLP {
 
   //region Activation functions
 
+  //! @param x
+  //! @return x to the power of 2
+  static double pow2(double x) {
+    return x * x;
+  }
+
+  //! @param x
+  //! @return Sigmoid of x
   static double sigmoid(double x) {
     return 1 / (1 + exp(-x));
   }
 
+  //! @param x
+  //! @return Derivative of the sigmoid of x
   static double sigmoidDerivative(double x) {
     double z = sigmoid(x);
     return z * (1 - z);
   }
 
+  //! @param x
+  //! @return Hyperbolic tangent of x
   static double tanh(double x) {
     return 2 * sigmoid(2 * x) - 1;
   }
 
+  //! @param x
+  //! @return Derivative of the hyperbolic tangent of x
   static double tanhDerivative(double x) {
     return 1 - pow(tanh(x), 2);
   }
 
   //endregion
 
+  //! Initialize a matrix according to a normal distribution N(0; 1)
+  //! @param in number of rows
+  //! @param out number of columns
+  //! @return a matrix of doubles, initialized according to the distribution
   static MatrixD initNormal(size_t in, size_t out) {
     MersenneTwister twister;
     MatrixD result(in, out, twister.vecFromNormal(in * out));
@@ -60,6 +81,19 @@ class MLP {
   MLP() {
   }
 
+  //! Train a multiplayer perceptron
+  //! @param X Input data, with rows representing examples and columns representing features
+  //! @param y Input labels as a column vector
+  //! @param hiddenConfig vector containing the number of neurons in each hidden layer
+  //! @param maxIters maximum number of training iterations
+  //! @param batchSize size of the batch. If <= 0, the whole data is used in every iteration
+  //! @param learningRate learning rate
+  //! @param errorThreshold minimum error for early stopping
+  //! @param func activation function
+  //! @param weightInit weight initilization procedure
+  //! @param adaptiveLR if true, the learning rate linearly decreases according to the number of iterations
+  //! @param standardize if true, data is standardized according to its mean and standard deviation
+  //! @param verbose output training summary at each iteration
   void fit(MatrixD X,
            MatrixD y,
            vector<size_t> hiddenConfig,
@@ -69,6 +103,7 @@ class MLP {
            double errorThreshold = 0.0001,
            ActivationFunction func = SIGMOID,
            WeightInitialization weightInit = UNIFORM,
+           bool adaptiveLR = false,
            bool standardize = true,
            bool verbose = true) {
     size_t outputEncodingSize = y.unique().nRows();
@@ -83,7 +118,7 @@ class MLP {
     for (int i = 0; i < nLayers; i++) {
       size_t nIn, nOut;
 
-      // number of inputs (+1 accounts for the weight used in the bias)
+      // number of inputs (+1 accounts for the bias weight)
       nIn = (i == 0 ? X : w[i - 1]).nCols() + 1;
 
       // number of outputs
@@ -93,9 +128,21 @@ class MLP {
       w[i] = weightInit == UNIFORM ? initUniform(nIn, nOut) : initNormal(nIn, nOut);
     }
 
-    fit(X, y, w, maxIters, batchSize, learningRate, errorThreshold, func, standardize, verbose);
+    fit(X, y, w, maxIters, batchSize, learningRate, errorThreshold, func, adaptiveLR, standardize, verbose);
   }
 
+  //! Train a multiplayer perceptron
+  //! @param X Input data, with rows representing examples and columns representing features
+  //! @param y Input labels as a column vector
+  //! @param hiddenLayers a vector of matrices, each one containing the weights for a hidden layer
+  //! @param maxIters maximum number of training iterations
+  //! @param batchSize size of the batch. If <= 0, the whole data is used in every iteration
+  //! @param learningRate learning rate
+  //! @param errorThreshold minimum error for early stopping
+  //! @param func activation function
+  //! @param adaptiveLR if true, the learning rate linearly decreases according to the number of iterations
+  //! @param standardize if true, data is standardized according to its mean and standard deviation
+  //! @param verbose output training summary at each iteration
   void fit(MatrixD X,
            MatrixD y,
            vector<MatrixD> hiddenLayers,
@@ -104,6 +151,7 @@ class MLP {
            double learningRate = 0.01,
            double errorThreshold = 0.0001,
            ActivationFunction func = SIGMOID,
+           bool adaptiveLR = false,
            bool standardize = true,
            bool verbose = true) {
     // create one-hot encoding for classes
@@ -231,6 +279,9 @@ class MLP {
         D[i] = F[i].hadamard(W_noBias * D[i + 1]);
       }
 
+      // learning rate is linearly scaled down with passing iterations
+      double lr = adaptiveLR ? (learningRate / maxIters) * (maxIters - iter) : learningRate;
+
       // weight updates
       for (size_t i = 0; i < nLayers; i++) {
         MatrixD input = i == 0 ? data : Z[i - 1];
@@ -244,9 +295,11 @@ class MLP {
     }
   }
 
-  MatrixD predict(MatrixD
-                  X,
-                  OutputFormat of = ACTIVATION) {
+  //! Predict the classes of a data set
+  //! @param X Input data to be classified
+  //! @param of output format of the method
+  //! @return a matrix, each row containing the output of the network for an example of X
+  MatrixD predict(MatrixD X, OutputFormat of = ACTIVATION) {
     if (!dataMean.isEmpty() && !dataDev.isEmpty())
       X = X.standardize(dataMean, dataDev);
 
@@ -255,7 +308,7 @@ class MLP {
 
     MatrixD currentInput = X;
     for (int i = 0; i < nLayers; i++) {
-// add the bias column to the input of the current layer
+      // add the bias column to the input of the current layer
       currentInput.addColumn(MatrixD::ones(currentInput.nRows(), 1), 0);
       MatrixD S = currentInput * W[i];
       currentInput = S.apply(sigmoid);
