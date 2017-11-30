@@ -16,6 +16,7 @@
 #include <cmath>
 #include <set>
 #include <complex>
+#include <armadillo>
 #include "nr3/nr3.h"
 #include "nr3/eigen_unsym.h"
 
@@ -1411,6 +1412,22 @@ class Matrix {
   bool isBinary() const {
     Matrix<T> uniqueBin = unique();
     return uniqueBin.mRows <= 2 && uniqueBin.contains(1) or uniqueBin.contains(0);
+  }
+
+  Matrix(arma::mat other) : mRows(other.n_rows), mCols(other.n_cols), mData(mRows * mCols) {
+    for (size_t i = 0; i < mRows; i++)
+      for (size_t j = 0; j < mCols; j++)
+        operator()(i, j) = other[i, j];
+  }
+
+  arma::mat toArmadillo() {
+    arma::mat result(mRows, mCols);
+
+    for (size_t i = 0; i < mRows; i++)
+      for (size_t j = 0; j < mCols; j++)
+        result[i, j] = operator()(i, j);
+
+    return result;
   }
 };
 
