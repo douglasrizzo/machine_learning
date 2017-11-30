@@ -18,7 +18,7 @@ using myClock = chrono::high_resolution_clock;
 
 class MLP {
  private:
-  MatrixD data, classes, dataMean, dataDev;
+  MatrixD data, dataMean, dataDev, classes, originalClasses;
   vector<MatrixD> W;
 
   //region Activation functions
@@ -243,6 +243,8 @@ class MLP {
            bool verbose = true) {
     // create one-hot encoding for classes
     classes = y.oneHot();
+    originalClasses = y.unique();
+    originalClasses.sort();
     size_t outputEncodingSize = classes.nCols();
 
     for (int i = 0; i < hiddenLayers.size(); ++i) {
