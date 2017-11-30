@@ -289,6 +289,8 @@ class MLP {
     chrono::time_point<chrono::system_clock> start = myClock::now();
     // training iterations
     for (int iter = 0; iter < maxIters; iter++) {
+      chrono::time_point<chrono::system_clock> iterStart = myClock::now();
+
       // matrices used in forward pass
       // Z holds f(S), where f is the activation function
       vector<MatrixD> Z(nLayers);
@@ -336,26 +338,6 @@ class MLP {
       if (iter == 0)
         previousLoss = loss;
 
-      if (verbose) {
-        chrono::duration<float> execution_time = myClock::now() - start;
-
-        float totalSecondsFloat = (execution_time.count() / (iter + 1)) * maxIters;
-        int totalSeconds = (int) totalSecondsFloat;
-        int milliseconds = (int) (totalSecondsFloat * 1000) % 1000;
-        int seconds = totalSeconds % 60;
-        int minutes = (totalSeconds / 60) % 60;
-        int hours = (totalSeconds / (60 * 60)) % 24;
-
-        char errorChar = loss == previousLoss ? '=' : loss > previousLoss ? '+' : '-';
-        cout << "it " << iter + 1 << "/" << maxIters << ", loss: " << loss << ' '
-             << errorChar << " time est. " << hours << ":" << minutes << ":"
-             << seconds << "." << milliseconds << endl;
-      }
-      if (loss < errorThreshold) {
-        break;
-      }
-      previousLoss = loss;
-
       // in case there is nothing wrong with our loss, continue backpropagation
       // loss signals for the intermediate layers
       for (int i = nLayers - 2; i >= 0; i--) {
@@ -379,6 +361,25 @@ class MLP {
         // bxm
         W[i] += dW;
       }
+
+      if (verbose) {
+        chrono::time_point<chrono::system_clock> currentTime = myClock::now();
+        float totalSeconds = ((chrono::duration<float>) (currentTime - start)).count(),
+            iterSeconds = ((chrono::duration<float>) (currentTime - iterStart)).count();
+
+        float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
+        string formattedTotalTime = prettyTime(estimatedTotalSeconds - totalSeconds),
+            formattedIterTime = prettyTime(iterSeconds);
+
+        char errorChar = (loss == previousLoss or iter == 0) ? '=' : loss > previousLoss ? '+' : '-';
+
+        cout << "it " << iter + 1 << "/" << maxIters << ", loss: " << loss << ' ' << errorChar << ", time: "
+             << formattedIterTime << " (est. " << formattedTotalTime << ")" << endl;
+      }
+      if (loss < errorThreshold) {
+        break;
+      }
+      previousLoss = loss;
     }
   }
 
