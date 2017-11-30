@@ -343,14 +343,17 @@ class Matrix {
           "Cannot multiply these matrices: L = " + to_string(this->mRows) + "x" +
               to_string(this->mCols) + ", R = " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
-    Matrix result = Matrix::zeros(mRows, b.mCols);
+    Matrix result = zeros(mRows, b.mCols);
 
-    // two loops iterate through every cell of the new matrix
 #pragma omp parallel for if(result.mRows * result.mCols > 250)
-    for (size_t i = 0; i < result.mRows; i++)
-      for (size_t j = 0; j < result.mCols; j++)
-        for (size_t k = 0; k < mCols; k++)
-          result(i, j) += operator()(i, k) * b(k, j);
+    for (size_t i = 0; i < result.mRows; i++) {
+      for (size_t k = 0; k < mCols; k++) {
+        double tmp = operator()(i, k);
+        for (size_t j = 0; j < result.mCols; j++) {
+          result(i, j) += tmp * b(k, j);
+        }
+      }
+    }
 
     return result;
   }
