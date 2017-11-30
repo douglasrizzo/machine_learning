@@ -1369,14 +1369,14 @@ class Matrix {
   }
 
   Matrix oneHot() {
-    Matrix result;
     Matrix uniqueValues = unique();
     Matrix oneHotUnique = identity(uniqueValues.mRows);
+    Matrix result(mRows, oneHotUnique.mCols);
 
     for (size_t i = 0; i < mRows; i++) {
       for (size_t ii = 0; ii < uniqueValues.mRows; ++ii) {
         if (getRow(i) == uniqueValues.getRow(ii)) {
-          result.addRow(oneHotUnique.getRow(oneHotUnique.mRows - ii - 1));
+          result.setRow(i, oneHotUnique.getRow(ii).transpose());
         }
       }
     }
