@@ -1,6 +1,6 @@
 /**
  * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
- * @brief
+ * @brief  Pseudo-random number generator using the Mersenne twister
  * @date   2017-10-25
  */
 
@@ -17,22 +17,23 @@ class MersenneTwister {
   using clock = chrono::high_resolution_clock;
  private:
   mt19937_64 myMersenne;
-  uniform_real_distribution<double> doubleDist;
-  uniform_int_distribution<int> intDist;
+  uniform_real_distribution<double> uniformDoubleDist;
+  uniform_int_distribution<int> uniformIntDist;
   normal_distribution<double> normalDist;
  public:
   MersenneTwister() {
     auto seed = clock::now().time_since_epoch().count();
     myMersenne = mt19937_64(seed);
-    doubleDist = uniform_real_distribution<double>(0, 1);
-    intDist = uniform_int_distribution<int>(0, 1);
+    uniformDoubleDist = uniform_real_distribution<double>(0, 1);
+    uniformIntDist = uniform_int_distribution<int>(0, 1);
     normalDist = normal_distribution<double>(0, 1);
   }
 
 //! Pseudo-random number generator using the Mersenne Twister method
 //! \return double between 0 and 1
   double d_random() {
-    return doubleDist(myMersenne);
+    uniformDoubleDist = uniform_real_distribution<double>(0, 1);
+    return uniformDoubleDist(myMersenne);
   }
 
 //! Pseudo-random number generator using the Mersenne Twister method
@@ -53,7 +54,8 @@ class MersenneTwister {
 //! Pseudo-random number generator using the Mersenne Twister method
 //! \return double between 0 and 1
   int i_random() {
-    return intDist(myMersenne);
+    uniformIntDist = uniform_int_distribution<int>(0, 1);
+    return uniformIntDist(myMersenne);
   }
 
 //! Pseudo-random number generator using the Mersenne Twister method
@@ -90,6 +92,12 @@ class MersenneTwister {
   }
 
   double n_random() {
+    normalDist = normal_distribution<double>(0, 1);
+    return normalDist(myMersenne);
+  }
+
+  double n_random(double mean, double stddev) {
+    normalDist = normal_distribution<double>(mean, stddev);
     return normalDist(myMersenne);
   }
 
@@ -101,10 +109,28 @@ class MersenneTwister {
     return myvector;
   }
 
+  vector<double> vecFromNormal(size_t n, double mean, double stddev) {
+    normalDist = normal_distribution<double>(mean, stddev);
+    vector<double> myvector(n);
+    for (double &i : myvector)
+      i = normalDist(myMersenne);
+
+    return myvector;
+  }
+
   vector<double> vecFromUniform(size_t n) {
     vector<double> myvector(n);
     for (double &i : myvector)
       i = d_random();
+
+    return myvector;
+  }
+
+  vector<double> vecFromUniform(size_t n, double min, double max) {
+    uniformDoubleDist = uniform_real_distribution<double>(min, max);
+    vector<double> myvector(n);
+    for (double &i : myvector)
+      i = uniformDoubleDist(myMersenne);
 
     return myvector;
   }
