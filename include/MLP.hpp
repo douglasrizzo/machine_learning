@@ -170,6 +170,7 @@ class MLP {
   //! @param batchSize size of the batch. If <= 0, the whole data is used in every iteration
   //! @param learningRate learning rate
   //! @param errorThreshold minimum error for early stopping
+  //! @param regularization the regularization parameter. 0 indicates no regularization.
   //! @param func activation function
   //! @param weightInit weight initilization procedure
   //! @param adaptiveLR if true, the learning rate linearly decreases according to the number of iterations
@@ -182,6 +183,7 @@ class MLP {
            size_t batchSize = 0,
            double learningRate = 0.01,
            double errorThreshold = 0.0001,
+           double regularization = 0,
            ActivationFunction func = SIGMOID,
            WeightInitialization weightInit = UNIFORM,
            bool adaptiveLR = false,
@@ -215,7 +217,18 @@ class MLP {
       }
     }
 
-    fit(X, y, w, maxIters, batchSize, learningRate, errorThreshold, func, adaptiveLR, standardize, verbose);
+    fit(X,
+        y,
+        w,
+        maxIters,
+        batchSize,
+        learningRate,
+        errorThreshold,
+        regularization,
+        func,
+        adaptiveLR,
+        standardize,
+        verbose);
   }
 
   //! Train a multiplayer perceptron
@@ -226,6 +239,7 @@ class MLP {
   //! @param batchSize size of the batch. If <= 0, the whole data is used in every iteration
   //! @param learningRate learning rate
   //! @param errorThreshold minimum error for early stopping
+  //! @param regularization the regularization parameter. 0 indicates no regularization.
   //! @param func activation function
   //! @param adaptiveLR if true, the learning rate linearly decreases according to the number of iterations
   //! @param standardize if true, data is standardized according to its mean and standard deviation
@@ -237,6 +251,7 @@ class MLP {
            size_t batchSize = 0,
            double learningRate = 0.01,
            double errorThreshold = 0.0001,
+           double regularization = 0,
            ActivationFunction func = SIGMOID,
            bool adaptiveLR = false,
            bool standardize = true,
@@ -345,6 +360,13 @@ class MLP {
       // calculate loss
       double loss = (D[nLayers - 1]).apply(pow2).sum() / (2 * batchClasses.nRows());
 
+      double regularizationTerm = 0;
+      for (auto w:W)
+        regularizationTerm += w.apply(pow2).sum();
+      regularizationTerm = regularization > 0 ? regularization / (2 * batchClasses.nRows()) : 0;
+
+      loss += regularizationTerm;
+
       // error signals for the intermediate layers
       for (int i = nLayers - 2; i >= 0; i--) {
         MatrixD W_noBias = W[i + 1].transpose();
@@ -370,7 +392,8 @@ class MLP {
 
         input.addColumn(MatrixD::ones(input.nRows(), 1), 0); // add the bias once again
         MatrixD dW = -lr * (D[i] * input).transpose();
-        W[i] += dW;
+//        W[i] += dW;
+        W[i] = (1 - ((learningRate * regularization) / batchClasses.nRows())) * W[i] + dW;
       }
 
       if (verbose) {
