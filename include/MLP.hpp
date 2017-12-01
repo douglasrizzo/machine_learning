@@ -287,6 +287,7 @@ class MLP {
       activationDerivative = tanhDerivative;
     }
 
+    float lastStdout = 0;
     double previousLoss;
     chrono::time_point<chrono::system_clock> start = myClock::now();
     // training iterations
@@ -294,10 +295,11 @@ class MLP {
       chrono::time_point<chrono::system_clock> iterStart = myClock::now();
 
       // matrices used in forward pass
-      // Z holds f(S), where f is the activation function
+      // Z holds the outputs of each layer
       vector<MatrixD> Z(nLayers);
-      // F are activation derivatives
-      vector<MatrixD> F(nLayers);
+
+      // F are activation derivatives, they are needed for all but the last layer
+      vector<MatrixD> F(nLayers - 1);
 
       // matrices used on backpropagation
       // D contains the loss signals for each layer
@@ -326,7 +328,10 @@ class MLP {
         currentInput.addColumn(MatrixD::ones(currentInput.nRows(), 1), 0);
 
         MatrixD S = currentInput * W[i]; // multiply input by weights
-        F[i] = S.apply(activationDerivative).transpose();
+
+        // calculate derivatives
+        if (i < nLayers - 1) // derivative of the last layer is not used, so no need to do it
+          F[i] = S.apply(activationDerivative).transpose();
 
         //apply activation function, whose resulting matrix will be the next input
         currentInput = Z[i] = S.apply(activationFunction);
@@ -334,10 +339,11 @@ class MLP {
 
       // backpropagation
       // last layer error signal
-      D[nLayers - 1] = (Z[nLayers - 1] - (filter.isEmpty() ? classes : classes.getRows(filter))).transpose();
+      MatrixD batchClasses = filter.isEmpty() ? classes : classes.getRows(filter);
+      D[nLayers - 1] = (Z[nLayers - 1] - batchClasses).transpose();
 
       // calculate loss
-      double loss = (D[nLayers - 1]).apply(pow2).sum() / (2 * batchSize > 0 ? batchSize : data.nRows());
+      double loss = (D[nLayers - 1]).apply(pow2).sum() / (2 * batchClasses.nRows());
 
       // error signals for the intermediate layers
       for (int i = nLayers - 2; i >= 0; i--) {
@@ -369,22 +375,33 @@ class MLP {
 
       if (verbose) {
         chrono::time_point<chrono::system_clock> currentTime = myClock::now();
-        float totalSeconds = ((chrono::duration<float>) (currentTime - start)).count(),
-            iterSeconds = ((chrono::duration<float>) (currentTime - iterStart)).count();
+        float totalSeconds = ((chrono::duration<float>) (currentTime - start)).count();
 
-        float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
-        string formattedTotalTime = prettyTime(estimatedTotalSeconds - totalSeconds),
-            formattedIterTime = prettyTime(iterSeconds);
+        if (totalSeconds - lastStdout > 1) {
+          lastStdout = totalSeconds;
 
-        char errorChar = (loss == previousLoss or iter == 0) ? '=' : loss > previousLoss ? '+' : '-';
+          float iterSeconds = ((chrono::duration<float>) (currentTime - iterStart)).count();
 
-        cout << "it " << iter + 1 << "/" << maxIters << ", loss: " << loss << ' ' << errorChar << ", time: "
-             << formattedIterTime << " (est. " << formattedTotalTime << ")" << endl;
+          float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
+          string formattedTotalTime = prettyTime(estimatedTotalSeconds - totalSeconds),
+              formattedIterTime = prettyTime(iterSeconds);
+
+          char errorChar = (loss == previousLoss or iter == 0) ? '=' : loss > previousLoss ? '+' : '-';
+
+          cout << "it " << iter + 1 << "/" << maxIters << ", loss: " << loss << ' ' << errorChar << ", time: "
+               << formattedIterTime << " (est. " << formattedTotalTime << ")" << endl;
+        }
       }
-      if (loss < errorThreshold) {
+
+      if (loss < errorThreshold)
         break;
-      }
+
       previousLoss = loss;
+    }
+    if (verbose) {
+      float totalSeconds = ((chrono::duration<float>) (myClock::now() - start)).count();
+      string formattedTotalTime = prettyTime(totalSeconds);
+      cout << "Total training time: " << formattedTotalTime << endl;
     }
   }
 
