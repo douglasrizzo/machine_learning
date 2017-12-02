@@ -11,9 +11,11 @@
 #include "include/KMeans.hpp"
 #include "include/MLP.hpp"
 #include "include/ClassifierUtils.hpp"
+#include "include/NaiveBayes.hpp"
 
 using namespace std;
 using myClock = chrono::high_resolution_clock;
+string datasetDir = "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/";
 
 std::vector<double> getNextLineAndSplitIntoTokens(std::istream &str) {
   std::vector<double> result;
@@ -98,13 +100,9 @@ vector<vector<double>> csvToVector(string path,
 
 void testBooks() {
   const vector<vector<double>>
-      &data = csvToVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/books/normalized-training.csv",
-      false);
+      &data = csvToVector(datasetDir + "books/normalized-training.csv", false);
   const vector<vector<double>>
-      &test = csvToVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/books/normalized-test.csv",
-      false);
+      &test = csvToVector(datasetDir + "books/normalized-test.csv", false);
   KNN knn(data, 2);
 
   int ks[] = {1, 2, 3, 5, 10};
@@ -136,17 +134,9 @@ void testIris() {
   // 1 = versicolor
   // 2 = virginica
   const vector<vector<double>>
-      &data = csvToVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/normalized-training.csv",
-      true,
-      4);
-  const vector<vector<double>> &test =
-      csvToVector(
-          "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/normalized-testing.csv",
-          true);
-  const vector<double>
-      &yTrue = csvToRowVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/normalized-testing-y.csv");
+      &data = csvToVector(datasetDir + "iris/normalized-training.csv", true, 4);
+  const vector<vector<double>> &test = csvToVector(datasetDir + "iris/normalized-testing.csv", true);
+  const vector<double> &yTrue = csvToRowVector(datasetDir + "iris/normalized-testing-y.csv");
 
   KNN knn(data, 4);
   int ks[] = {1, 2, 3, 5, 10};
@@ -162,17 +152,9 @@ void testIris() {
 }
 
 void testPoker() {
-  const vector<vector<double>>
-      &data = csvToVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/poker-hand/training.csv",
-      false);
-  const vector<vector<double>>
-      &test = csvToVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/poker-hand/testing-single.csv",
-      false);
-  const vector<double>
-      &yTrue = csvToRowVector(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/poker-hand/testing-single-y.csv");
+  const vector<vector<double>> &data = csvToVector(datasetDir + "poker-hand/training.csv", false);
+  const vector<vector<double>> &test = csvToVector(datasetDir + "poker-hand/testing-single.csv", false);
+  const vector<double> &yTrue = csvToRowVector(datasetDir + "poker-hand/testing-single-y.csv");
 
   KNN knn(data, 10, 1, KNN::Distance::HAMMING);
 
@@ -186,12 +168,9 @@ void testPoker() {
 }
 
 void testWine(const string &path) {
-  const vector<vector<double>>
-      &data = csvToVector(path + "normalized-training.csv", false);
-  const vector<vector<double>>
-      &test = csvToVector(path + "normalized-testing.csv", false);
-  const vector<double>
-      &yTrue = csvToRowVector(path + "normalized-testing-y.csv");
+  const vector<vector<double>> &data = csvToVector(path + "normalized-training.csv", false);
+  const vector<vector<double>> &test = csvToVector(path + "normalized-testing.csv", false);
+  const vector<double> &yTrue = csvToRowVector(path + "normalized-testing-y.csv");
 
   KNN knn(data, 11);
 
@@ -274,8 +253,7 @@ void testBigOperations() {
 }
 
 void testMatrixFromCSV() {
-  MatrixD m = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/alpswater/alpswater.csv");
+  MatrixD m = MatrixD::fromCSV(datasetDir + "alpswater/alpswater.csv");
   cout << m;
 }
 
@@ -300,8 +278,7 @@ void testMatrices() {
 }
 
 void testLeastSquaresAlps() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/alpswater/alpswater.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "alpswater/alpswater.csv");
   MatrixD X = data.getColumn(0);
   MatrixD y = data.getColumn(1);
   LeastSquares l(X, y);
@@ -320,8 +297,7 @@ void testLeastSquaresAlps() {
 }
 
 void testLeastSquaresBooks() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/books/training.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "books/training.csv");
   MatrixD y = data.getColumn(2);
   MatrixD X = data;
   X.removeColumn(2);
@@ -343,8 +319,7 @@ void testLeastSquaresBooks() {
 }
 
 void testLeastSquaresCensus() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/us-census/training.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "us-census/training.csv");
   MatrixD X = data.getColumn(0);
   MatrixD y = data.getColumn(1);
   LeastSquares l(X, y);
@@ -369,8 +344,7 @@ void testLeastSquares() {
 }
 
 void testPCALindsay() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/lindsay.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "lindsay.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -379,8 +353,7 @@ void testPCALindsay() {
 }
 
 void testPCAAlps() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/alpswater/alpswater.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "alpswater/alpswater.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -389,8 +362,7 @@ void testPCAAlps() {
 }
 
 void testPCABooks() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/books/training.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "books/training.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -399,8 +371,7 @@ void testPCABooks() {
 }
 
 void testPCACensus() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/us-census/training.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "us-census/training.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -409,8 +380,7 @@ void testPCACensus() {
 }
 
 void testPCAHald() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/hald/hald.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "hald/hald.csv");
   PCA pca(data);
   pca.fit();
 //    cout << pca.getEigenvalues().transpose() << pca.getPercentages().transpose() * 100
@@ -427,8 +397,7 @@ void testPCA() {
 }
 
 void testLDAIris() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/original.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "iris/original.csv");
 
   MatrixD y = data.getColumn(4);
   data.removeColumn(4);
@@ -440,8 +409,7 @@ void testLDAIris() {
 }
 
 void testPCAIris() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/original.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "iris/original.csv");
 
   MatrixD y = data.getColumn(4);
   data.removeColumn(4);
@@ -453,8 +421,7 @@ void testPCAIris() {
 }
 
 void testMDFIris() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/original.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "iris/original.csv");
 
   MatrixD y = data.getColumn(4);
   data.removeColumn(4);
@@ -477,8 +444,7 @@ void testLDA() {
 
 void testKMeansToyDataset() {
   MatrixD
-      data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/kmeans-toy.csv");
+      data = MatrixD::fromCSV(datasetDir + "synth-clustering/kmeans-toy.csv");
 
   KMeans kmeans;
   kmeans.fit(data, 3, 100, 1, 2, KMeans::RANDOM);
@@ -486,8 +452,7 @@ void testKMeansToyDataset() {
 }
 
 void testKMeansIris() {
-  MatrixD data = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/original.csv");
+  MatrixD data = MatrixD::fromCSV(datasetDir + "iris/original.csv");
   data.removeColumn(4);
   KMeans kmeans;
   kmeans.fit(data, 3);
@@ -498,35 +463,29 @@ void testGiantToyDatasets() {
   KMeans kmeans;
   ofstream myfile;
 
-  MatrixD sset = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/s-set.csv");
+  MatrixD sset = MatrixD::fromCSV(datasetDir + "synth-clustering/s-set.csv");
   kmeans.fit(sset, 15, 100, 100, 2, KMeans::SAMPLE, true);
   myfile.open(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/sset-clusters.txt");
+      datasetDir + "synth-clustering/sset-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
-  MatrixD birch1 = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/birch1.csv");
+  MatrixD birch1 = MatrixD::fromCSV(datasetDir + "synth-clustering/birch1.csv");
   kmeans.fit(birch1, 100, 1, 100, 2, KMeans::SAMPLE, true);
-  myfile.open(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/birch1-clusters.txt");
+  myfile.open(datasetDir + "synth-clustering/birch1-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
-  MatrixD birch2 = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/birch2.csv");
+  MatrixD birch2 = MatrixD::fromCSV(datasetDir + "synth-clustering/birch2.csv");
   kmeans.fit(birch2, 100, 1, 100, 2, KMeans::SAMPLE, true);
   myfile.open(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/birch2-clusters.txt");
+      datasetDir + "synth-clustering/birch2-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
-  MatrixD birch3 = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/birch3.csv");
+  MatrixD birch3 = MatrixD::fromCSV(datasetDir + "synth-clustering/birch3.csv");
   kmeans.fit(birch3, 100, 1, 100, 2, KMeans::SAMPLE, true);
-  myfile.open(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/synth-clustering/birch3-clusters.txt");
+  myfile.open(datasetDir + "synth-clustering/birch3-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 }
@@ -599,13 +558,11 @@ void testMLPXor() {
 }
 
 void testMLPIris() {
-  MatrixD trainData = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/original.csv");
+  MatrixD trainData = MatrixD::fromCSV(datasetDir + "iris/original.csv");
   MatrixD yTrain = trainData.getColumn(4);
   trainData.removeColumn(4);
 
-  MatrixD testData = MatrixD::fromCSV(
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/iris/testing.csv");
+  MatrixD testData = MatrixD::fromCSV(datasetDir + "iris/testing.csv");
   MatrixD yTrue = testData.getColumn(4);
   testData.removeColumn(4);
 
@@ -683,10 +640,8 @@ void testMLPIris() {
 }
 
 void testMLPDigits() {
-//  string dataPath =
-//      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/digits/oneseights/";
-  string dataPath =
-      "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/digits/";
+//  string dataPath = datasetDir + "digits/oneseights/";
+  string dataPath = datasetDir + "digits/";
 
   MatrixD data = MatrixD::fromCSV(dataPath + "train.csv");
   MatrixD y = MatrixD::fromCSV(dataPath + "train_labels.csv");
@@ -724,13 +679,20 @@ void testMLP() {
 //  testMLPIris();
 }
 
+void testNaiveBayes() {
+  MatrixD data;
+  NaiveBayes(datasetDir + "naivebayes/tennis.csv");
+  NaiveBayes(datasetDir + "naivebayes/laptop_phone.csv");
+  NaiveBayes(datasetDir + "naivebayes/mau_pagador.csv");
+}
+
 int main() {
   cout.precision(12);
 //  testBooks();
 //  testIris();
 //  testPoker();
-//  string red_path = "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/winequality-red/";
-//  string white_path = "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/winequality-white/";
+//  string red_path = datasetDir + "winequality-red/";
+//  string white_path = datasetDir + "winequality-white/";
 //  testWine(red_path);
 //  testWine(white_path);
 //  testMatrices();
@@ -738,7 +700,8 @@ int main() {
 //  testPCA();
 //  testLDA();
 //  testKMeans();
-  testMLP();
+//  testMLP();
+  testNaiveBayes();
 //  testBigOperations();
 //  sanityCheck();
   return 0;
