@@ -66,7 +66,7 @@ vector<vector<double>> csvToVector(string path,
         for (double x :innerVector)
           sums.push_back(x);
       } else {
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < sums.size(); i++) {
           sums[i] += innerVector[i];
         }
@@ -86,7 +86,7 @@ vector<vector<double>> csvToVector(string path,
       dev.push_back(sqrt(squaredSum / (outer.size() - 1)));
     }
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int j = 0; j < outer.size(); j++) {
       for (int i = 0; i < outer[j].size(); i++) {
         if (i != ignoreColumn) {
@@ -122,7 +122,7 @@ void testBooks() {
 double accuracy(vector<double> yTrue, vector<double> yPred) {
   int right = 0;
 
-#pragma omp parallel for reduction(+:right)
+  #pragma omp parallel for reduction(+:right)
   for (int i = 0; i < yTrue.size(); i++)
     right += (yTrue[i] == yPred[i]);
 
