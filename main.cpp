@@ -465,8 +465,7 @@ void testGiantToyDatasets() {
 
   MatrixD sset = MatrixD::fromCSV(datasetDir + "synth-clustering/s-set.csv");
   kmeans.fit(sset, 15, 100, 100, 2, KMeans::SAMPLE, true);
-  myfile.open(
-      datasetDir + "synth-clustering/sset-clusters.txt");
+  myfile.open(datasetDir + "synth-clustering/sset-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
@@ -478,8 +477,7 @@ void testGiantToyDatasets() {
 
   MatrixD birch2 = MatrixD::fromCSV(datasetDir + "synth-clustering/birch2.csv");
   kmeans.fit(birch2, 100, 1, 100, 2, KMeans::SAMPLE, true);
-  myfile.open(
-      datasetDir + "synth-clustering/birch2-clusters.txt");
+  myfile.open(datasetDir + "synth-clustering/birch2-clusters.txt");
   myfile << kmeans.getY();
   myfile.close();
 
@@ -681,9 +679,12 @@ void testMLP() {
 
 void testNaiveBayes() {
   MatrixD data;
-  NaiveBayes(datasetDir + "naivebayes/tennis.csv");
-  NaiveBayes(datasetDir + "naivebayes/laptop_phone.csv");
-  NaiveBayes(datasetDir + "naivebayes/mau_pagador.csv");
+
+  NaiveBayes nb = NaiveBayes(datasetDir + "naivebayes/tennis.csv");
+  nb = NaiveBayes(datasetDir + "naivebayes/laptop_phone.csv");
+  nb.predict(CSVReader::csvToStringVecVec(datasetDir + "naivebayes/laptop_phone_test.csv"));
+  nb = NaiveBayes(datasetDir + "naivebayes/mau_pagador.csv");
+  nb.predict(CSVReader::csvToStringVecVec(datasetDir + "naivebayes/mau_pagador_test.csv"));
 }
 
 int main() {
