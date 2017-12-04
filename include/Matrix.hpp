@@ -19,6 +19,7 @@
 #include <armadillo>
 #include "nr3/nr3.h"
 #include "nr3/eigen_unsym.h"
+#include "CSVReader.hpp"
 
 using namespace std;
 
@@ -26,8 +27,7 @@ using namespace std;
 //! @tparam T The arithmetic type the matrix will store
 template<
     typename T,
-    typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type
->
+    typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 class Matrix {
  private:
   size_t mRows;
@@ -45,32 +45,6 @@ class Matrix {
     if (col < 0 or col >= mCols)
       throw invalid_argument(
           "Invalid column index (" + to_string(col) + "): should be between 0 and " + to_string(mCols - 1));
-  }
-
-  //! Helper function that separates lines in a CSV file into tokens
-  //! \param str stream containing the contents of the CSV file
-  //! \return a vector with the flattened contents of the CSV converted to double
-  static std::vector<T> getNextLineAndSplitIntoTokens(std::istream &str) {
-    std::vector<T> result;
-    std::string line;
-    std::getline(str, line);
-
-    std::stringstream lineStream(line);
-    std::string cell;
-
-    int lineCount = 1;
-    while (std::getline(lineStream, cell, ',')) {
-      try {
-        double value = stod(cell);
-        result.push_back(value);
-      }
-      catch (exception ex) {
-        cout << ex.what() << " " << cell << " " << lineCount << endl;
-        throw ex;
-      }
-    }
-
-    return result;
   }
 
   //! Sorts eigenvalues by magnitude, sorting their corresponding eigenvectors in te same order
@@ -1021,24 +995,9 @@ class Matrix {
   //! \param path path of the CSV file
   //! \return a matrix constructed from the contents of the CSV file
   static Matrix fromCSV(const string &path) {
-    vector<vector<T>> outer;
-    vector<T> innerVector;
+    vector<vector<double>> outer = CSVReader::csvToNumericVecVec(path, true);
 
-    ifstream arquivo(path);
-    if (!arquivo.good())
-      throw invalid_argument("File '" + path + "' doesn't exist");
-
-    unsigned long numCols = 0;
-
-    while (!(innerVector = getNextLineAndSplitIntoTokens(arquivo)).empty()) {
-      if (numCols == 0)
-        numCols = innerVector.size();
-      else if (numCols != innerVector.size())
-        throw runtime_error("File has missing values in some columns");
-      outer.push_back(innerVector);
-    }
-
-    Matrix result(outer.size(), numCols);
+    Matrix result(outer.size(), outer[0].size());
 
     for (size_t i = 0; i < result.mRows; i++)
       for (size_t j = 0; j < result.mCols; j++)
