@@ -9,6 +9,7 @@
 #define MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP
 
 #include "Matrix.hpp"
+#include "MersenneTwister.hpp"
 
 class DynamicProgramming {
  private:
@@ -27,7 +28,8 @@ class DynamicProgramming {
     for (auto goal:goals)
       rewards(goal.first, goal.second) = 0;
 
-    policy = MatrixD::ones(height * width, actions.size());
+    // initialize the policy matrix giving equal probability of choice for every action
+    policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
   }
 
   double transition(size_t currentState, ActionType action, size_t nextState) {
@@ -40,8 +42,53 @@ class DynamicProgramming {
     }
   }
 
-  void policyIteration() {
+  MatrixD policyForState(size_t s) {
+    MatrixD actionProportions = policy.getRow(s);
+    double sum = actionProportions.sum();
 
+    // normalize proportions so their sum is 1
+    if (sum != 1)
+      for (size_t i = 0; i < actionProportions.nRows(); i++)
+        actionProportions(i, 0) /= sum;
+
+    return actionProportions;
+  }
+
+  Matrix<double> bestActionForState(size_t s) {
+    return Matrix<double>();
+  }
+
+  void policyIteration(double threshold = .001) {
+    // step 1: initialization was done in the constructor
+    // step 2: policy evaluation
+    double delta = 0;
+    for (size_t i = 0; i < value.nRows(); ++i) {
+      for (size_t j = 0; j < value.nCols(); ++j) {
+        double v = value(i, j);
+        // TODO insane sum
+        double newDelta = abs(v - value(i, j));
+
+        if (newDelta > delta)
+          delta = newDelta;
+      }
+    }
+
+    // step 3: policy improvement
+    MatrixD b;
+    bool stablePolicy;
+    do {
+      stablePolicy = true;
+      for (size_t i = 0; i < value.nRows(); ++i) {
+        for (size_t j = 0; j < value.nCols(); ++j) {
+          size_t state = i * policy.nRows() + j;
+          b = policyForState(state);
+          policy.setRow(state, bestActionForState(state));
+
+          if (stablePolicy and b != policy.getRow(state))
+            stablePolicy = false;
+        }
+      }
+    } while (!stablePolicy);
   }
 };
 
