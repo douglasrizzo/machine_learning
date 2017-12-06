@@ -1,6 +1,6 @@
 /**
  * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
- * @brief  Implementaion of the k-means algorithm
+ * @brief  Implementation of the k-means algorithm
  * @date   2017-10-25
  */
 

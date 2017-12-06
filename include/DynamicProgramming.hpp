@@ -1,15 +1,18 @@
-//
-// Created by dodo on 04/12/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Class to solve the grid world toy problem using dynamic programming
+ * @date   2017-12-04
+ */
+
 
 #ifndef MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP
 #define MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP
 
 #include "Matrix.hpp"
+
 class DynamicProgramming {
  private:
   MatrixD value, rewards, policy;
-  vector<MatrixD> transition;
   double gamma;
 
   enum ActionType { UP, DOWN, LEFT, RIGHT };
@@ -25,11 +28,20 @@ class DynamicProgramming {
       rewards(goal.first, goal.second) = 0;
 
     policy = MatrixD::ones(height * width, actions.size());
+  }
 
-    transition = vector<MatrixD>(height * width);
+  double transition(size_t currentState, ActionType action, size_t nextState) {
+    switch (action) {
+      case UP:return currentState - value.nCols() == nextState;
+      case DOWN:return currentState + value.nCols() == nextState;
+      case LEFT:return currentState - 1 % value.nCols() != value.nCols() - 1 && currentState - 1 == nextState;
+      case RIGHT:return currentState - 1 % value.nCols() != 0 && currentState + 1 == nextState;
+      default:return 0;
+    }
+  }
 
-    for (int i = 0; i < height * width; i++)
-      transition[i] = MatrixD::zeros(height * width, actions.size());
+  void policyIteration() {
+
   }
 };
 
