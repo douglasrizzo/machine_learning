@@ -19,7 +19,7 @@ class NaiveBayes {
   vector<string> lookupColumns, lookupRows;
  public:
 
-  explicit NaiveBayes(const string &csvPath) {
+  explicit NaiveBayes(const string &csvPath, bool verbose = true) {
     lookupColumns = vector<string>(), lookupRows = vector<string>();
 
     vector<vector<string>> data = CSVReader::csvToStringVecVec(csvPath, true);
@@ -56,9 +56,22 @@ class NaiveBayes {
         yFrequency(col, 0) += 1;
       }
     }
+
+    if (verbose) {
+      cout << "Lookup table:" << endl << lookupTable << endl << "Rows:" << endl;
+      for (auto s : lookupRows)
+        cout << s << '\t';
+      cout << endl << "Columns:" << endl;
+
+      for (auto s : lookupColumns)
+        cout << s << '\t';
+      cout << endl;
+
+      cout << "Class frequency:" << endl << yFrequency;
+    }
   }
 
-  vector<string> predict(vector<vector<string>> data) {
+  vector<string> predict(vector<vector<string>> data, bool verbose = true) {
     vector<string> csvHeader = data[0];
     data.erase(data.begin());
     vector<string> result(data.size());
@@ -83,16 +96,25 @@ class NaiveBayes {
         }
       }
 
-      int chosenOne = -1;
-      double currentProb = 0;
+      int maxProbIndex = -1;
+      double currentMaxProb = 0, probSum = 0;
       for (size_t j = 0; j < lookupColumns.size(); j++) {
-        if (probabilities(i, j) > currentProb) {
-          currentProb = probabilities(i, j);
-          chosenOne = static_cast<int>(j);
+        probSum += probabilities(i, j);
+        if (probabilities(i, j) > currentMaxProb) {
+          currentMaxProb = probabilities(i, j);
+          maxProbIndex = static_cast<int>(j);
         }
       }
-      result[i] = chosenOne != -1 ? lookupColumns[chosenOne] : "NaN";
+
+      // normalize probabilities so their sum equals 1
+      for (size_t j = 0; j < lookupColumns.size(); j++)
+        probabilities(i, j) /= probSum;
+
+      result[i] = maxProbIndex != -1 ? lookupColumns[maxProbIndex] : "NaN";
     }
+
+    if (verbose)
+      cout << "Probabilities:" << endl << probabilities;
 
     return result;
   }
