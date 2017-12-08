@@ -26,7 +26,6 @@ class PCA {
     X = std::move(data);
   }
 
-
   /**
    * Finds the principal components of a Matrix. Eigenvectors and eigenvalues are found via the Jacobi eigenvalue algorithm
    */
@@ -60,7 +59,6 @@ class PCA {
 
   MatrixD transform(int numComponents) {
     MatrixI filter = MatrixI::zeros(eigenvalues.nRows(), 1);
-
 
     for (int i = 0; i < numComponents; i++) {
       filter(i, 0) = 1;

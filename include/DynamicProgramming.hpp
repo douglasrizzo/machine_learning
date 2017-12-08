@@ -111,15 +111,17 @@ class DynamicProgramming {
   double actionValue(size_t s, ActionType a) {
     double q = 0;
 
+    pair<size_t, size_t> coords = toCoord(s);
+    double r = rewards(coords.first, coords.second);
     for (size_t i = 0; i < value.nRows(); ++i) {
       for (size_t j = 0; j < value.nCols(); ++j) {
         size_t s2 = fromCoord(i, j);
         double t = transition(s, a, s2);
-        double p = policy(s, a);
-        double r = rewards(i, j);
         double v = value(i, j);
+
         // WARNING: here the ActionType a is being used as an index
-        q += transition(s, a, s2) * policy(s, a) * (rewards(i, j) + (gamma * value(i, j)));
+        q += t * (r + gamma * v);
+
       }
     }
 
@@ -139,27 +141,33 @@ class DynamicProgramming {
     return result;
   }
 
-  double bestQForState(size_t s) {
-    const vector<double> &actionValues = actionValuesForState(s);
-    double bestQ = actionValues[0];
-    for (int k = 1; k < actionValues.size(); k++) {
-      if (actionValues[k] > bestQ)
-        bestQ = actionValues[k];
-    }
-    return bestQ;
-  }
-
   void onPolicyMonteCarloControl(unsigned nIters) {
     for (unsigned iter = 0; iter < nIters; iter++) {
 
     }
   }
-  Matrix<double> bestPolicyForState(size_t s) {
+
+  Matrix<double> policyIncrement(size_t s, bool weightbyProb = true) {
     MatrixD result = MatrixD::zeros(actions.size(), 1);
 
     vector<double> actionValues = actionValuesForState(s);
-    double bestQ = bestQForState(s);
+    const MatrixD &currentPolicy = policyForState(s);
+    double bestQ = 0;
 
+    for (size_t i = 0; i < actionValues.size(); i++) {
+      // weight action values by the probability each action is chosen
+      if (weightbyProb)
+        actionValues[i] *= currentPolicy(i, 0);
+
+      // store best weighted action value
+      if (i == 0)
+        bestQ = actionValues[i];
+      else if (actionValues[i] > bestQ)
+        bestQ = actionValues[i];
+    }
+
+    // actions with best action value receive equal probability of being chosen,
+    // all others have prob 0
     for (size_t i = 0; i < actions.size(); i++) {
       if (actionValues[i] == bestQ)
         result(i, 0) = 1;
@@ -230,7 +238,7 @@ class DynamicProgramming {
           double currentV = value(i, j), newV = 0;
 
           for (ActionType action : actions)
-            newV += actionValue(state1, action);
+            newV += policy(state1, action) * actionValue(state1, action);
 
           value(i, j) = newV;
 
@@ -252,14 +260,23 @@ class DynamicProgramming {
       // step 2: policy evaluation
       iterativePolicyEvaluation(threshold, verbose);
 
+      // round values to avoid precision error
+      for (size_t i = 0; i < value.nRows(); ++i)
+        for (size_t j = 0; j < value.nCols(); ++j)
+          value(i, j) = floor(value(i, j) * 10000) / 10000;
+
+
       // step 3: policy improvement
       stablePolicy = true;
       for (size_t i = 0; i < value.nRows(); ++i) {
         for (size_t j = 0; j < value.nCols(); ++j) {
           size_t state = fromCoord(i, j);
 
+          // retrieve policy for current state
           MatrixD currentPolicy = policyForState(state);
-          MatrixD bestPolicy = bestPolicyForState(state);
+
+          // generate a better policy
+          MatrixD bestPolicy = policyIncrement(state);
 
           if (currentPolicy != bestPolicy) {
             policy.setRow(state, bestPolicy.transpose());
@@ -272,22 +289,31 @@ class DynamicProgramming {
   }
 
   void valueIteration(double threshold = .000001, bool verbose = true) {
-    // initialization was done in the constructor
-    double delta = 0;
 
+    double delta;
     do {
-      for (size_t i = 0; i < value.nRows(); ++i) {
-        for (size_t j = 0; j < value.nCols(); ++j) {
+      delta = 0;
+      for (size_t i = 0; i < value.nRows(); i++) {
+        for (size_t j = 0; j < value.nCols(); j++) {
           size_t state1 = fromCoord(i, j);
 
           // workaround to optimize running time
-          if (isGoal(state1))continue;
+          if (isGoal(state1))
+            continue;
+
+          vector<double> actionValues = actionValuesForState(state1);
+
+          size_t action = 0;
+          for (size_t k = 1; k < actionValues.size(); k++) {
+            if (actionValues[k] > actionValues[action]) {
+              action = k;
+            }
+          }
 
           double currentV = value(i, j);
+          value(i, j) = actionValues[action];
 
-          value(i, j) = bestQForState(state1);
-          const Matrix<double> bestPolicy = bestPolicyForState(state1);
-          policy.setRow(state1, bestPolicy.transpose());
+          policy.setRow(state1, policyIncrement(state1, false).transpose());
 
           double newDelta = abs(currentV - value(i, j));
 
@@ -295,10 +321,9 @@ class DynamicProgramming {
             delta = newDelta;
         }
       }
-      if (verbose) cout << value << endl;
+      if (verbose) cout << value << prettifyPolicy() << endl;
     } while (delta >= threshold);
   }
-
 };
 
 #endif //MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP

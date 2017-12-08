@@ -150,7 +150,7 @@ class KNN {
     // sum the y column
     double ySum = 0;
 
-  #pragma omp parallel for reduction(+:ySum)
+    #pragma omp parallel for reduction(+:ySum)
     for (int j = 0; j < k; j++) {
       ySum += data[chosen_indices[j]][yColumn];
     }
