@@ -114,6 +114,10 @@ class DynamicProgramming {
     for (size_t i = 0; i < value.nRows(); ++i) {
       for (size_t j = 0; j < value.nCols(); ++j) {
         size_t s2 = fromCoord(i, j);
+        double t = transition(s, a, s2);
+        double p = policy(s, a);
+        double r = rewards(i, j);
+        double v = value(i, j);
         // WARNING: here the ActionType a is being used as an index
         q += transition(s, a, s2) * policy(s, a) * (rewards(i, j) + (gamma * value(i, j)));
       }
@@ -124,6 +128,22 @@ class DynamicProgramming {
 
   Matrix<double> normalizeToOne(MatrixD m) {
     return m / m.sum();
+  }
+
+  double bestQForState(size_t s) {
+    double bestQ = actionValue(s, actions[0]);
+    for (int k = 1; k < actions.size(); k++) {
+      double q = actionValue(s, actions[k]);
+      if (q > bestQ)
+        bestQ = q;
+    }
+    return bestQ;
+  }
+
+  void onPolicyMonteCarloControl(unsigned nIters) {
+    for (unsigned iter = 0; iter < nIters; iter++) {
+
+    }
   }
 
   Matrix<double> bestPolicyForState(size_t s) {
@@ -140,16 +160,61 @@ class DynamicProgramming {
     return normalizeToOne(result);
   }
 
+  string prettifyPolicy() {
+    string s = "";
+    for (size_t i = 0; i < value.nRows(); i++) {
+      for (size_t j = 0; j < value.nCols(); ++j) {
+        size_t state = fromCoord(i, j);
+
+        if (isGoal(state)) {
+          s += "☻";
+          continue;
+        }
+
+        const MatrixD p = policyForState(state);
+        double maxProb = p.max();
+
+        if (p(UP, 0) == maxProb and p(DOWN, 0) == maxProb and p(LEFT, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "╬";
+        else if (p(UP, 0) == maxProb and p(DOWN, 0) == maxProb and p(LEFT, 0) == maxProb)
+          s += "╣";
+        else if (p(UP, 0) == maxProb and p(DOWN, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "╠";
+        else if (p(UP, 0) == maxProb and p(LEFT, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "╩";
+        else if (p(DOWN, 0) == maxProb and p(LEFT, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "╦";
+        else if (p(UP, 0) == maxProb and p(DOWN, 0) == maxProb)
+          s += "║";
+        else if (p(UP, 0) == maxProb and p(LEFT, 0) == maxProb)
+          s += "╝";
+        else if (p(UP, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "╚";
+        else if (p(DOWN, 0) == maxProb and p(LEFT, 0) == maxProb)
+          s += "╗";
+        else if (p(DOWN, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "╔";
+        else if (p(LEFT, 0) == maxProb and p(RIGHT, 0) == maxProb)
+          s += "═";
+        else if (p(UP, 0) == maxProb)
+          s += "⇧";
+        else if (p(DOWN, 0) == maxProb)
+          s += "⇩";
+        else if (p(LEFT, 0) == maxProb)
+          s += "⇦";
+        else if (p(RIGHT, 0) == maxProb)
+          s += "⇨";
+      }
+      s += '\n';
     }
-    return actions[actions.size() - 1];
+    return s;
   }
 
-  void policyIteration(double threshold = .001, bool verbose = true) {
-    // step 1: initialization was done in the constructor
-    // step 2: policy evaluation
-    double delta = 0;
+  void iterativePolicyEvaluation(double threshold, bool verbose) {
 
+    double delta;
     do {
+      delta = 0;
       for (size_t i = 0; i < value.nRows(); i++) {
         for (size_t j = 0; j < value.nCols(); j++) {
           size_t state1 = fromCoord(i, j);
@@ -169,28 +234,36 @@ class DynamicProgramming {
       }
       if (verbose) cout << value << endl;
     } while (delta >= threshold);
+  }
 
+  void policyIteration(double threshold = .000001, bool verbose = true) {
+    // step 1: initialization was done in the constructor
 
-    // step 3: policy improvement
-    MatrixD b;
     bool stablePolicy;
     do {
+      // step 2: policy evaluation
+      iterativePolicyEvaluation(threshold, verbose);
+
+      // step 3: policy improvement
       stablePolicy = true;
       for (size_t i = 0; i < value.nRows(); ++i) {
         for (size_t j = 0; j < value.nCols(); ++j) {
           size_t state = fromCoord(i, j);
-          b = policyForState(state);
 
-          policy.setRow(state, bestPolicyForState(state));
+          MatrixD currentPolicy = policyForState(state);
+          MatrixD bestPolicy = bestPolicyForState(state);
 
-          if (stablePolicy and b != policy.getRow(state))
+          if (currentPolicy != bestPolicy) {
+            policy.setRow(state, bestPolicy.transpose());
             stablePolicy = false;
+          }
         }
       }
+      if (verbose) cout << prettifyPolicy() << endl;
     } while (!stablePolicy);
   }
 
-  void valueIteration(double threshold = .001, bool verbose = true) {
+  void valueIteration(double threshold = .000001, bool verbose = true) {
     // initialization was done in the constructor
     double delta = 0;
 
@@ -205,7 +278,7 @@ class DynamicProgramming {
           double currentV = value(i, j);
 
           value(i, j) = bestQForState(state1);
-          const Matrix<double> &bestPolicy = bestPolicyForState(state1);
+          const Matrix<double> bestPolicy = bestPolicyForState(state1);
           policy.setRow(state1, bestPolicy.transpose());
 
           double newDelta = abs(currentV - value(i, j));
@@ -218,21 +291,6 @@ class DynamicProgramming {
     } while (delta >= threshold);
   }
 
-  double bestQForState(size_t s) {
-    double bestQ = actionValue(s, actions[0]);
-    for (int k = 1; k < actions.size(); k++) {
-      double q = actionValue(s, actions[k]);
-      if (q > bestQ)
-        bestQ = q;
-    }
-    return bestQ;
-  }
-
-  void onPolicyMonteCarloControl(unsigned nIters) {
-    for (unsigned iter = 0; iter < nIters; iter++) {
-
-    }
-  }
 };
 
 #endif //MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP

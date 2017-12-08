@@ -1297,27 +1297,27 @@ class Matrix {
     return Sb;
   }
 
-  T sum() {
+  T sum() const {
     T sum_of_elems = 0;
-    for (T &n : mData)
+    for (T n : mData)
       sum_of_elems += n;
 
     return sum_of_elems;
   }
 
-  bool isColumn() {
+  bool isColumn() const {
     return mCols == 1;
   }
 
-  bool isRow() {
+  bool isRow() const {
     return mRows == 1;
   }
 
-  T min() {
+  T min() const {
     return *std::min_element(std::begin(mData), std::end(mData));
   }
 
-  T max() {
+  T max() const {
     return *std::max_element(std::begin(mData), std::end(mData));
   }
 
