@@ -130,12 +130,21 @@ class DynamicProgramming {
     return m / m.sum();
   }
 
+  vector<double> actionValuesForState(size_t s) {
+    vector<double> result(actions.size());
+
+    for (int i = 0; i < actions.size(); i++)
+      result[i] = actionValue(s, actions[i]);
+
+    return result;
+  }
+
   double bestQForState(size_t s) {
-    double bestQ = actionValue(s, actions[0]);
-    for (int k = 1; k < actions.size(); k++) {
-      double q = actionValue(s, actions[k]);
-      if (q > bestQ)
-        bestQ = q;
+    const vector<double> &actionValues = actionValuesForState(s);
+    double bestQ = actionValues[0];
+    for (int k = 1; k < actionValues.size(); k++) {
+      if (actionValues[k] > bestQ)
+        bestQ = actionValues[k];
     }
     return bestQ;
   }
@@ -145,11 +154,10 @@ class DynamicProgramming {
 
     }
   }
-
   Matrix<double> bestPolicyForState(size_t s) {
     MatrixD result = MatrixD::zeros(actions.size(), 1);
 
-    vector<double> actionValues(4);
+    vector<double> actionValues = actionValuesForState(s);
     double bestQ = bestQForState(s);
 
     for (size_t i = 0; i < actions.size(); i++) {
