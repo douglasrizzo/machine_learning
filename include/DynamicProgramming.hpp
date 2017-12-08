@@ -42,72 +42,6 @@ class DynamicProgramming {
     return {row, col};
   }
 
- public:
-  DynamicProgramming(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1)
-      : goals(goals), gamma(gamma) {
-
-    // value function starts as 0 everywhere
-    value = MatrixD::zeros(height, width);
-
-    // set goal rewards are 0, all other states are -1
-    rewards = MatrixD::fill(height, width, -1);
-    for (auto goal:goals)
-      rewards(goal.first, goal.second) = 0;
-
-    // initialize the policy matrix giving equal probability of choice for every action
-    policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
-  }
-
-  bool isGoal(size_t s) {
-    pair<size_t, size_t> stateCoords = toCoord(s);
-    return std::find(goals.begin(), goals.end(), stateCoords) != goals.end();
-  }
-
-  double transition(size_t currentState, ActionType action, size_t nextState) {
-    // the agent never leaves the goal
-    if (isGoal(currentState))
-      return 0;
-
-    // return 1 if applying the given action actually takes the agent to the desired state
-    size_t resultingState = applyAction(currentState, action);
-    return resultingState == nextState;
-  }
-
-  size_t applyAction(size_t currentState, ActionType action) {
-    pair<size_t, size_t> s1 = toCoord(currentState);
-    size_t s1row = s1.first, s1col = s1.second, s2row, s2col;
-
-    switch (action) {
-      case UP:s2col = s1col;
-        s2row = s1row != 0 ? s1row - 1 : s1row;
-        break;
-      case DOWN:s2col = s1col;
-        s2row = s1row != value.nCols() - 1 ? s1row + 1 : s1row;
-        break;
-      case LEFT:s2row = s1row;
-        s2col = s1col != 0 ? s1col - 1 : s1col;
-        break;
-      case RIGHT:s2row = s1row;
-        s2col = s1col != value.nRows() - 1 ? s1col + 1 : s1col;
-        break;
-      default:return 0;
-    }
-
-    return fromCoord(s2row, s2col);
-  }
-
-  MatrixD policyForState(size_t s) {
-    return normalizeToOne(policy.getRow(s));
-  }
-
-  size_t nextState(size_t s, ActionType a) {
-    for (size_t ss = 0; ss < value.nRows() * value.nCols(); ss++) {
-      if (transition(s, a, ss) == 1)
-        return ss;
-    }
-    throw runtime_error("No next state found");
-  }
-
   double actionValue(size_t s, ActionType a) {
     double q = 0;
 
@@ -139,12 +73,6 @@ class DynamicProgramming {
       result[i] = actionValue(s, actions[i]);
 
     return result;
-  }
-
-  void onPolicyMonteCarloControl(unsigned nIters) {
-    for (unsigned iter = 0; iter < nIters; iter++) {
-
-    }
   }
 
   Matrix<double> policyIncrement(size_t s, bool weightbyProb = true) {
@@ -252,6 +180,72 @@ class DynamicProgramming {
     } while (delta >= threshold);
   }
 
+  bool isGoal(size_t s) {
+    pair<size_t, size_t> stateCoords = toCoord(s);
+    return std::find(goals.begin(), goals.end(), stateCoords) != goals.end();
+  }
+
+  double transition(size_t currentState, ActionType action, size_t nextState) {
+    // the agent never leaves the goal
+    if (isGoal(currentState))
+      return 0;
+
+    // return 1 if applying the given action actually takes the agent to the desired state
+    size_t resultingState = applyAction(currentState, action);
+    return resultingState == nextState;
+  }
+
+  size_t applyAction(size_t currentState, ActionType action) {
+    pair<size_t, size_t> s1 = toCoord(currentState);
+    size_t s1row = s1.first, s1col = s1.second, s2row, s2col;
+
+    switch (action) {
+      case UP:s2col = s1col;
+        s2row = s1row != 0 ? s1row - 1 : s1row;
+        break;
+      case DOWN:s2col = s1col;
+        s2row = s1row != value.nCols() - 1 ? s1row + 1 : s1row;
+        break;
+      case LEFT:s2row = s1row;
+        s2col = s1col != 0 ? s1col - 1 : s1col;
+        break;
+      case RIGHT:s2row = s1row;
+        s2col = s1col != value.nRows() - 1 ? s1col + 1 : s1col;
+        break;
+      default:return 0;
+    }
+
+    return fromCoord(s2row, s2col);
+  }
+
+  MatrixD policyForState(size_t s) {
+    return normalizeToOne(policy.getRow(s));
+  }
+
+  size_t nextState(size_t s, ActionType a) {
+    for (size_t ss = 0; ss < value.nRows() * value.nCols(); ss++) {
+      if (transition(s, a, ss) == 1)
+        return ss;
+    }
+    throw runtime_error("No next state found");
+  }
+
+ public:
+  DynamicProgramming(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1)
+      : goals(goals), gamma(gamma) {
+
+    // value function starts as 0 everywhere
+    value = MatrixD::zeros(height, width);
+
+    // set goal rewards are 0, all other states are -1
+    rewards = MatrixD::fill(height, width, -1);
+    for (auto goal:goals)
+      rewards(goal.first, goal.second) = 0;
+
+    // initialize the policy matrix giving equal probability of choice for every action
+    policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
+  }
+
   void policyIteration(double threshold = .000001, bool verbose = true) {
     // step 1: initialization was done in the constructor
 
@@ -289,7 +283,6 @@ class DynamicProgramming {
   }
 
   void valueIteration(double threshold = .000001, bool verbose = true) {
-
     double delta;
     do {
       delta = 0;
