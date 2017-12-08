@@ -20,14 +20,24 @@ class DynamicProgramming {
   enum ActionType { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
   vector<ActionType> actions = {UP, DOWN, LEFT, RIGHT};
 
+  /**
+   * Transforms row x column coordinates from the grid world into a raster representation
+   * @param row
+   * @param col
+   * @return
+   */
   size_t fromCoord(size_t row, size_t col) {
     return row * value.nCols() + col;
   }
 
+  /**
+   * Transforms a raster coordinate from the grid world into its corresponding row x column representation
+   * @param s
+   * @return
+   */
   pair<size_t, size_t> toCoord(size_t s) {
-    size_t nCols = value.nCols();
-    double row = ceil((s + 1) / (double) value.nCols()) - 1,
-        col = s - row * value.nCols();
+    size_t row = static_cast<size_t>(ceil((s + 1) / (double) value.nCols()) - 1);
+    size_t col = s - row * value.nCols();
 
     return {row, col};
   }
