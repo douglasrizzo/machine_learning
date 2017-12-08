@@ -75,25 +75,25 @@ class DynamicProgramming {
 
   size_t applyAction(size_t currentState, ActionType action) {
     pair<size_t, size_t> s1 = toCoord(currentState);
-    size_t s1x = s1.first, s1y = s1.second, s2x, s2y;
+    size_t s1row = s1.first, s1col = s1.second, s2row, s2col;
 
     switch (action) {
-      case UP:s2x = s1x;
-        s2y = s1y != 0 ? s1y - 1 : s1y;
+      case UP:s2col = s1col;
+        s2row = s1row != 0 ? s1row - 1 : s1row;
         break;
-      case DOWN:s2x = s1x;
-        s2y = s1y != value.nRows() - 1 ? s1y + 1 : s1y;
+      case DOWN:s2col = s1col;
+        s2row = s1row != value.nCols() - 1 ? s1row + 1 : s1row;
         break;
-      case LEFT:s2y = s1y;
-        s2x = s1x != 0 ? s1x - 1 : s1x;
+      case LEFT:s2row = s1row;
+        s2col = s1col != 0 ? s1col - 1 : s1col;
         break;
-      case RIGHT:s2y = s1y;
-        s2x = s1x != value.nCols() - 1 ? s1x + 1 : s1x;
+      case RIGHT:s2row = s1row;
+        s2col = s1col != value.nRows() - 1 ? s1col + 1 : s1col;
         break;
       default:return 0;
     }
 
-    return fromCoord(s2y, s2x);
+    return fromCoord(s2row, s2col);
   }
 
   MatrixD policyForState(size_t s) {
