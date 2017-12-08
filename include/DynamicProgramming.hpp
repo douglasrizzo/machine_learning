@@ -97,15 +97,7 @@ class DynamicProgramming {
   }
 
   MatrixD policyForState(size_t s) {
-    MatrixD actionProportions = policy.getRow(s);
-    double sum = actionProportions.sum();
-
-    // normalize proportions so their sum is 1
-    if (sum != 1)
-      for (size_t i = 0; i < actionProportions.nRows(); i++)
-        actionProportions(i, 0) /= sum;
-
-    return actionProportions;
+    return normalizeToOne(policy.getRow(s));
   }
 
   size_t nextState(size_t s, ActionType a) {
