@@ -15,16 +15,32 @@ class DynamicProgramming {
  private:
   MatrixD value, rewards, policy;
   double gamma;
+  vector<pair<size_t, size_t>> goals;
 
   enum ActionType { UP, DOWN, LEFT, RIGHT };
   vector<ActionType> actions = {UP, DOWN, LEFT, RIGHT};
 
- public:
-  DynamicProgramming(size_t height, size_t width, vector<pair<size_t, size_t>> goals)
-      : gamma(gamma) {
-    value = MatrixD::zeros(height, width);
-    rewards = MatrixD::fill(height, width, -1);
+  size_t fromCoord(size_t row, size_t col) {
+    return row * value.nCols() + col;
+  }
 
+  pair<size_t, size_t> toCoord(size_t s) {
+    size_t nCols = value.nCols();
+    double row = ceil((s + 1) / (double) value.nCols()) - 1,
+        col = s - row * value.nCols();
+
+    return {row, col};
+  }
+
+ public:
+  DynamicProgramming(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1)
+      : goals(goals), gamma(gamma) {
+
+    // value function starts as 0 everywhere
+    value = MatrixD::zeros(height, width);
+
+    // set goal rewards are 0, all other states are -1
+    rewards = MatrixD::fill(height, width, -1);
     for (auto goal:goals)
       rewards(goal.first, goal.second) = 0;
 
@@ -32,14 +48,42 @@ class DynamicProgramming {
     policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
   }
 
+  bool isGoal(size_t s) {
+    pair<size_t, size_t> stateCoords = toCoord(s);
+    return std::find(goals.begin(), goals.end(), stateCoords) != goals.end();
+  }
+
   double transition(size_t currentState, ActionType action, size_t nextState) {
+    // the agent never leaves the goal
+    if (isGoal(currentState))
+      return 0;
+
+    // return 1 if applying the given action actually takes the agent to the desired state
+    size_t resultingState = applyAction(currentState, action);
+    return resultingState == nextState;
+  }
+
+  size_t applyAction(size_t currentState, ActionType action) {
+    pair<size_t, size_t> s1 = toCoord(currentState);
+    size_t s1x = s1.first, s1y = s1.second, s2x, s2y;
+
     switch (action) {
-      case UP:return currentState - value.nCols() == nextState;
-      case DOWN:return currentState + value.nCols() == nextState;
-      case LEFT:return currentState - 1 % value.nCols() != value.nCols() - 1 && currentState - 1 == nextState;
-      case RIGHT:return currentState - 1 % value.nCols() != 0 && currentState + 1 == nextState;
+      case UP:s2x = s1x;
+        s2y = s1y != 0 ? s1y - 1 : s1y;
+        break;
+      case DOWN:s2x = s1x;
+        s2y = s1y != value.nRows() - 1 ? s1y + 1 : s1y;
+        break;
+      case LEFT:s2y = s1y;
+        s2x = s1x != 0 ? s1x - 1 : s1x;
+        break;
+      case RIGHT:s2y = s1y;
+        s2x = s1x != value.nCols() - 1 ? s1x + 1 : s1x;
+        break;
       default:return 0;
     }
+
+    return fromCoord(s2y, s2x);
   }
 
   MatrixD policyForState(size_t s) {
@@ -54,24 +98,94 @@ class DynamicProgramming {
     return actionProportions;
   }
 
-  Matrix<double> bestActionForState(size_t s) {
-    return Matrix<double>();
+  size_t nextState(size_t s, ActionType a) {
+    for (size_t ss = 0; ss < value.nRows() * value.nCols(); ss++) {
+      if (transition(s, a, ss) == 1)
+        return ss;
+    }
+    throw runtime_error("No next state found");
   }
 
-  void policyIteration(double threshold = .001) {
+  ActionType bestActionForState(size_t s) {
+    ActionType best = UP;
+
+    for (ActionType a:actions) {
+      // TODO should consider if equal...
+      if (actionValue(s, a) > actionValue(s, best))
+        best = a;
+    }
+
+    return best;
+  }
+
+  double actionValue(size_t s, ActionType a) {
+    double q = 0;
+
+    for (size_t i = 0; i < value.nRows(); ++i) {
+      for (size_t j = 0; j < value.nCols(); ++j) {
+        size_t s2 = fromCoord(i, j);
+        // WARNING: here the ActionType a is being used as an index
+        q += transition(s, a, s2) * policy(s, a) * (rewards(i, j) + (gamma * value(i, j)));
+      }
+    }
+
+    return q;
+  }
+
+  Matrix<double> bestPolicyForState(size_t s) {
+    MatrixD result = MatrixD::zeros(1, actions.size());
+
+    int bestIndex = 0;
+    ActionType best = actions[bestIndex];
+    for (int i = 1; i < actions.size(); i++) {
+      if (actionValue(s, actions[i]) > actionValue(s, actions[bestIndex]))
+        bestIndex = i;
+    }
+
+    result(0, bestIndex) = 1;
+    return result;
+  }
+
+  ActionType actionFromPolicy(size_t s) {
+    MatrixD statePolicy = policyForState(s);
+    double prob = MersenneTwister().d_random();
+
+    for (size_t i = 1; i < statePolicy.nRows(); i++)
+      statePolicy(i, 0) += statePolicy(i - 1, 0);
+
+    for (size_t i = 0; i < statePolicy.nRows() - 1; i++) {
+      if (prob <= statePolicy(i, 0))
+        return actions[i];
+    }
+    return actions[actions.size() - 1];
+  }
+
+  void policyIteration(double threshold = .001, bool verbose = true) {
     // step 1: initialization was done in the constructor
     // step 2: policy evaluation
     double delta = 0;
-    for (size_t i = 0; i < value.nRows(); ++i) {
-      for (size_t j = 0; j < value.nCols(); ++j) {
-        double v = value(i, j);
-        // TODO insane sum
-        double newDelta = abs(v - value(i, j));
 
-        if (newDelta > delta)
-          delta = newDelta;
+    do {
+      for (size_t i = 0; i < value.nRows(); i++) {
+        for (size_t j = 0; j < value.nCols(); j++) {
+          size_t state1 = fromCoord(i, j);
+
+          double currentV = value(i, j), newV = 0;
+
+          for (ActionType action : actions)
+            newV += actionValue(state1, action);
+
+          value(i, j) = newV;
+
+          double newDelta = abs(currentV - value(i, j));
+
+          if (newDelta > delta)
+            delta = newDelta;
+        }
       }
-    }
+      if (verbose) cout << value << endl;
+    } while (delta >= threshold);
+
 
     // step 3: policy improvement
     MatrixD b;
@@ -80,15 +194,45 @@ class DynamicProgramming {
       stablePolicy = true;
       for (size_t i = 0; i < value.nRows(); ++i) {
         for (size_t j = 0; j < value.nCols(); ++j) {
-          size_t state = i * policy.nRows() + j;
+          size_t state = fromCoord(i, j);
           b = policyForState(state);
-          policy.setRow(state, bestActionForState(state));
+
+          policy.setRow(state, bestPolicyForState(state));
 
           if (stablePolicy and b != policy.getRow(state))
             stablePolicy = false;
         }
       }
     } while (!stablePolicy);
+  }
+
+  void valueIteration(double threshold = .001, bool verbose = true) {
+    // initialization was done in the constructor
+    double delta = 0;
+
+    do {
+      for (size_t i = 0; i < value.nRows(); ++i) {
+        for (size_t j = 0; j < value.nCols(); ++j) {
+          size_t state1 = fromCoord(i, j);
+
+          double currentV = value(i, j);
+          value(i, j) = actionValue(state1, bestActionForState(state1));
+          policy.setRow(state1, bestPolicyForState(state1));
+
+          double newDelta = abs(currentV - value(i, j));
+
+          if (newDelta > delta)
+            delta = newDelta;
+        }
+      }
+      if (verbose) cout << value << endl;
+    } while (delta >= threshold);
+  }
+
+  void onPolicyMonteCarloControl(unsigned nIters) {
+    for (unsigned iter = 0; iter < nIters; iter++) {
+
+    }
   }
 };
 

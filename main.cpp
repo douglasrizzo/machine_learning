@@ -12,6 +12,7 @@
 #include "include/MLP.hpp"
 #include "include/ClassifierUtils.hpp"
 #include "include/NaiveBayes.hpp"
+#include "include/DynamicProgramming.hpp"
 
 using namespace std;
 using myClock = chrono::high_resolution_clock;
@@ -687,6 +688,15 @@ void testNaiveBayes() {
   nb.predict(CSVReader::csvToStringVecVec(datasetDir + "naivebayes/mau_pagador_test.csv"));
 }
 
+void testDynamicProgramming() {
+  vector<pair<size_t, size_t>> goals(2);
+  goals[0].first = goals[0].second = 0;
+  goals[1].first = goals[1].second = 3;
+  DynamicProgramming d(4, 4, goals);
+//  d.policyIteration();
+  d.valueIteration();
+}
+
 int main() {
   cout.precision(12);
 //  testBooks();
@@ -702,7 +712,8 @@ int main() {
 //  testLDA();
 //  testKMeans();
 //  testMLP();
-  testNaiveBayes();
+//  testNaiveBayes();
+  testDynamicProgramming();
 //  testBigOperations();
 //  sanityCheck();
   return 0;
