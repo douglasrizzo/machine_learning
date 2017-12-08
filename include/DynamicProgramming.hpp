@@ -17,7 +17,7 @@ class DynamicProgramming {
   double gamma;
   vector<pair<size_t, size_t>> goals;
 
-  enum ActionType { UP, DOWN, LEFT, RIGHT };
+  enum ActionType { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
   vector<ActionType> actions = {UP, DOWN, LEFT, RIGHT};
 
   size_t fromCoord(size_t row, size_t col) {
