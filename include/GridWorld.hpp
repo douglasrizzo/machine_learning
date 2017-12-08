@@ -11,7 +11,7 @@
 #include "Matrix.hpp"
 #include "MersenneTwister.hpp"
 
-class DynamicProgramming {
+class GridWorld {
  private:
   MatrixD value, rewards, policy;
   double gamma;
@@ -231,7 +231,7 @@ class DynamicProgramming {
   }
 
  public:
-  DynamicProgramming(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1)
+  GridWorld(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1)
       : goals(goals), gamma(gamma) {
 
     // value function starts as 0 everywhere
@@ -316,6 +316,12 @@ class DynamicProgramming {
       }
       if (verbose) cout << value << prettifyPolicy() << endl;
     } while (delta >= threshold);
+  }
+
+  void onPolicyMonteCarloControl(unsigned nIters) {
+    for (unsigned iter = 0; iter < nIters; iter++) {
+
+    }
   }
 };
 
