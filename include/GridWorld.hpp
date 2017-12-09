@@ -250,7 +250,9 @@ class GridWorld {
     // step 1: initialization was done in the constructor
 
     bool stablePolicy;
+    int iter = 0;
     do {
+      iter++;
       // step 2: policy evaluation
       iterativePolicyEvaluation(threshold, verbose);
 
@@ -278,13 +280,15 @@ class GridWorld {
           }
         }
       }
-      if (verbose) cout << prettifyPolicy() << endl;
+      if (verbose) cout << "iteration " << iter << endl << prettifyPolicy() << endl;
     } while (!stablePolicy);
   }
 
   void valueIteration(double threshold = .000001, bool verbose = true) {
     double delta;
+    int iter = 0;
     do {
+      iter++;
       delta = 0;
       for (size_t i = 0; i < value.nRows(); i++) {
         for (size_t j = 0; j < value.nCols(); j++) {
@@ -314,7 +318,7 @@ class GridWorld {
             delta = newDelta;
         }
       }
-      if (verbose) cout << value << prettifyPolicy() << endl;
+      if (verbose) cout << "iteration " << iter << endl << value << prettifyPolicy() << endl;
     } while (delta >= threshold);
   }
 
