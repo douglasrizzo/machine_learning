@@ -52,7 +52,7 @@ class MersenneTwister {
   }
 
 //! Pseudo-random number generator using the Mersenne Twister method
-//! \return double between 0 and 1
+//! \return integer between 0 and 1
   int i_random() {
     uniformIntDist = uniform_int_distribution<int>(0, 1);
     return uniformIntDist(myMersenne);
@@ -61,16 +61,17 @@ class MersenneTwister {
 //! Pseudo-random number generator using the Mersenne Twister method
 //! \param min the lower bound for the random number
 //! \param max the upper bound for the random number
-//! \return double between min and max
+//! \return integer between min and max
   int i_random(int min, int max) {
-    return i_random() * (max - min) + min;
+    uniformIntDist = uniform_int_distribution<int>(min, max);
+    return uniformIntDist(myMersenne);
   }
 
 //! Pseudo-random number generator using the Mersenne Twister method
 //! \param max the upper bound for the random number
-//! \return double between 0 and max
-  double i_random(int max) {
-    return i_random() * max;
+//! \return integer between 0 and max
+  int i_random(int max) {
+    return i_random(0, max);
   }
 
   vector<int> randomValues(int maxValue, unsigned int numValues, bool replacement = true) {
@@ -133,6 +134,11 @@ class MersenneTwister {
       i = uniformDoubleDist(myMersenne);
 
     return myvector;
+  }
+  unsigned int uint_random(unsigned int max) {
+    uniform_int_distribution<unsigned int> uniformUIntDist;
+    uniformUIntDist = uniform_int_distribution<unsigned int>(0, max);
+    return uniformUIntDist(myMersenne);
   }
 };
 
