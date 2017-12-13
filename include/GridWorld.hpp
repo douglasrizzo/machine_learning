@@ -10,6 +10,7 @@
 
 #include "Matrix.hpp"
 #include "MersenneTwister.hpp"
+#include "Timer.hpp"
 
 class GridWorld {
  private:
@@ -75,22 +76,16 @@ class GridWorld {
     return result;
   }
 
-  Matrix<double> policyIncrement(size_t s, bool weightbyProb = true) {
+  Matrix<double> policyIncrement(size_t s) {
     MatrixD result = MatrixD::zeros(actions.size(), 1);
 
     vector<double> actionValues = actionValuesForState(s);
     const MatrixD &currentPolicy = policyForState(s);
-    double bestQ = 0;
+    double bestQ = actionValues[0];
 
-    for (size_t i = 0; i < actionValues.size(); i++) {
-      // weight action values by the probability each action is chosen
-      if (weightbyProb)
-        actionValues[i] *= currentPolicy(i, 0);
-
+    for (size_t i = 1; i < actionValues.size(); i++) {
       // store best weighted action value
-      if (i == 0)
-        bestQ = actionValues[i];
-      else if (actionValues[i] > bestQ)
+      if (actionValues[i] > bestQ)
         bestQ = actionValues[i];
     }
 
@@ -157,7 +152,9 @@ class GridWorld {
   void iterativePolicyEvaluation(double threshold, bool verbose) {
 
     double delta;
+    int iter = 0;
     do {
+      iter++;
       delta = 0;
       for (size_t i = 0; i < value.nRows(); i++) {
         for (size_t j = 0; j < value.nCols(); j++) {
@@ -176,8 +173,9 @@ class GridWorld {
             delta = newDelta;
         }
       }
-      if (verbose) cout << value << endl;
+//      if (verbose) cout << value << endl;
     } while (delta >= threshold);
+    cout << iter << " iterations of policy evaluation" << endl;
   }
 
   bool isGoal(size_t s) {
@@ -222,17 +220,25 @@ class GridWorld {
     return normalizeToOne(policy.getRow(s));
   }
 
-  size_t nextState(size_t s, ActionType a) {
-    for (size_t ss = 0; ss < value.nRows() * value.nCols(); ss++) {
-      if (transition(s, a, ss) == 1)
-        return ss;
+  ActionType actionFromPolicy(size_t state) {
+    MatrixD statePolicy = policyForState(state);
+    double p = MersenneTwister().d_random(1);
+
+    for (size_t i = 1; i < actions.size(); i++) {
+      statePolicy(i, 0) += statePolicy(i - 1, 0);
     }
-    throw runtime_error("No next state found");
+
+    for (size_t i = 0; i < actions.size() - 1; i++) {
+      if (p <= statePolicy(i, 0))
+        return actions[i];
+    }
+
+    return actions[actions.size() - 1];
   }
 
- public:
-  GridWorld(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1)
-      : goals(goals), gamma(gamma) {
+  void initialize(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1) {
+    if (goals.size() == 0)
+      throw invalid_argument("No goal state, must pass at least one");
 
     // value function starts as 0 everywhere
     value = MatrixD::zeros(height, width);
@@ -242,49 +248,71 @@ class GridWorld {
     for (auto goal:goals)
       rewards(goal.first, goal.second) = 0;
 
+    if (rewards.unique().sum() == 0)
+      throw invalid_argument("All states are goal!");
+
+    this->goals = goals;
+    this->gamma = gamma;
+
     // initialize the policy matrix giving equal probability of choice for every action
     policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
   }
+ public:
 
-  void policyIteration(double threshold = .000001, bool verbose = true) {
-    // step 1: initialization was done in the constructor
+  void policyIteration(size_t height,
+                       size_t width,
+                       vector<pair<size_t, size_t>> goals,
+                       double gamma = 1,
+                       double threshold = .001,
+                       bool verbose = true) {
+    // step 1: initialization
+    initialize(height, width, goals, gamma);
 
     bool stablePolicy;
     int iter = 0;
+    MatrixD currentPolicy;
     do {
+      currentPolicy = policy;
       iter++;
       // step 2: policy evaluation
       iterativePolicyEvaluation(threshold, verbose);
 
       // round values to avoid precision error
-      for (size_t i = 0; i < value.nRows(); ++i)
-        for (size_t j = 0; j < value.nCols(); ++j)
-          value(i, j) = floor(value(i, j) * 10000) / 10000;
+//      for (size_t i = 0; i < value.nRows(); ++i)
+//        for (size_t j = 0; j < value.nCols(); ++j)
+//          value(i, j) = floor(value(i, j) * 10000) / 10000;
 
 
       // step 3: policy improvement
-      stablePolicy = true;
       for (size_t i = 0; i < value.nRows(); ++i) {
         for (size_t j = 0; j < value.nCols(); ++j) {
           size_t state = fromCoord(i, j);
 
+          // workaround to optimize running time
+          if (isGoal(state))
+            continue;
+
           // retrieve policy for current state
-          MatrixD currentPolicy = policyForState(state);
+          MatrixD currentStatePolicy = policyForState(state);
 
           // generate a better policy
-          MatrixD bestPolicy = policyIncrement(state);
+          MatrixD betterStatePolicy = policyIncrement(state);
 
-          if (currentPolicy != bestPolicy) {
-            policy.setRow(state, bestPolicy.transpose());
-            stablePolicy = false;
-          }
+          if (currentStatePolicy != betterStatePolicy)
+            policy.setRow(state, betterStatePolicy.transpose());
         }
       }
-      if (verbose) cout << "iteration " << iter << endl << prettifyPolicy() << endl;
-    } while (!stablePolicy);
+      if (verbose) cout << "iteration " << iter << " of policy improvement" << endl << prettifyPolicy() << endl;
+    } while (currentPolicy != policy);
   }
 
-  void valueIteration(double threshold = .000001, bool verbose = true) {
+  void valueIteration(size_t height,
+                      size_t width,
+                      vector<pair<size_t, size_t>> goals,
+                      double gamma = 1,
+                      double threshold = .000001,
+                      bool verbose = true) {
+    initialize(height, width, goals, gamma);
     double delta;
     int iter = 0;
     do {
@@ -310,7 +338,7 @@ class GridWorld {
           double currentV = value(i, j);
           value(i, j) = actionValues[action];
 
-          policy.setRow(state1, policyIncrement(state1, false).transpose());
+          policy.setRow(state1, policyIncrement(state1).transpose());
 
           double newDelta = abs(currentV - value(i, j));
 
@@ -322,9 +350,110 @@ class GridWorld {
     } while (delta >= threshold);
   }
 
-  void onPolicyMonteCarloControl(unsigned nIters) {
-    for (unsigned iter = 0; iter < nIters; iter++) {
+  void MonteCarloEstimatingStarts(size_t height,
+                                  size_t width,
+                                  vector<pair<size_t, size_t>> goals,
+                                  double gamma = 1,
+                                  unsigned maxIters = 1000000) {
+    initialize(height, width, goals, gamma);
+    size_t nStates = value.nRows() * value.nCols();
 
+    MatrixI visits = MatrixI::zeros(nStates, actions.size());
+    MatrixD Q(nStates, actions.size()),
+        QSum = MatrixD::zeros(nStates, actions.size());
+
+    MersenneTwister twister;
+    ActionType action;
+    size_t state;
+    chrono::time_point<chrono::system_clock> start = myClock::now();
+    float lastStdout = 0;
+
+    for (unsigned iter = 0; iter < maxIters; iter++) {
+      chrono::time_point<chrono::system_clock> currentTime = myClock::now();
+      float totalSeconds = ((chrono::duration<float>) (currentTime - start)).count();
+
+      if (totalSeconds - lastStdout > 1) {
+        lastStdout = totalSeconds;
+
+        float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
+        string formattedTotalTime = Timer::prettyTime(estimatedTotalSeconds - totalSeconds);
+
+        cout << "it " << iter + 1 << "/" << maxIters << " (est. " << formattedTotalTime << ")" << endl << prettifyPolicy();
+      }
+
+      vector<size_t> visitedStates;
+      vector<ActionType> appliedActions;
+
+      // select a random initial state
+      // TODO this may run infinitely...
+      do {
+        state = static_cast<size_t>(twister.i_random(static_cast<int>(nStates - 1)));
+      } while (isGoal(state));
+
+      // loop that generates the current episode
+      do {
+        // select action according to current policy
+        action = actions[twister.i_random(static_cast<int>(actions.size() - 1))];
+
+        // store the current state and action
+        visitedStates.push_back(state);
+        appliedActions.push_back(action);
+
+        // generate next state
+        state = applyAction(state, action);
+      } while (!isGoal(state)); // terminate when a goal state is generated
+
+      vector<size_t> processedStates;
+      vector<ActionType> processedActions;
+
+      // backwards loop that will update Q values
+      for (size_t i = visitedStates.size() - 1; i != (size_t) 0; i--) {
+        state = visitedStates[i];
+        action = appliedActions[i];
+
+        // skip this state/action pair if it has already appeared in the episode
+        bool processed = false;
+        for (int j = 0; j < processedStates.size(); j++) {
+          if (processedStates[i] == state and processedActions[i] == action) {
+            processed = true;
+            break;
+          }
+        }
+
+        if (processed)
+          continue;
+
+        processedStates.push_back(state);
+        processedActions.push_back(action);
+
+        pair<size_t, size_t> stateCoords = toCoord(state);
+
+        QSum += rewards(stateCoords.first, stateCoords.second);
+        visits(state, action)++;
+      }
+
+      for (state = 0; state < nStates; state++) {
+        // build Q matrix from sums and n. visits
+        for (size_t j = 0; j < actions.size(); j++) {
+          Q(state, j) = isGoal(state) ? 0 : QSum(state, j) / visits(state, j);
+        }
+
+        // store best action value for the current state
+        double bestQ = Q(state, 0);
+        for (size_t j = 1; j < actions.size(); j++) {
+          if (bestQ < Q(state, j))
+            bestQ = Q(state, j);
+        }
+
+        // actions with best action value receive equal probability of being chosen,
+        // all others have prob 0
+        for (size_t j = 0; j < actions.size(); j++) {
+          if (Q(state, j) == bestQ)
+            policy(state, j) = 1;
+        }
+
+        policy.setRow(state, normalizeToOne(policy.getRow(state).transpose()));
+      }
     }
   }
 };

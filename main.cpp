@@ -689,12 +689,13 @@ void testNaiveBayes() {
 }
 
 void testDynamicProgramming() {
-  vector<pair<size_t, size_t>> goals(1);
-  goals[0].first = 5;
-  goals[0].second = 3;
-  GridWorld d(8, 8, goals);
-//  d.policyIteration();
-  d.valueIteration();
+  vector<pair<size_t, size_t>> goals(2);
+  goals[0].first = goals[0].second = 0;
+  goals[1].first = goals[1].second = 5;
+  GridWorld d;
+//  d.policyIteration(6, 6, goals);
+//  d.valueIteration(6, 6, goals);
+  d.MonteCarloEstimatingStarts(6, 6, goals);
 }
 
 int main() {
