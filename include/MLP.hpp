@@ -12,6 +12,7 @@
 #include <iostream>
 #include "Matrix.hpp"
 #include "MersenneTwister.hpp"
+#include "Timer.hpp"
 
 using namespace std;
 using myClock = chrono::high_resolution_clock;
@@ -98,18 +99,6 @@ class MLP {
     MersenneTwister twister;
     MatrixD result(in, out, twister.vecFromUniform(in * out, min, max));
     return result;
-  }
-
-  string prettyTime(float secondsFloat) const {
-    int totalSeconds = (int) secondsFloat;
-    int milliseconds = (int) (secondsFloat * 1000) % 1000;
-    int seconds = totalSeconds % 60;
-    int minutes = (totalSeconds / 60) % 60;
-    int hours = (totalSeconds / (60 * 60)) % 24;
-
-    string formattedTime = to_string(hours) + ":" + to_string(minutes) + ":"
-        + to_string(seconds) + "." + to_string(milliseconds);
-    return formattedTime;
   }
 
   static MatrixD binarize(MatrixD m) {
@@ -406,8 +395,8 @@ class MLP {
           float iterSeconds = ((chrono::duration<float>) (currentTime - iterStart)).count();
 
           float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
-          string formattedTotalTime = prettyTime(estimatedTotalSeconds - totalSeconds),
-              formattedIterTime = prettyTime(iterSeconds);
+          string formattedTotalTime = Timer::prettyTime(estimatedTotalSeconds - totalSeconds),
+              formattedIterTime = Timer::prettyTime(iterSeconds);
 
           char errorChar = (loss == previousLoss or iter == 0) ? '=' : loss > previousLoss ? '+' : '-';
 
@@ -423,7 +412,7 @@ class MLP {
     }
     if (verbose) {
       float totalSeconds = ((chrono::duration<float>) (myClock::now() - start)).count();
-      string formattedTotalTime = prettyTime(totalSeconds);
+      string formattedTotalTime = Timer::prettyTime(totalSeconds);
       cout << "Total training time: " << formattedTotalTime << endl;
     }
   }
