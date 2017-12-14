@@ -457,6 +457,13 @@ class GridWorld {
       }
     }
   }
+
+  void QLearning(size_t height, size_t width,
+                 vector<pair<size_t, size_t>> goals,
+                 double gamma = 1,
+                 unsigned maxIters = 1000000) {
+
+  }
 };
 
 #endif //MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP

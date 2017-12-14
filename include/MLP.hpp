@@ -408,7 +408,8 @@ class MLP {
     if (!dataMean.isEmpty() && !dataDev.isEmpty())
       X = X.standardize(dataMean, dataDev);
 
-// even when there are no hidden layers, there must be at least one of each of the following
+    // even when there are no hidden layers, there
+    // must be at least one of each of the following
     size_t nLayers = W.size();
 
     MatrixD currentInput = X;
