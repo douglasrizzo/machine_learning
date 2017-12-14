@@ -257,6 +257,7 @@ class GridWorld {
     // initialize the policy matrix giving equal probability of choice for every action
     policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
   }
+
  public:
 
   void policyIteration(size_t height,
@@ -406,6 +407,8 @@ class GridWorld {
       vector<size_t> processedStates;
       vector<ActionType> processedActions;
 
+      double G = 0;
+
       // backwards loop that will update Q values
       for (size_t i = visitedStates.size() - 1; i != (size_t) 0; i--) {
         state = visitedStates[i];
@@ -428,7 +431,9 @@ class GridWorld {
 
         pair<size_t, size_t> stateCoords = toCoord(state);
 
-        QSum += rewards(stateCoords.first, stateCoords.second);
+        G += rewards(stateCoords.first, stateCoords.second);
+
+        QSum(state, action) += G;
         visits(state, action)++;
       }
 
