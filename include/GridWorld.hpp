@@ -367,20 +367,10 @@ class GridWorld {
     ActionType action;
     size_t state;
     chrono::time_point<chrono::system_clock> start = myClock::now();
-    float lastStdout = 0;
+    Timer timer(1, maxIters);
+    timer.start();
 
     for (unsigned iter = 0; iter < maxIters; iter++) {
-      chrono::time_point<chrono::system_clock> currentTime = myClock::now();
-      float totalSeconds = ((chrono::duration<float>) (currentTime - start)).count();
-
-      if (totalSeconds - lastStdout > 1) {
-        lastStdout = totalSeconds;
-
-        float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
-        string formattedTotalTime = Timer::prettyTime(estimatedTotalSeconds - totalSeconds);
-
-        cout << "it " << iter + 1 << "/" << maxIters << " (est. " << formattedTotalTime << ")" << endl << prettifyPolicy();
-      }
 
       vector<size_t> visitedStates;
       vector<ActionType> appliedActions;
@@ -437,27 +427,33 @@ class GridWorld {
         visits(state, action)++;
       }
 
-      for (state = 0; state < nStates; state++) {
-        // build Q matrix from sums and n. visits
-        for (size_t j = 0; j < actions.size(); j++) {
-          Q(state, j) = isGoal(state) ? 0 : QSum(state, j) / visits(state, j);
+      if (timer.activate(iter)) {
+        for (state = 0; state < nStates; state++) {
+          // build Q matrix from sums and n. visits
+          for (size_t j = 0; j < actions.size(); j++) {
+            Q(state, j) = isGoal(state) ? 0 : QSum(state, j) / visits(state, j);
+
+            Q(state, j) = ceil(Q(state, j) * 100) / 100;
+          }
+
+          // store best action value for the current state
+          double bestQ = Q(state, 0);
+          for (size_t j = 1; j < actions.size(); j++) {
+            if (bestQ < Q(state, j))
+              bestQ = Q(state, j);
+          }
+
+          // actions with best action value receive equal probability of being chosen,
+          // all others have prob 0
+          for (size_t j = 0; j < actions.size(); j++) {
+            if (Q(state, j) == bestQ)
+              policy(state, j) = 1;
+          }
+
+          policy.setRow(state, normalizeToOne(policy.getRow(state).transpose()));
         }
 
-        // store best action value for the current state
-        double bestQ = Q(state, 0);
-        for (size_t j = 1; j < actions.size(); j++) {
-          if (bestQ < Q(state, j))
-            bestQ = Q(state, j);
-        }
-
-        // actions with best action value receive equal probability of being chosen,
-        // all others have prob 0
-        for (size_t j = 0; j < actions.size(); j++) {
-          if (Q(state, j) == bestQ)
-            policy(state, j) = 1;
-        }
-
-        policy.setRow(state, normalizeToOne(policy.getRow(state).transpose()));
+        cout << prettifyPolicy() << endl;
       }
     }
   }

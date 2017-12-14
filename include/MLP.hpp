@@ -236,7 +236,7 @@ class MLP {
   void fit(MatrixD X,
            MatrixD y,
            vector<MatrixD> hiddenLayers,
-           int maxIters,
+           unsigned int maxIters,
            size_t batchSize = 0,
            double learningRate = 0.01,
            double errorThreshold = 0.0001,
@@ -293,7 +293,8 @@ class MLP {
 
     float lastStdout = 0;
     double previousLoss;
-    chrono::time_point<chrono::system_clock> start = myClock::now();
+    Timer timer(1, maxIters);
+    timer.start();
     // training iterations
     for (int iter = 0; iter < maxIters; iter++) {
       chrono::time_point<chrono::system_clock> iterStart = myClock::now();
@@ -385,24 +386,9 @@ class MLP {
         W[i] = (1 - ((learningRate * regularization) / batchClasses.nRows())) * W[i] + dW;
       }
 
-      if (verbose) {
-        chrono::time_point<chrono::system_clock> currentTime = myClock::now();
-        float totalSeconds = ((chrono::duration<float>) (currentTime - start)).count();
-
-        if (totalSeconds - lastStdout > 1) {
-          lastStdout = totalSeconds;
-
-          float iterSeconds = ((chrono::duration<float>) (currentTime - iterStart)).count();
-
-          float estimatedTotalSeconds = (totalSeconds / (iter + 1)) * maxIters;
-          string formattedTotalTime = Timer::prettyTime(estimatedTotalSeconds - totalSeconds),
-              formattedIterTime = Timer::prettyTime(iterSeconds);
-
-          char errorChar = (loss == previousLoss or iter == 0) ? '=' : loss > previousLoss ? '+' : '-';
-
-          cout << "it " << iter + 1 << "/" << maxIters << ", loss: " << loss << ' ' << errorChar << ", time: "
-               << formattedIterTime << " (est. " << formattedTotalTime << ")" << endl;
-        }
+      if (verbose and timer.activate(iter)) {
+        char errorChar = (loss == previousLoss or iter == 0) ? '=' : loss > previousLoss ? '+' : '-';
+        cout << "loss: " << loss << ' ' << errorChar << endl;
       }
 
       if (loss < errorThreshold)
@@ -410,11 +396,8 @@ class MLP {
 
       previousLoss = loss;
     }
-    if (verbose) {
-      float totalSeconds = ((chrono::duration<float>) (myClock::now() - start)).count();
-      string formattedTotalTime = Timer::prettyTime(totalSeconds);
-      cout << "Total training time: " << formattedTotalTime << endl;
-    }
+    if (verbose)
+      cout << "Total training time: " << timer.runningTime() << endl;
   }
 
   //! Predict the classes of a data set
