@@ -14,12 +14,38 @@
 
 class GridWorld {
  private:
-  MatrixD value, rewards, policy;
+  MatrixD V, Q, rewards, policy;
   double gamma;
+  unsigned long nStates;
   vector<pair<size_t, size_t>> goals;
 
   enum ActionType { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
   vector<ActionType> actions = {UP, DOWN, LEFT, RIGHT};
+
+  void initialize(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1) {
+    if (goals.size() == 0)
+      throw invalid_argument("No goal state, must pass at least one");
+
+    this->nStates = height * width;
+
+    // state and actions value functions starts as 0 everywhere
+    V = MatrixD::zeros(height, width);
+    Q = MatrixD::zeros(nStates, actions.size());
+
+    // set goal rewards are 0, all other states are -1
+    rewards = MatrixD::fill(height, width, -1);
+    for (auto goal:goals)
+      rewards(goal.first, goal.second) = 0;
+
+    if (rewards.unique().sum() == 0)
+      throw invalid_argument("All states are goal!");
+
+    this->goals = goals;
+    this->gamma = gamma;
+
+    // initialize the policy matrix giving equal probability of choice for every action
+    policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
+  }
 
   /**
    * Transforms row x column coordinates from the grid world into a raster representation
@@ -28,7 +54,7 @@ class GridWorld {
    * @return
    */
   size_t fromCoord(size_t row, size_t col) {
-    return row * value.nCols() + col;
+    return row * V.nCols() + col;
   }
 
   /**
@@ -37,8 +63,8 @@ class GridWorld {
    * @return
    */
   pair<size_t, size_t> toCoord(size_t s) {
-    size_t row = static_cast<size_t>(ceil((s + 1) / (double) value.nCols()) - 1);
-    size_t col = s - row * value.nCols();
+    size_t row = static_cast<size_t>(ceil((s + 1) / (double) V.nCols()) - 1);
+    size_t col = s - row * V.nCols();
 
     return {row, col};
   }
@@ -48,11 +74,11 @@ class GridWorld {
 
     pair<size_t, size_t> coords = toCoord(s);
     double r = rewards(coords.first, coords.second);
-    for (size_t i = 0; i < value.nRows(); ++i) {
-      for (size_t j = 0; j < value.nCols(); ++j) {
+    for (size_t i = 0; i < V.nRows(); ++i) {
+      for (size_t j = 0; j < V.nCols(); ++j) {
         size_t s2 = fromCoord(i, j);
         double t = transition(s, a, s2);
-        double v = value(i, j);
+        double v = V(i, j);
 
         // WARNING: here the ActionType a is being used as an index
         q += t * (r + gamma * v);
@@ -101,8 +127,8 @@ class GridWorld {
 
   string prettifyPolicy() {
     string s = "";
-    for (size_t i = 0; i < value.nRows(); i++) {
-      for (size_t j = 0; j < value.nCols(); ++j) {
+    for (size_t i = 0; i < V.nRows(); i++) {
+      for (size_t j = 0; j < V.nCols(); ++j) {
         size_t state = fromCoord(i, j);
 
         if (isGoal(state)) {
@@ -150,30 +176,28 @@ class GridWorld {
   }
 
   void iterativePolicyEvaluation(double threshold, bool verbose) {
-
     double delta;
     int iter = 0;
     do {
       iter++;
       delta = 0;
-      for (size_t i = 0; i < value.nRows(); i++) {
-        for (size_t j = 0; j < value.nCols(); j++) {
+      for (size_t i = 0; i < V.nRows(); i++) {
+        for (size_t j = 0; j < V.nCols(); j++) {
           size_t state1 = fromCoord(i, j);
 
-          double currentV = value(i, j), newV = 0;
+          double currentV = V(i, j), newV = 0;
 
           for (ActionType action : actions)
             newV += policy(state1, action) * actionValue(state1, action);
 
-          value(i, j) = newV;
+          V(i, j) = newV;
 
-          double newDelta = abs(currentV - value(i, j));
+          double newDelta = abs(currentV - V(i, j));
 
           if (newDelta > delta)
             delta = newDelta;
         }
       }
-//      if (verbose) cout << value << endl;
     } while (delta >= threshold);
     cout << iter << " iterations of policy evaluation" << endl;
   }
@@ -202,13 +226,13 @@ class GridWorld {
         s2row = s1row != 0 ? s1row - 1 : s1row;
         break;
       case DOWN:s2col = s1col;
-        s2row = s1row != value.nCols() - 1 ? s1row + 1 : s1row;
+        s2row = s1row != V.nCols() - 1 ? s1row + 1 : s1row;
         break;
       case LEFT:s2row = s1row;
         s2col = s1col != 0 ? s1col - 1 : s1col;
         break;
       case RIGHT:s2row = s1row;
-        s2col = s1col != value.nRows() - 1 ? s1col + 1 : s1col;
+        s2col = s1col != V.nRows() - 1 ? s1col + 1 : s1col;
         break;
       default:return 0;
     }
@@ -285,8 +309,8 @@ class GridWorld {
 
 
       // step 3: policy improvement
-      for (size_t i = 0; i < value.nRows(); ++i) {
-        for (size_t j = 0; j < value.nCols(); ++j) {
+      for (size_t i = 0; i < V.nRows(); ++i) {
+        for (size_t j = 0; j < V.nCols(); ++j) {
           size_t state = fromCoord(i, j);
 
           // workaround to optimize running time
@@ -319,8 +343,8 @@ class GridWorld {
     do {
       iter++;
       delta = 0;
-      for (size_t i = 0; i < value.nRows(); i++) {
-        for (size_t j = 0; j < value.nCols(); j++) {
+      for (size_t i = 0; i < V.nRows(); i++) {
+        for (size_t j = 0; j < V.nCols(); j++) {
           size_t state1 = fromCoord(i, j);
 
           // workaround to optimize running time
@@ -336,18 +360,18 @@ class GridWorld {
             }
           }
 
-          double currentV = value(i, j);
-          value(i, j) = actionValues[action];
+          double currentV = V(i, j);
+          V(i, j) = actionValues[action];
 
           policy.setRow(state1, policyIncrement(state1).transpose());
 
-          double newDelta = abs(currentV - value(i, j));
+          double newDelta = abs(currentV - V(i, j));
 
           if (newDelta > delta)
             delta = newDelta;
         }
       }
-      if (verbose) cout << "iteration " << iter << endl << value << prettifyPolicy() << endl;
+      if (verbose) cout << "iteration " << iter << endl << V << prettifyPolicy() << endl;
     } while (delta >= threshold);
   }
 
@@ -357,11 +381,9 @@ class GridWorld {
                                   double gamma = 1,
                                   unsigned maxIters = 1000000) {
     initialize(height, width, goals, gamma);
-    size_t nStates = value.nRows() * value.nCols();
 
     MatrixI visits = MatrixI::zeros(nStates, actions.size());
-    MatrixD Q(nStates, actions.size()),
-        QSum = MatrixD::zeros(nStates, actions.size());
+    MatrixD QSum = MatrixD::zeros(nStates, actions.size());
 
     MersenneTwister twister;
     ActionType action;
