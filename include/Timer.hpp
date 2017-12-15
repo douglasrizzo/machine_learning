@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <climits>
 
 using namespace std;
 
@@ -18,8 +19,58 @@ class Timer {
   float lastUpdate;
   chrono::time_point<chrono::system_clock> startTime;
 
+// partial specialization optimization for 32-bit numbers
+//  template<>
+  static int numDigits(int32_t x) {
+    if (x == INT_MIN) return 10 + 1;
+    if (x < 0) return numDigits(-x) + 1;
+
+    if (x >= 10000) {
+      if (x >= 10000000) {
+        if (x >= 100000000) {
+          if (x >= 1000000000)
+            return 10;
+          return 9;
+        }
+        return 8;
+      }
+      if (x >= 100000) {
+        if (x >= 1000000)
+          return 7;
+        return 6;
+      }
+      return 5;
+    }
+    if (x >= 100) {
+      if (x >= 1000)
+        return 4;
+      return 3;
+    }
+    if (x >= 10)
+      return 2;
+    return 1;
+  }
+
+// partial-specialization optimization for 8-bit numbers
+//  template<>
+  static int numDigits(char n) {
+    // if you have the time, replace this with a static initialization to avoid
+    // the initial overhead & unnecessary branch
+    static char x[256] = {0};
+    if (x[0] == 0) {
+      for (char c = 1; c != 0; c++)
+        x[c] = numDigits((int32_t) c);
+      x[0] = 1;
+    }
+    return x[n];
+  }
+
+  static string zeroPad(int value, unsigned int desiredSize) {
+    return string(desiredSize - numDigits(value), '0').append(to_string(value));
+  }
+
  public:
-  Timer(unsigned int interval=0, unsigned int predictedIters = 0) :
+  explicit Timer(unsigned int interval = 0, unsigned int predictedIters = 0) :
       interval(interval),
       predictedIters(predictedIters) {
   }
@@ -54,8 +105,8 @@ class Timer {
     int minutes = (totalSeconds / 60) % 60;
     int hours = (totalSeconds / (60 * 60)) % 24;
 
-    std::__cxx11::string formattedTime = std::__cxx11::to_string(hours) + ":" + std::__cxx11::to_string(minutes) + ":"
-        + std::__cxx11::to_string(seconds) + "." + std::__cxx11::to_string(milliseconds);
+    string formattedTime = to_string(hours) + ":" + zeroPad(minutes, 2) + ":"
+        + zeroPad(seconds, 2) + "." + zeroPad(milliseconds, 3);
     return formattedTime;
   }
 
