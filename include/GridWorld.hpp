@@ -199,7 +199,8 @@ class GridWorld {
         }
       }
     } while (delta >= threshold);
-    cout << iter << " iterations of policy evaluation" << endl;
+    if (verbose)
+      cout << iter << " iterations of policy evaluation" << endl;
   }
 
   bool isGoal(size_t s) {
@@ -322,8 +323,6 @@ class GridWorld {
     int iter = 0;
     MatrixD currentPolicy;
 
-    Timer timer;
-    timer.start();
     do {
       currentPolicy = policy;
       iter++;
@@ -352,7 +351,6 @@ class GridWorld {
       }
       if (verbose) cout << "iteration " << iter << " of policy improvement" << endl << prettifyPolicy() << endl;
     } while (currentPolicy != policy);
-    cout << timer.runningTime();
   }
 
   void valueIteration(size_t height,
@@ -364,8 +362,7 @@ class GridWorld {
     initialize(height, width, goals, gamma);
     double delta;
     int iter = 0;
-    Timer timer;
-    timer.start();
+
     do {
       iter++;
       delta = 0;
@@ -397,16 +394,16 @@ class GridWorld {
             delta = newDelta;
         }
       }
-      if (verbose) cout << "iteration " << iter << endl << V << prettifyPolicy() << endl;
+      if (verbose) cout << "iteration " << iter << endl << prettifyPolicy() << endl;
     } while (delta >= threshold);
-    cout << timer.runningTime();
   }
 
   void MonteCarloEstimatingStarts(size_t height,
                                   size_t width,
                                   vector<pair<size_t, size_t>> goals,
                                   double gamma = 1,
-                                  unsigned maxIters = 1000000) {
+                                  unsigned maxIters = 10000,
+                                  bool verbose = true) {
     initialize(height, width, goals, gamma);
 
     MatrixI visits = MatrixI::zeros(nStates, actions.size());
@@ -473,7 +470,7 @@ class GridWorld {
         visits(state, action)++;
       }
 
-      if (timer.activate(iter)) {
+      if (iter == maxIters - 1 or (verbose and timer.activate(iter))) {
         for (state = 0; state < nStates; state++) {
           // build Q matrix from sums and n. visits
           for (size_t j = 0; j < actions.size(); j++) {
@@ -483,7 +480,8 @@ class GridWorld {
 
         getOptimalPolicyFromQ();
 
-        cout << prettifyPolicy() << endl;
+        if (verbose)
+          cout << prettifyPolicy() << endl;
       }
     }
   }
@@ -493,7 +491,8 @@ class GridWorld {
              double gamma = 1,
              double alpha = .3,
              double epsilon = .8,
-             unsigned int maxIters = 1000000) {
+             unsigned int maxIters = 10000,
+             bool verbose = true) {
     initialize(height, width, goals, gamma);
     Timer timer(1, maxIters);
     timer.start();
@@ -511,14 +510,13 @@ class GridWorld {
         s = newState;
         a = newAction;
       }
-      if (timer.activate(iter)) {
+
+      if (iter == maxIters - 1 or (verbose and timer.activate(iter))) {
         getOptimalPolicyFromQ();
-        cout << prettifyPolicy();
+        if (verbose)
+          cout << prettifyPolicy();
       }
     }
-
-    getOptimalPolicyFromQ();
-    cout << prettifyPolicy();
   }
 
   void QLearning(size_t height, size_t width,
@@ -526,7 +524,8 @@ class GridWorld {
                  double gamma = 1,
                  double alpha = .3,
                  double epsilon = .8,
-                 unsigned int maxIters = 10000) {
+                 unsigned int maxIters = 10000,
+                 bool verbose = true) {
     initialize(height, width, goals, gamma);
     Timer timer(1, maxIters);
     timer.start();
@@ -545,14 +544,13 @@ class GridWorld {
         Q(s, a) += alpha * (r + gamma * bestQForState(newState) - Q(s, a));
         s = newState;
       }
-      if (timer.activate(iter)) {
+
+      if (iter == maxIters - 1 or (verbose and timer.activate(iter))) {
         getOptimalPolicyFromQ();
-        cout << prettifyPolicy();
+        if (verbose)
+          cout << prettifyPolicy();
       }
     }
-
-    getOptimalPolicyFromQ();
-    cout << prettifyPolicy();
   }
 };
 
