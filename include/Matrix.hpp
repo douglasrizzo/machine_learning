@@ -8,6 +8,7 @@
 #define MACHINE_LEARNING_MATRIX_HPP
 
 #include <vector>
+#include <functional>
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
@@ -15,17 +16,22 @@
 #include <cmath>
 #include <set>
 #include <complex>
-#include "nr3.h"
-#include "eigen_unsym.h"
+#include "nr3/nr3.h"
+#include "nr3/eigen_unsym.h"
+#include "CSVReader.hpp"
 
 using namespace std;
 
 //! Matrix implementation, with a series of linear algebra functions
+//! @tparam T The arithmetic type the matrix will store
+template<
+    typename T,
+    typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 class Matrix {
  private:
   size_t mRows;
   size_t mCols;
-  std::vector<double> mData;
+  std::vector<T> mData;
 
   //! Validates if indices are contained inside the matrix
   //! \param row row index
@@ -33,30 +39,11 @@ class Matrix {
   //! \throws runtime error if at least one of the indices is out of bounds
   void validateIndexes(size_t row, size_t col) const {
     if (row < 0 or row >= mRows)
-      throw runtime_error(
+      throw invalid_argument(
           "Invalid row index (" + to_string(row) + "): should be between 0 and " + to_string(mRows - 1));
     if (col < 0 or col >= mCols)
-      throw runtime_error(
+      throw invalid_argument(
           "Invalid column index (" + to_string(col) + "): should be between 0 and " + to_string(mCols - 1));
-  }
-
-  //! Helper function that separates lines in a CSV file into tokens
-  //! \param str stream containing the contents of the CSV file
-  //! \return a vector with the flattened contents of the CSV converted to double
-  static std::vector<double> getNextLineAndSplitIntoTokens(std::istream &str) {
-    std::vector<double> result;
-    std::string line;
-    std::getline(str, line);
-
-    std::stringstream lineStream(line);
-    std::string cell;
-
-    while (std::getline(lineStream, cell, ',')) {
-      double value = stod(cell);
-      result.push_back(value);
-    }
-
-    return result;
   }
 
   //! Sorts eigenvalues by magnitude, sorting their corresponding eigenvectors in te same order
@@ -82,11 +69,11 @@ class Matrix {
     }
 
     // order eigenvalues and eigenvectors by the value of the eigenvalues
-    for (int i = 0; i < newOrder.size(); i++) {
+    for (size_t i = 0; i < newOrder.size(); i++) {
       eigval(i, 0) = eigenvalues(newOrder[i], 0);
 
       for (int j = 0; j < eigenvectors.nRows(); j++) {
-        eigvec(j, i) = eigenvectors(j, newOrder[i]);
+        eigvec(static_cast<size_t>(j), i) = eigenvectors(j, newOrder[i]);
       }
     }
 
@@ -94,15 +81,24 @@ class Matrix {
   }
 
  public:
-  size_t nCols() { return mCols; }
 
-  size_t nRows() { return mRows; }
+  enum Axis { ALL, ROWS, COLUMNS };
+
+  size_t nCols() const { return mCols; }
+
+  size_t nRows() const { return mRows; }
 
   //region Constructors
 
   //! Initializes an empty matrix
   Matrix() {
     mRows = mCols = 0;
+  }
+
+  //! Initializes a square matrix
+  //! \param dimension number of rows and columns
+  Matrix(size_t dimension) {
+    Matrix(dimension, dimension);
   }
 
   //! Initializes a matrix with a predetermined number of rows and columns
@@ -118,12 +114,20 @@ class Matrix {
   //! \param rows number of rows in the matrix
   //! \param cols number of columns in the matrix
   //! \param data a vector containing <code>rows * cols</code> elements to populate the matrix
-  Matrix(size_t rows, size_t cols, const vector<double> &data)
+  Matrix(size_t rows, size_t cols, const vector<T> &data)
       : mRows(rows),
         mCols(cols) {
     if (data.size() != rows * cols)
-      throw runtime_error("Matrix dimension incompatible with its initializing vector.");
+      throw invalid_argument("Matrix dimension incompatible with its initializing vector.");
     mData = data;
+  }
+
+  template<std::size_t N>
+  Matrix(size_t rows, size_t cols, T (&data)[N]) {
+    if (N != rows * cols)
+      throw invalid_argument("Matrix dimension incompatible with its initializing vector.");
+    vector<T> v(data, data + N);
+    Matrix(rows, cols, v);
   }
   //endregion
 
@@ -138,7 +142,7 @@ class Matrix {
   friend Matrix operator+(const Matrix &m, double value) {
     Matrix result(m.mRows, m.mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < m.mRows; i++) {
       for (size_t j = 0; j < m.mCols; j++) {
         result(i, j) = value + m(i, j);
@@ -179,7 +183,7 @@ class Matrix {
   friend Matrix operator*(const Matrix &m, double value) {
     Matrix result(m.mRows, m.mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < m.mRows; i++) {
       for (size_t j = 0; j < m.mCols; j++) {
         result(i, j) = value * m(i, j);
@@ -204,7 +208,7 @@ class Matrix {
   friend Matrix operator/(const Matrix &m, double value) {
     Matrix result(m.mRows, m.mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < m.mRows; i++) {
       for (size_t j = 0; j < m.mCols; j++) {
         result(i, j) = m(i, j) / value;
@@ -222,7 +226,7 @@ class Matrix {
     // division is not commutative, so a new method is implemented
     Matrix result(m.mRows, m.mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < m.mRows; i++) {
       for (size_t j = 0; j < m.mCols; j++) {
         result(i, j) = value / m(i, j);
@@ -233,28 +237,28 @@ class Matrix {
   }
 
   Matrix operator+=(double value) {
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < mData.size(); i++)
       mData[i] += value;
     return *this;
   }
 
   Matrix operator-=(double value) {
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < mData.size(); i++)
       mData[i] -= value;
     return *this;
   }
 
   Matrix operator*=(double value) {
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < mData.size(); i++)
       mData[i] *= value;
     return *this;
   }
 
   Matrix operator/=(double value) {
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < mData.size(); i++)
       mData[i] /= value;
     return *this;
@@ -268,14 +272,15 @@ class Matrix {
   //! \return Result of the addition of both matrices
   Matrix operator+(const Matrix &b) {
     if (mRows != b.mRows || mCols != b.mCols)
-      throw runtime_error("Cannot add these matrices");
+      throw invalid_argument("Cannot add these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+                                 + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) + b(i, j);
+        result(i, j) = operator()(i, j) + b(i, j);
       }
     }
 
@@ -287,14 +292,16 @@ class Matrix {
   //! \return Result of the subtraction of both matrices
   Matrix operator-(const Matrix &b) {
     if (mRows != b.mRows || mCols != b.mCols)
-      throw runtime_error("Cannot add these matrices");
+      throw invalid_argument(
+          "Cannot subtract these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+              + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) - b(i, j);
+        result(i, j) = operator()(i, j) - b(i, j);
       }
     }
 
@@ -304,31 +311,35 @@ class Matrix {
   //! Matrix multiplication operation
   //! \param b another matrix
   //! \return Result of the multiplication of both matrices
-  Matrix operator*(const Matrix &b) {
+  Matrix operator*(const Matrix &b) const {
     if (mCols != b.mRows)
-      throw runtime_error(
-          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
-              to_string(this->mCols) + ", right hand " + to_string(b.mRows) + "x" + to_string(b.mCols));
+      throw invalid_argument(
+          "Cannot multiply these matrices: L = " + to_string(this->mRows) + "x" +
+              to_string(this->mCols) + ", R = " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
-    Matrix result(mRows, b.mCols);
+    Matrix result = zeros(mRows, b.mCols);
 
-#pragma omp parallel for collapse(2)
-    // two loops iterate through every cell of the new matrix
+    #pragma omp parallel for if(result.mRows * result.mCols > 250)
     for (size_t i = 0; i < result.mRows; i++) {
-      for (size_t j = 0; j < result.mCols; j++) {
-        // here we calculate the value of a single cell in our new matrix
-        result(i, j) = 0;
-        for (size_t ii = 0; ii < mCols; ii++)
-          result(i, j) += this->operator()(i, ii) * b(ii, j);
+      for (size_t k = 0; k < mCols; k++) {
+        double tmp = operator()(i, k);
+        for (size_t j = 0; j < result.mCols; j++) {
+          result(i, j) += tmp * b(k, j);
+        }
       }
     }
+
     return result;
   }
+
   Matrix &operator+=(const Matrix &other) {
-#pragma omp parallel for collapse(2)
+    if (mRows != other.mRows || mCols != other.mCols)
+      throw invalid_argument("Cannot add these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+                                 + to_string(other.mRows) + "x" + to_string(other.mCols));
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
       for (size_t j = 0; j < other.mCols; j++) {
-        this->operator()(i, j) += other(i, j);
+        operator()(i, j) += other(i, j);
       }
     }
 
@@ -336,10 +347,15 @@ class Matrix {
   }
 
   Matrix &operator-=(const Matrix &other) {
-#pragma omp parallel for collapse(2)
+    if (mRows != other.mRows || mCols != other.mCols)
+      throw invalid_argument(
+          "Cannot subtract these matrices: L = " + to_string(mRows) + "x" + to_string(mCols) + ", R = "
+              + to_string(other.mRows) + "x" + to_string(other.mCols));
+
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < other.mRows; i++) {
       for (size_t j = 0; j < other.mCols; j++) {
-        this->operator()(i, j) -= other(i, j);
+        operator()(i, j) -= other(i, j);
       }
     }
 
@@ -348,20 +364,20 @@ class Matrix {
 
   Matrix &operator*=(const Matrix &other) {
     if (mCols != other.mRows)
-      throw runtime_error(
-          "Cannot multiply these matrices: left hand " + to_string(this->mRows) + "x" +
-              to_string(this->mCols) + ", right hand " + to_string(other.mRows) + "x" + to_string(other.mCols));
+      throw invalid_argument(
+          "Cannot multiply these matrices: L " + to_string(mRows) + "x" +
+              to_string(mCols) + ", R " + to_string(other.mRows) + "x" + to_string(other.mCols));
 
     Matrix result(mRows, other.mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     // two loops iterate through every cell of the new matrix
     for (size_t i = 0; i < result.mRows; i++) {
       for (size_t j = 0; j < result.mCols; j++) {
         // here we calculate the value of a single cell in our new matrix
         result(i, j) = 0;
         for (size_t ii = 0; ii < mCols; ii++)
-          result(i, j) += this->operator()(i, ii) * other(ii, j);
+          result(i, j) += operator()(i, ii) * other(ii, j);
       }
     }
 
@@ -374,13 +390,13 @@ class Matrix {
 
   //region Equality operators
 
-  Matrix operator==(const double &value) {
-    Matrix result(mRows, mCols);
+  Matrix<int> operator==(const T &value) {
+    Matrix<int> result(mRows, mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) == value;
+        result(i, j) = operator()(i, j) == value;
       }
     }
 
@@ -403,6 +419,12 @@ class Matrix {
     // negate everything: 0s remains 0s, -1s becomes 1s
     return -((*this == value) - 1);
   }
+
+  bool operator!=(const Matrix &other) {
+    // subtract 1 from everything: 0s become -1s, 1s become 0s
+    // negate everything: 0s remains 0s, -1s becomes 1s
+    return !(*this == other);
+  }
   //endregion
 
   //! Matrix negative operation
@@ -410,10 +432,10 @@ class Matrix {
   Matrix operator-() {
     Matrix result(this->mRows, this->mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mCols; i++) {
       for (size_t j = 0; j < mRows; j++) {
-        result(i, j) = -this->operator()(i, j);
+        result(i, j) = -operator()(i, j);
       }
     }
 
@@ -426,7 +448,7 @@ class Matrix {
   //! \param i row index
   //! \param j column index
   //! \return element in position ij of the matrix
-  double &operator()(size_t i, size_t j) {
+  T &operator()(size_t i, size_t j) {
     validateIndexes(i, j);
     return mData[i * mCols + j];
   }
@@ -435,7 +457,7 @@ class Matrix {
   //! \param i row index
   //! \param j column index
   //! \return element in position ij of the matrix
-  double operator()(size_t i, size_t j) const {
+  T operator()(size_t i, size_t j) const {
     validateIndexes(i, j);
     return mData[i * mCols + j];
   }
@@ -448,7 +470,7 @@ class Matrix {
   //! \param value value to be used for initialization
   //! \return a matrix with all values set to <code>value</code>
   static Matrix fill(size_t rows, size_t cols, double value) {
-    Matrix result(rows, cols, vector<double>(rows * cols, value));
+    Matrix result(rows, cols, vector<T>(rows * cols, value));
     return result;
   }
 
@@ -476,9 +498,9 @@ class Matrix {
 
     Matrix result(mRows, 1);
 
-#pragma omp parallel
+    #pragma omp parallel
     for (size_t i = 0; i < mRows; i++)
-      result(i, 0) = this->operator()(i, i);
+      result(i, 0) = operator()(i, i);
 
     return result;
   }
@@ -511,14 +533,16 @@ class Matrix {
   //! \return result of the Hadamard multiplication of the two matrices
   Matrix hadamard(const Matrix &b) {
     if (mCols != b.mCols || mRows != b.mRows)
-      throw runtime_error("Matrices have different dimentions");
+      throw invalid_argument(
+          "Cannot multiply these matrices element-wise: L = " + to_string(mRows) + "x" +
+              to_string(mCols) + ", R = " + to_string(b.mRows) + "x" + to_string(b.mCols));
 
     Matrix result(mRows, mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) * b(i, j);
+        result(i, j) = operator()(i, j) * b(i, j);
       }
     }
 
@@ -534,13 +558,13 @@ class Matrix {
 
     size_t subi = 0;
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < mRows; i++) {
       size_t subj = 0;
       if (i == row) continue;
       for (size_t j = 0; j < mCols; j++) {
         if (j == column) continue;
-        result(subi, subj) = this->operator()(i, j);
+        result(subi, subj) = operator()(i, j);
         subj++;
       }
       subi++;
@@ -559,10 +583,10 @@ class Matrix {
 //                           c d    b a
     if (mRows == 2 and mCols == 2) {
       Matrix result(2, 2);
-      result(0, 0) = this->operator()(1, 1);
-      result(0, 1) = this->operator()(1, 0);
-      result(1, 0) = this->operator()(0, 1);
-      result(1, 1) = this->operator()(0, 0);
+      result(0, 0) = operator()(1, 1);
+      result(0, 1) = operator()(1, 0);
+      result(1, 0) = operator()(0, 1);
+      result(1, 1) = operator()(0, 0);
       return result.determinant();
     }
 
@@ -579,13 +603,13 @@ class Matrix {
     // special case for when our matrix is 2x2
     if (mRows == 2 and mCols == 2) {
       if (row == 0 and column == 0)
-        minor = this->operator()(1, 1);
+        minor = operator()(1, 1);
       else if (row == 1 and column == 1)
-        minor = this->operator()(0, 0);
+        minor = operator()(0, 0);
       else if (row == 0 and column == 1)
-        minor = this->operator()(1, 0);
+        minor = operator()(1, 0);
       else if (row == 1 and column == 0)
-        minor = this->operator()(0, 1);
+        minor = operator()(0, 1);
     } else
       minor = this->getMinor(row, column);
     return (row + column) % 2 == 0 ? minor : -minor;
@@ -596,7 +620,7 @@ class Matrix {
   Matrix cofactorMatrix() const {
     Matrix result(mRows, mCols);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
         result(i, j) = cofactor(i, j);
@@ -637,12 +661,12 @@ class Matrix {
     size_t n = mRows;
     double d = 0;
     if (n == 2) {
-      return ((this->operator()(0, 0) * this->operator()(1, 1)) -
-          (this->operator()(1, 0) * this->operator()(0, 1)));
+      return ((operator()(0, 0) * operator()(1, 1)) -
+          (operator()(1, 0) * operator()(0, 1)));
     } else {
-#pragma omp parallel for reduction (+:d)
+      #pragma omp parallel for reduction (+:d)
       for (size_t c = 0; c < n; c++) {
-        d += pow(-1, c) * this->operator()(0, c) * submatrix(0, c).determinant();
+        d += pow(-1, c) * operator()(0, c) * submatrix(0, c).determinant();
       }
       return d;
     }
@@ -653,10 +677,10 @@ class Matrix {
   Matrix transpose() const {
     Matrix result(mCols, mRows);
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(j, i) = this->operator()(i, j);
+        result(j, i) = operator()(i, j);
       }
     }
 
@@ -681,9 +705,9 @@ class Matrix {
   //! position and all columns succeeding it are pushed forward.
   void addColumn(Matrix values, size_t position) {
     if (!isEmpty() and values.nRows() != mRows)
-      throw runtime_error("Wrong number of values passed for new column");
+      throw invalid_argument("Wrong number of values passed for new column");
     if (values.nCols() != 1)
-      throw runtime_error("Can't add multiple columns at once");
+      throw invalid_argument("Can't add multiple columns at once");
 
     if (isEmpty()) {
       mRows = values.mRows;
@@ -692,22 +716,32 @@ class Matrix {
       return;
     }
 
-    // this is how you stop a reverse for loop with unsigned integers
-    for (size_t i = mRows - 1; i != (size_t) -1; i--)
-      mData.insert(mData.begin() + (i * mCols + position), values(i, 0));
+    vector<T> newData(mData.size() + values.mRows);
 
+    size_t newData_mCols = mCols + 1;
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < newData_mCols; j++) {
+        if (j == position)
+          newData[i * newData_mCols + j] = values(i, 0);
+        else {
+          int a = j > position;
+          newData[i * newData_mCols + j] = operator()(i, j - (j > position));
+        }
+      }
+    }
     mCols += 1;
+    mData = newData;
   }
 
   //! Adds a row to the matrix at the given position. Addition is done inplace.
   //! \param values a column vector containing the values to be added in the new row
-  //! \param index index of the new row. The row at the current
+  //! \param position index of the new row. The row at the current
   //! position and all rows succeeding it are pushed forward.
-  void addRow(Matrix values, size_t index) {
+  void addRow(Matrix values, size_t position) {
     if (!isEmpty() and values.mRows != mCols)
-      throw runtime_error("Wrong number of values passed for new row");
+      throw invalid_argument("Wrong number of values passed for new row");
     if (values.mCols != 1)
-      throw runtime_error("Can't add multiple rows at once");
+      throw invalid_argument("Can't add multiple rows at once");
 
     if (isEmpty()) {
       mRows = values.mCols;
@@ -716,15 +750,21 @@ class Matrix {
       return;
     }
 
-    for (size_t i = 0; i != mCols; i++) {
-      size_t exact_position = index * (mCols) + i;
-      if (exact_position < mData.size())
-        mData.insert(mData.begin() + exact_position, values(i, 0));
-      else
-        mData.push_back(values(i, 0));
-    }
+    // TODO addColumn with same logic was wrong, must check this one
+
+    vector<T> newData(mData.size() + values.mRows);
 
     mRows += 1;
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t j = 0; j < mCols; j++) {
+        if (i == position)
+          newData[i * mCols + j] = values(j, 0);
+        else
+          newData[i * mCols + j] = operator()(i - (i > position), j);
+      }
+    }
+
+    mData = newData;
   }
 
   //! Removes a column from the matrix. Removal is done inplace.
@@ -741,14 +781,14 @@ class Matrix {
   //! \return column vector containing the unique values from the matrix
   Matrix unique() const {
     // include all data from the inner vector in a set
-    set<double> s;
-    vector<double> auxVec;
+    set<T> s;
     unsigned long size = mData.size();
 
     for (unsigned i = 0; i < size; ++i)
       s.insert(mData[i]);
 
     // include all the data from the set back into a vector
+    vector<T> auxVec;
     auxVec.assign(s.begin(), s.end());
 
     // return a column matrix with the unique elements
@@ -767,7 +807,7 @@ class Matrix {
   static Matrix sort(Matrix m) {
     // copy the inner vector of the matrix passed as argument
     // and return a new matrix with the sorted inner vector
-    vector<double> data = m.mData;
+    vector<T> data = m.mData;
     std::sort(data.begin(), data.end());
     return Matrix(m.mRows, m.mCols, data);
   }
@@ -781,11 +821,10 @@ class Matrix {
 
     result.addColumn(zeros(result.mRows, 1), 1);
 
-#pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++)
       for (size_t j = 0; j < mCols; j++)
         for (size_t g = 0; g < result.mRows; g++)
-          if (this->operator()(i, j) == result(g, 0)) {
+          if (operator()(i, j) == result(g, 0)) {
             result(g, 1)++;
             break;
           }
@@ -800,24 +839,22 @@ class Matrix {
   //! Columns are sorted by the group numbers in ascending order.
   Matrix mean(Matrix groups) {
     if (mRows != groups.mRows)
-      throw runtime_error("Not enough groups for every element in the matrix");
+      throw invalid_argument("Not enough groups for every element in the matrix");
 
     Matrix groupCount = groups.count();
     Matrix result = zeros(groupCount.mRows, mCols);
 
-#pragma omp parallel for
     for (size_t i = 0; i < mRows; i++) {
       for (size_t g = 0; g < groupCount.mRows; g++) {
         if (groups(i, 0) == groupCount(g, 0)) {
           for (size_t j = 0; j < mCols; j++) {
-            result(g, j) += this->operator()(i, j);
+            result(g, j) += operator()(i, j);
           }
           break;
         }
       }
     }
 
-#pragma omp parallel for collapse(2)
     for (size_t i = 0; i < result.mRows; i++)
       for (size_t j = 0; j < result.mCols; j++)
         result(i, j) /= groupCount(i, 1);
@@ -832,7 +869,7 @@ class Matrix {
 
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(j, 0) += this->operator()(i, j);
+        result(j, 0) += operator()(i, j);
       }
     }
 
@@ -869,7 +906,7 @@ class Matrix {
 
     for (size_t i = 0; i < mCols; i++) {
       for (size_t ii = 0; ii < mRows; ii++)
-        result(i, 0) += pow((this->operator()(ii, i) - means(i, 0)), 2);
+        result(i, 0) += pow((operator()(ii, i) - means(i, 0)), 2);
 
       result(i, 0) /= (mRows - 1);
     }
@@ -882,7 +919,7 @@ class Matrix {
   Matrix stdev() {
     Matrix result = var();
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < mCols; i++)
       result(i, 0) = sqrt(result(i, 0));
 
@@ -894,7 +931,7 @@ class Matrix {
   //! \param cols new number of columns
   void reshape(size_t rows, size_t cols) {
     if (mData.size() != rows * cols)
-      throw runtime_error(
+      throw invalid_argument(
           "Invalid shape (" + to_string(rows) + "x" +
               to_string(cols) + " = " + to_string(rows * cols) +
               ") for a matrix with" + to_string(mData.size()) + " elements");
@@ -908,12 +945,12 @@ class Matrix {
   //! \return column vector containing the values in the given column of the original matrix
   Matrix getColumn(size_t index) {
     if (index >= mCols)
-      throw runtime_error("Column index out of bounds");
+      throw invalid_argument("Column index out of bounds");
 
     Matrix result(mRows, 1);
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < mRows; i++)
-      result(i, 0) = this->operator()(i, index);
+      result(i, 0) = operator()(i, index);
 
     return result;
   }
@@ -923,12 +960,12 @@ class Matrix {
   //! \return column vector containing the values in the given row of the original matrix
   Matrix getRow(size_t index) {
     if (index >= mRows)
-      throw runtime_error("Row index out of bounds");
+      throw invalid_argument("Row index out of bounds");
 
     Matrix result(mCols, 1);
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < mCols; i++)
-      result(i, 0) = this->operator()(index, i);
+      result(i, 0) = operator()(index, i);
 
     return result;
   }
@@ -957,24 +994,9 @@ class Matrix {
   //! \param path path of the CSV file
   //! \return a matrix constructed from the contents of the CSV file
   static Matrix fromCSV(const string &path) {
-    vector<vector<double>> outer;
-    vector<double> innerVector;
+    vector<vector<double>> outer = CSVReader::csvToNumericVecVec(path, true);
 
-    ifstream arquivo(path);
-    if (!arquivo.good())
-      throw runtime_error("File '" + path + "' doesn't exist");
-
-    unsigned long numCols = 0;
-
-    while (!(innerVector = getNextLineAndSplitIntoTokens(arquivo)).empty()) {
-      if (numCols == 0)
-        numCols = innerVector.size();
-      else if (numCols != innerVector.size())
-        throw runtime_error("File has missing values in some columns");
-      outer.push_back(innerVector);
-    }
-
-    Matrix result(outer.size(), numCols);
+    Matrix result(outer.size(), outer[0].size());
 
     for (size_t i = 0; i < result.mRows; i++)
       for (size_t j = 0; j < result.mCols; j++)
@@ -993,9 +1015,9 @@ class Matrix {
 
     Matrix result = zeros(dimension, dimension);
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < dimension; i++) {
-      result(i, i) = mCols > 1 ? this->operator()(0, i) : this->operator()(i, 0);
+      result(i, i) = mCols > 1 ? operator()(0, i) : operator()(i, 0);
     }
     return result;
   }
@@ -1012,12 +1034,30 @@ class Matrix {
   //! by the column mean and dividing it by the standard deviation of the column.
   //! \return a new matrix with the columns standardized as described
   Matrix standardize() {
-    Matrix result = copy(), means = mean(), stds = stdev();
+    return standardize(mean(), stdev());
+  }
 
-#pragma omp parallel for collapse(2)
+  //! Standardizes the columns of the matrix, subtracting each element of a column
+  //! by the <code>mean</code> argument and dividing it by the <code>stds</code> argument.
+  //! \param means a column matrix containing the elements that will subtract each column of the original matrix
+  //! \param stds a column matrix containing the elements that will divide each column of the original matrix
+  //! \return a new matrix with the columns standardized as described
+  Matrix standardize(Matrix means, Matrix stds) {
+    if (!means.isColumn())
+      throw invalid_argument("Argument \"mean\" must have exactly one column");
+    if (!stds.isColumn())
+      throw invalid_argument("Argument \"stds\" must have exactly one column");
+    if (means.mRows != mCols)
+      throw invalid_argument("Number of mean values is different than number of features");
+    if (stds.mRows != mCols)
+      throw invalid_argument("Number of std. dev. values is different than number of features");
+
+    Matrix result(mRows, mCols);
+
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = (this->operator()(i, j) - means(j, 0)) / stds(j, 0);
+        result(i, j) = (operator()(i, j) - means(j, 0)) / stds(j, 0);
       }
     }
 
@@ -1025,12 +1065,12 @@ class Matrix {
   }
 
   Matrix minusMean() {
-    Matrix result = copy(), means = mean();
+    Matrix result(mRows, mCols), means = mean();
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        result(i, j) = this->operator()(i, j) - means(j, 0);
+        result(i, j) = operator()(i, j) - means(j, 0);
       }
     }
 
@@ -1040,7 +1080,7 @@ class Matrix {
   //! Checks if the matrix contains a value
   //! \param value the vaue to look for
   //! \return true if the matrix contains the value, otherwise false
-  bool contains(double value) {
+  bool contains(T value) {
     return std::find(mData.begin(), mData.end(), value) != mData.end();
   }
 
@@ -1055,22 +1095,18 @@ class Matrix {
   //! 1s indicate the indices of the columns/rows that will be returned by the method
   //! \param columns true if the filter will select the columns of the matrix, otherwise, rows will be selected
   //! \return
-  Matrix filter(const Matrix bin, bool columns = false) {
+  Matrix filter(const Matrix<int> bin, bool columns = false) {
     size_t dimension = columns ? mCols : mRows;
 
-    if (bin.mCols != 1)
-      throw runtime_error("Binary filter must have only one column");
-    if (bin.mRows != dimension)
-      throw runtime_error("Binary filter has the wrong number of row entries");
-
-    Matrix uniqueBin = bin.unique();
-    if (uniqueBin.mRows != 2 or !(uniqueBin.contains(1) and uniqueBin.contains(0)))
-      throw runtime_error("Binary filter must be composed of only 0s and 1s");
+    if (bin.nCols() != 1)
+      throw invalid_argument("Binary filter must have only one column");
+    if (bin.nRows() != dimension)
+      throw invalid_argument("Binary filter has the wrong number of row entries");
 
     Matrix result;
 
-    for (size_t i = 0; i < bin.mRows; i++) {
-      if (bin(i, 0) == 1) {
+    for (size_t i = 0; i < bin.nRows(); i++) {
+      if (bin(i, 0)) {
         if (columns)
           result.addColumn(getColumn(i));
         else
@@ -1084,14 +1120,14 @@ class Matrix {
   //! Selects a subset of rows of the matrix
   //! \param bin a column vector containing only 0s and 1s, where indices with
   //! 1s indicate the indices of the columns/rows that will be returned by the method
-  Matrix getRows(const Matrix bin) {
+  Matrix getRows(const Matrix<int> bin) {
     return filter(bin);
   }
 
   //! Selects a subset of columns of the matrix
   //! \param bin a column vector containing only 0s and 1s, where indices with
   //! 1s indicate the indices of the columns/rows that will be returned by the method
-  Matrix getColumns(const Matrix bin) {
+  Matrix getColumns(const Matrix<int> bin) {
     return filter(bin, true);
   }
 
@@ -1109,15 +1145,14 @@ class Matrix {
 
     // Calculate length of the column vector
     for (size_t j = 0; j < mCols; j++) {
-      double length = 0;
-#pragma omp parallel for reduction(+:length)
+      T length = 0;
+      #pragma omp parallel for reduction(+:length)
       for (size_t i = 0; i < mRows; i++) {
         length += pow(result(i, j), 2);
       }
       length = sqrt(length);
 
       // divide each element of the column by its length
-#pragma omp parallel for
       for (size_t i = 0; i < mRows; i++) {
         result(i, j) /= length;
       }
@@ -1154,7 +1189,7 @@ class Matrix {
     while (true) {
       // find the element in the matrix with the largest modulo
       size_t p, q;
-      double largest = 0;
+      T largest = 0;
       for (size_t i = 0; i < A.mRows; i++) {
         for (size_t j = 0; j < A.mCols; j++) {
           // it can't be in the diagonal
@@ -1208,10 +1243,10 @@ class Matrix {
 
     MatDoub unholyConvertion(static_cast<int>(mRows), static_cast<int>(mCols));
 
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < mRows; i++) {
       for (size_t j = 0; j < mCols; j++) {
-        unholyConvertion[i][j] = this->operator()(i, j);
+        unholyConvertion[i][j] = operator()(i, j);
       }
     }
 
@@ -1232,6 +1267,113 @@ class Matrix {
 
     return make_pair(eigenvalues, eigenvectors);
   }
+
+  Matrix WithinClassScatter(Matrix y) {
+    Matrix Sw = zeros(mCols, mCols);
+    Matrix uniqueClasses = y.unique();
+
+    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
+      Matrix classElements = getRows(y == i); // get class elements
+
+      Matrix scatterMatrix = classElements.scatter();
+      Sw += scatterMatrix;
+    }
+
+    return Sw;
+  }
+
+  Matrix BetweenClassScatter(Matrix y) {
+    Matrix innerMean = mean(y); // means for each class
+    Matrix grandMean = mean(); // mean of the entire data set
+    Matrix Sb = zeros(mCols, mCols);
+    Matrix uniqueClasses = y.unique();
+
+    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
+      Matrix classElements = getRows(y == i); // get class elements
+      Matrix meanDiff = innerMean.getRow(i) - grandMean;
+      Sb += classElements.nRows() * meanDiff * meanDiff.transpose();
+    }
+
+    return Sb;
+  }
+
+  T sum() const {
+    T sum_of_elems = 0;
+    for (T n : mData)
+      sum_of_elems += n;
+
+    return sum_of_elems;
+  }
+
+  bool isColumn() const {
+    return mCols == 1;
+  }
+
+  bool isRow() const {
+    return mRows == 1;
+  }
+
+  T min() const {
+    return *std::min_element(std::begin(mData), std::end(mData));
+  }
+
+  T max() const {
+    return *std::max_element(std::begin(mData), std::end(mData));
+  }
+
+  Matrix<T> apply(function<T(T)> f) {
+    Matrix<T> result(mRows, mCols, vector<T>(mRows * mCols, 0));
+    std::transform(mData.begin(), mData.end(), result.mData.begin(), f);
+    return result;
+  }
+
+  Matrix oneHot() {
+    Matrix uniqueValues = unique();
+    Matrix oneHotUnique = identity(uniqueValues.mRows);
+    Matrix result(mRows, oneHotUnique.mCols);
+
+    for (size_t i = 0; i < mRows; i++) {
+      for (size_t ii = 0; ii < uniqueValues.mRows; ++ii) {
+        if (getRow(i) == uniqueValues.getRow(ii)) {
+          result.setRow(i, oneHotUnique.getRow(ii).transpose());
+        }
+      }
+    }
+
+    return result;
+  }
+
+  void setRow(size_t index, Matrix<T> row) {
+    if (mRows < index)
+      throw invalid_argument("Invalid row index, matrix is not that large");
+    if (mCols != row.mCols)
+      throw invalid_argument("Incompatible number of columns");
+    if (row.mRows > 1)
+      throw invalid_argument("Row matrix contains more than one row");
+
+    for (size_t col = 0; col < mCols; col++)
+      operator()(index, col) = row(0, col);
+  }
+
+  void setColumn(size_t index, Matrix<T> column) {
+    if (mCols < index)
+      throw invalid_argument("Invalid row column, matrix is not that large");
+    if (mRows != column.mRows)
+      throw invalid_argument("Incompatible number of rows");
+    if (column.mCols > 1)
+      throw invalid_argument("Column matrix contains more than one column");
+
+    for (size_t row = 0; row < mCols; row++)
+      operator()(row, index) = column(row, 0);
+  }
+
+  bool isBinary() const {
+    Matrix<T> uniqueBin = unique();
+    return uniqueBin.mRows <= 2 && uniqueBin.contains(1) or uniqueBin.contains(0);
+  }
 };
+
+typedef Matrix<double> MatrixD;
+typedef Matrix<int> MatrixI;
 
 #endif //MACHINE_LEARNING_MATRIX_HPP

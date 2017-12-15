@@ -1,6 +1,8 @@
-//
-// Created by dodo on 18/10/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Linear discriminant analysis algorithm
+ * @date   2017-10-18
+ */
 
 #ifndef MACHINE_LEARNING_LDA_HPP
 #define MACHINE_LEARNING_LDA_HPP
@@ -11,44 +13,43 @@
 
 using namespace std;
 
+/**
+ * Linear discriminant analysis algorithm
+ */
 class LDA {
  private:
-  Matrix X, y, eigenvalues, eigenvectors;
+  MatrixD X, y, eigenvalues, eigenvectors, transformedData;
  public:
-  LDA(Matrix data, Matrix classes) : X(std::move(data)), y(std::move(classes)) {
-
+  /**
+   * Linear discriminant analysis algorithm
+   * @param data The matrix whose linear discriminants will be found
+   * @param classes Column vector containing the classes each row element in <code>data</code> belongs to
+   */
+  LDA(MatrixD data, MatrixD classes) : X(std::move(data)), y(std::move(classes)) {
+    if (data.nRows() != classes.nRows())
+      throw invalid_argument("data and classes must have the same number of rows");
+    if (classes.nCols() != 1)
+      throw invalid_argument("classes must me a column vector");
   }
 
   void fit() {
-    Matrix innerMean = X.mean(y); // means for each class
-    Matrix grandMean = X.mean(); // mean of the entire data set
-    Matrix uniqueClasses = y.unique();
-
-    Matrix Sw = Matrix::zeros(X.nCols(), X.nCols()); // within-class scatter matrix
-    Matrix Sb = Matrix::zeros(X.nCols(), X.nCols()); // between-class scatter matrix
-    for (size_t i = 0; i < uniqueClasses.nRows(); i++) {
-      Matrix classElements = X.getRows(y == i); // get class elements
-
-      Matrix scatterMatrix = classElements.scatter();
-      Sw += scatterMatrix;
-
-      Matrix meanDiff = innerMean.getRow(i) - grandMean;
-      Sb += classElements.nRows() * meanDiff * meanDiff.transpose();
-    }
+    MatrixD Sw = X.WithinClassScatter(y);
+    MatrixD Sb = X.BetweenClassScatter(y);
 
     auto eigen = (Sw.inverse() * Sb).eigen();
 
     eigenvalues = eigen.first;
     eigenvectors = eigen.second;
+
+    transformedData = (eigenvectors.transpose() * X.transpose()).transpose();
   }
 
-  Matrix transform() {
-    Matrix finalData = eigenvectors.transpose() * X.transpose();
-    return finalData.transpose();
-  }
-
-  Matrix predict(Matrix data) {
-    return Matrix::fill(data.nRows(), 1, -1);
+  /**
+   * Transforms the data matrix using the eigenvectors found by <code>fit()</code>
+   * @return
+   */
+  MatrixD transform() {
+    return transformedData;
   }
 };
 
