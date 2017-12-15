@@ -244,42 +244,67 @@ class GridWorld {
     return normalizeToOne(policy.getRow(s));
   }
 
-  ActionType actionFromPolicy(size_t state) {
-    MatrixD statePolicy = policyForState(state);
-    double p = MersenneTwister().d_random(1);
+  size_t getNonGoalState() {
+    MersenneTwister t;
+    size_t s;
 
-    for (size_t i = 1; i < actions.size(); i++) {
-      statePolicy(i, 0) += statePolicy(i - 1, 0);
-    }
+    do {
+      s = static_cast<size_t>(t.i_random(static_cast<int>(nStates - 1)));
+    } while (isGoal(s));
 
-    for (size_t i = 0; i < actions.size() - 1; i++) {
-      if (p <= statePolicy(i, 0))
-        return actions[i];
-    }
-
-    return actions[actions.size() - 1];
+    return s;
   }
 
-  void initialize(size_t height, size_t width, vector<pair<size_t, size_t>> goals, double gamma = 1) {
-    if (goals.size() == 0)
-      throw invalid_argument("No goal state, must pass at least one");
+  ActionType eGreedy(size_t s, double epsilon) {
+    MersenneTwister t;
 
-    // value function starts as 0 everywhere
-    value = MatrixD::zeros(height, width);
+    if (t.d_random() <= epsilon) {
+      ActionType bestAction = UP;
+      double bestQ = Q(s, 0);
 
-    // set goal rewards are 0, all other states are -1
-    rewards = MatrixD::fill(height, width, -1);
-    for (auto goal:goals)
-      rewards(goal.first, goal.second) = 0;
+      for (size_t j = 1; j < actions.size(); j++) {
+        if (bestQ < Q(s, j)) {
+          bestQ = Q(s, j);
+          bestAction = actions[j];
+        }
+      }
 
-    if (rewards.unique().sum() == 0)
-      throw invalid_argument("All states are goal!");
+      return bestAction;
 
-    this->goals = goals;
-    this->gamma = gamma;
+    } else {
+      return actions[t.i_random(static_cast<int>(actions.size() - 1))];
+    }
+  }
 
-    // initialize the policy matrix giving equal probability of choice for every action
-    policy = MatrixD::fill(height * width, actions.size(), 1.0 / actions.size());
+  double bestQForState(size_t s) {
+    double bestQ = Q(s, 0);
+
+    for (size_t j = 1; j < actions.size(); j++) {
+      if (bestQ < Q(s, j)) {
+        bestQ = Q(s, j);
+      }
+    }
+    return bestQ;
+  }
+
+  void getOptimalPolicyFromQ() {
+    for (size_t state = 0; state < nStates; state++) {
+      // store best action value for the current state
+      double bestQ = Q(state, 0);
+      for (size_t j = 1; j < actions.size(); j++) {
+        if (bestQ < Q(state, j))
+          bestQ = Q(state, j);
+      }
+
+      // actions with best action value receive equal probability of being chosen,
+      // all others have prob 0
+      for (size_t j = 0; j < actions.size(); j++) {
+        if (Q(state, j) == bestQ)
+          policy(state, j) = 1;
+      }
+
+      policy.setRow(state, normalizeToOne(policy.getRow(state).transpose()));
+    }
   }
 
  public:
@@ -398,14 +423,11 @@ class GridWorld {
       vector<ActionType> appliedActions;
 
       // select a random initial state
-      // TODO this may run infinitely...
-      do {
-        state = static_cast<size_t>(twister.i_random(static_cast<int>(nStates - 1)));
-      } while (isGoal(state));
+      state = getNonGoalState();
 
       // loop that generates the current episode
       do {
-        // select action according to current policy
+        // select random action
         action = actions[twister.i_random(static_cast<int>(actions.size() - 1))];
 
         // store the current state and action
@@ -454,26 +476,16 @@ class GridWorld {
           // build Q matrix from sums and n. visits
           for (size_t j = 0; j < actions.size(); j++) {
             Q(state, j) = isGoal(state) ? 0 : QSum(state, j) / visits(state, j);
-
-            Q(state, j) = ceil(Q(state, j) * 100) / 100;
           }
-
-          // store best action value for the current state
-          double bestQ = Q(state, 0);
-          for (size_t j = 1; j < actions.size(); j++) {
-            if (bestQ < Q(state, j))
-              bestQ = Q(state, j);
-          }
-
-          // actions with best action value receive equal probability of being chosen,
-          // all others have prob 0
-          for (size_t j = 0; j < actions.size(); j++) {
-            if (Q(state, j) == bestQ)
-              policy(state, j) = 1;
-          }
-
-          policy.setRow(state, normalizeToOne(policy.getRow(state).transpose()));
         }
+
+        getOptimalPolicyFromQ();
+
+        cout << prettifyPolicy() << endl;
+      }
+    }
+  }
+
 
         cout << prettifyPolicy() << endl;
       }
