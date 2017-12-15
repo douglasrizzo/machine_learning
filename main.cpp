@@ -695,7 +695,9 @@ void testDynamicProgramming() {
   GridWorld d;
 //  d.policyIteration(6, 6, goals);
 //  d.valueIteration(6, 6, goals);
-  d.MonteCarloEstimatingStarts(6, 6, goals);
+//  d.MonteCarloEstimatingStarts(6, 6, goals);
+  d.Sarsa(6, 6, goals);
+  d.QLearning(6, 6, goals);
 }
 
 int main() {

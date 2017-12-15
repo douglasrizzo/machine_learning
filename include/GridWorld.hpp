@@ -486,17 +486,71 @@ class GridWorld {
     }
   }
 
+  void Sarsa(size_t height, size_t width,
+             vector<pair<size_t, size_t>> goals,
+             double gamma = 1,
+             double alpha = .3,
+             double epsilon = .8,
+             unsigned int maxIters = 1000000) {
+    initialize(height, width, goals, gamma);
+    Timer timer(1, maxIters);
+    timer.start();
 
-        cout << prettifyPolicy() << endl;
+    for (unsigned int iter = 0; iter < maxIters; iter++) {
+      size_t s = getNonGoalState();
+      ActionType a = eGreedy(s, epsilon);
+
+      while (!isGoal(s)) {
+        pair<size_t, size_t> stateCoords = toCoord(s);
+        double r = rewards(stateCoords.first, stateCoords.second);
+        size_t newState = applyAction(s, a);
+        ActionType newAction = eGreedy(newState, epsilon);
+        Q(s, a) += alpha * (r + gamma * Q(newState, newAction) - Q(s, a));
+        s = newState;
+        a = newAction;
+      }
+      if (timer.activate(iter)) {
+        getOptimalPolicyFromQ();
+        cout << prettifyPolicy();
       }
     }
+
+    getOptimalPolicyFromQ();
+    cout << prettifyPolicy();
   }
 
   void QLearning(size_t height, size_t width,
                  vector<pair<size_t, size_t>> goals,
                  double gamma = 1,
-                 unsigned maxIters = 1000000) {
+                 double alpha = .3,
+                 double epsilon = .8,
+                 unsigned int maxIters = 10000) {
+    initialize(height, width, goals, gamma);
+    Timer timer(1, maxIters);
+    timer.start();
 
+    for (unsigned int iter = 0; iter < maxIters; iter++) {
+      size_t s = getNonGoalState();
+
+      while (!isGoal(s)) {
+        pair<size_t, size_t> stateCoords = toCoord(s);
+
+        ActionType a = eGreedy(s, epsilon);
+        double r = rewards(stateCoords.first, stateCoords.second);
+
+        size_t newState = applyAction(s, a);
+
+        Q(s, a) += alpha * (r + gamma * bestQForState(newState) - Q(s, a));
+        s = newState;
+      }
+      if (timer.activate(iter)) {
+        getOptimalPolicyFromQ();
+        cout << prettifyPolicy();
+      }
+    }
+
+    getOptimalPolicyFromQ();
+    cout << prettifyPolicy();
   }
 };
 
