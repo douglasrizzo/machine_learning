@@ -110,7 +110,7 @@ class GridWorld {
     double bestQ = actionValues[0];
 
     for (size_t i = 1; i < actionValues.size(); i++) {
-      // store best weighted action value
+      // store best action value
       if (actionValues[i] > bestQ)
         bestQ = actionValues[i];
     }
@@ -264,9 +264,12 @@ class GridWorld {
       double bestQ = Q(s, 0);
 
       for (size_t j = 1; j < actions.size(); j++) {
-        if (bestQ < Q(s, j)) {
+        if (bestQ <= Q(s, j)) {
+          if (bestQ == Q(s, j))
+            bestAction = t.d_random(1) <= .5 ? actions[j] : bestAction;
+          else
+            bestAction = actions[j];
           bestQ = Q(s, j);
-          bestAction = actions[j];
         }
       }
 
