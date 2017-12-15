@@ -16,6 +16,7 @@
 
 using namespace std;
 using myClock = chrono::high_resolution_clock;
+
 string datasetDir = "/home/dodo/Documents/FEI/Matérias/PEL 208 - Tópicos Especiais em Aprendizagem/trabalhos/datasets/";
 
 std::vector<double> getNextLineAndSplitIntoTokens(std::istream &str) {
@@ -692,12 +693,30 @@ void testDynamicProgramming() {
   vector<pair<size_t, size_t>> goals(2);
   goals[0].first = goals[0].second = 0;
   goals[1].first = goals[1].second = 5;
+  size_t gridSize = 6;
   GridWorld d;
-//  d.policyIteration(6, 6, goals);
-//  d.valueIteration(6, 6, goals);
-//  d.MonteCarloEstimatingStarts(6, 6, goals);
-  d.Sarsa(6, 6, goals);
-  d.QLearning(6, 6, goals);
+  Timer timer;
+  double gamma = 1, theta = .000001, alpha = .3, epsilon = .8;
+  unsigned int maxIters = 10000;
+  bool verbose = false;
+
+  for (int i = 0; i < 32; ++i) {
+    timer.start();
+    d.policyIteration(gridSize, gridSize, goals, gamma, theta, i == 0);
+    cout << "policy:\t" << timer.runningTime() << endl;
+    timer.start();
+    d.valueIteration(gridSize, gridSize, goals, gamma, theta, i == 0);
+    cout << "value:\t" << timer.runningTime() << endl;
+    timer.start();
+    d.MonteCarloEstimatingStarts(gridSize, gridSize, goals, gamma, maxIters, i == 0);
+    cout << "mc:\t" << timer.runningTime() << endl;
+    timer.start();
+    d.Sarsa(gridSize, gridSize, goals, gamma, alpha, epsilon, maxIters, i == 0);
+    cout << "sarsa:\t" << timer.runningTime() << endl;
+    timer.start();
+    d.QLearning(gridSize, gridSize, goals, gamma, alpha, epsilon, maxIters, i == 0);
+    cout << "ql:\t" << timer.runningTime() << endl;
+  }
 }
 
 int main() {
