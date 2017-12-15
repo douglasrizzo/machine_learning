@@ -321,16 +321,14 @@ class GridWorld {
     bool stablePolicy;
     int iter = 0;
     MatrixD currentPolicy;
+
+    Timer timer;
+    timer.start();
     do {
       currentPolicy = policy;
       iter++;
       // step 2: policy evaluation
       iterativePolicyEvaluation(threshold, verbose);
-
-      // round values to avoid precision error
-//      for (size_t i = 0; i < value.nRows(); ++i)
-//        for (size_t j = 0; j < value.nCols(); ++j)
-//          value(i, j) = floor(value(i, j) * 10000) / 10000;
 
 
       // step 3: policy improvement
@@ -354,6 +352,7 @@ class GridWorld {
       }
       if (verbose) cout << "iteration " << iter << " of policy improvement" << endl << prettifyPolicy() << endl;
     } while (currentPolicy != policy);
+    cout << timer.runningTime();
   }
 
   void valueIteration(size_t height,
@@ -365,6 +364,8 @@ class GridWorld {
     initialize(height, width, goals, gamma);
     double delta;
     int iter = 0;
+    Timer timer;
+    timer.start();
     do {
       iter++;
       delta = 0;
@@ -398,6 +399,7 @@ class GridWorld {
       }
       if (verbose) cout << "iteration " << iter << endl << V << prettifyPolicy() << endl;
     } while (delta >= threshold);
+    cout << timer.runningTime();
   }
 
   void MonteCarloEstimatingStarts(size_t height,

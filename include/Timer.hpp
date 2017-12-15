@@ -19,7 +19,7 @@ class Timer {
   chrono::time_point<chrono::system_clock> startTime;
 
  public:
-  Timer(unsigned int interval, unsigned int predictedIters = 0) :
+  Timer(unsigned int interval=0, unsigned int predictedIters = 0) :
       interval(interval),
       predictedIters(predictedIters) {
   }
