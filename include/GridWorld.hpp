@@ -367,7 +367,8 @@ class GridWorld {
   /**
    * Updates the policy matrix according to the action values from the Q matrix.
    */
-  void getOptimalPolicyFromQ() {
+  MatrixD getOptimalPolicyFromQ() {
+    MatrixD newPolicy = MatrixD::zeros(nStates, actions.size());
     for (size_t state = 0; state < nStates; state++) {
       // store best action value for the current state
       double bestQ = Q(state, 0);
@@ -380,11 +381,12 @@ class GridWorld {
       // all others have prob 0
       for (size_t j = 0; j < actions.size(); j++) {
         if (Q(state, j) == bestQ)
-          policy(state, j) = 1;
+          newPolicy(state, j) = 1;
       }
 
-      policy.setRow(state, normalizeToOne(policy.getRow(state).transpose()));
+      newPolicy.setRow(state, normalizeToOne(newPolicy.getRow(state).transpose()));
     }
+    return newPolicy;
   }
 
  public:
@@ -575,19 +577,18 @@ class GridWorld {
         QSum(state, action) += G;
         visits(state, action)++;
       }
-
-      if (iter == maxIters - 1 or (verbose and timer.activate(iter))) {
-        for (state = 0; state < nStates; state++) {
-          // build Q matrix from sums and n. visits
-          for (size_t j = 0; j < actions.size(); j++) {
-            Q(state, j) = isGoal(state) ? 0 : QSum(state, j) / visits(state, j);
-          }
+      for (state = 0; state < nStates; state++) {
+        // build Q matrix from sums and n. visits
+        for (size_t j = 0; j < actions.size(); j++) {
+          Q(state, j) = isGoal(state) ? 0 : QSum(state, j) / visits(state, j);
         }
+      }
 
-        getOptimalPolicyFromQ();
-
+      MatrixD newPolicy = getOptimalPolicyFromQ();
+      if (newPolicy != policy) {
+        policy = newPolicy;
         if (verbose)
-          cout << prettifyPolicy() << endl;
+          cout << iter << endl << prettifyPolicy() << endl;
       }
     }
   }
@@ -628,10 +629,11 @@ class GridWorld {
         a = newAction;
       }
 
-      if (iter == maxIters - 1 or (verbose and timer.activate(iter))) {
-        getOptimalPolicyFromQ();
+      MatrixD newPolicy = getOptimalPolicyFromQ();
+      if (newPolicy != policy) {
+        policy = newPolicy;
         if (verbose)
-          cout << prettifyPolicy();
+          cout << iter << endl << prettifyPolicy() << endl;
       }
     }
   }
@@ -671,10 +673,12 @@ class GridWorld {
         s = newState;
       }
 
-      if (iter == maxIters - 1 or (verbose and timer.activate(iter))) {
-        getOptimalPolicyFromQ();
+      MatrixD newPolicy = getOptimalPolicyFromQ();
+
+      if (newPolicy != policy) {
+        policy = newPolicy;
         if (verbose)
-          cout << prettifyPolicy();
+          cout << iter << endl << prettifyPolicy() << endl;
       }
     }
   }
