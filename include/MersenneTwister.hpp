@@ -74,10 +74,25 @@ class MersenneTwister {
     return i_random(0, max);
   }
 
+  /**
+   * Generates a list of random values
+   * @param maxValue the maximum value to be generated, inclusive
+   * @param numValues number of values to be generated
+   * @param replacement whether to generate values with replacement or not
+   * @return
+   */
   vector<int> randomValues(int maxValue, unsigned int numValues, bool replacement = true) {
     return randomValues(0, maxValue, numValues, replacement);
   }
 
+  /**
+   * Generates a list of random values
+   * @param minValue the minimum value to be generated, inclusive
+   * @param maxValue the maximum value to be generated, inclusive
+   * @param numValues number of values to be generated
+   * @param replacement whether to generate values with replacement or not
+   * @return
+   */
   vector<int> randomValues(int minValue, int maxValue, unsigned int numValues, bool replacement = true) {
     vector<int> myvector(maxValue - minValue);
     if (replacement)
@@ -92,16 +107,30 @@ class MersenneTwister {
     return myvector;
   }
 
+  /**
+   * @return a random number from a normal distribution with mean = 0 and stdev = 1
+   */
   double n_random() {
     normalDist = normal_distribution<double>(0, 1);
     return normalDist(myMersenne);
   }
 
+  /**
+   * Generates a random number from a normal distribution
+   * @param mean mean of the normal distribution
+   * @param stddev stddev of the normal distribution
+   * @return a random number from a normal distribution with the given parameters
+   */
   double n_random(double mean, double stddev) {
     normalDist = normal_distribution<double>(mean, stddev);
     return normalDist(myMersenne);
   }
 
+  /**
+   * Generates a list of numbers from a normal distribution
+   * @param n number of elements to be generated
+   * @return a vector containing <code>n</code> elements from the normal distribution
+   */
   vector<double> vecFromNormal(size_t n) {
     vector<double> myvector(n);
     for (double &i : myvector)
@@ -110,6 +139,13 @@ class MersenneTwister {
     return myvector;
   }
 
+  /**
+   * Generates a list of numbers from a normal distribution
+   * @param n number of elements to be generated
+   * @param mean mean of the normal distribution
+   * @param stddev stddev of the normal distribution
+   * @return a vector containing <code>n</code> elements from the normal distribution
+   */
   vector<double> vecFromNormal(size_t n, double mean, double stddev) {
     normalDist = normal_distribution<double>(mean, stddev);
     vector<double> myvector(n);
@@ -119,6 +155,12 @@ class MersenneTwister {
     return myvector;
   }
 
+
+  /**
+   * Generates a list of numbers from a uniform distribution between 0 and 1, inclusive
+   * @param n number of elements to be generated
+   * @return a vector containing <code>n</code> elements from the uniform distribution
+   */
   vector<double> vecFromUniform(size_t n) {
     vector<double> myvector(n);
     for (double &i : myvector)
@@ -127,6 +169,14 @@ class MersenneTwister {
     return myvector;
   }
 
+
+  /**
+   * Generates a list of numbers from a uniform distribution
+   * @param n number of elements to be generated
+   * @param min minimum value to be generated, inclusive
+   * @param max maximum value to be generated, inclusive
+   * @return a vector containing <code>n</code> elements from the uniform distribution
+   */
   vector<double> vecFromUniform(size_t n, double min, double max) {
     uniformDoubleDist = uniform_real_distribution<double>(min, max);
     vector<double> myvector(n);
@@ -134,11 +184,6 @@ class MersenneTwister {
       i = uniformDoubleDist(myMersenne);
 
     return myvector;
-  }
-  unsigned int uint_random(unsigned int max) {
-    uniform_int_distribution<unsigned int> uniformUIntDist;
-    uniformUIntDist = uniform_int_distribution<unsigned int>(0, max);
-    return uniformUIntDist(myMersenne);
   }
 };
 

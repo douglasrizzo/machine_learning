@@ -697,16 +697,15 @@ void testDynamicProgramming() {
   GridWorld d;
   Timer timer;
   double gamma = 1, theta = .000001, alpha = .3, epsilon = .8;
-  unsigned int maxIters = 10000;
-  bool verbose = false;
+  unsigned int maxIters = 100000;
 
   for (int i = 0; i < 32; ++i) {
-    timer.start();
-    d.policyIteration(gridSize, gridSize, goals, gamma, theta, i == 0);
-    cout << "policy:\t" << timer.runningTime() << endl;
-    timer.start();
-    d.valueIteration(gridSize, gridSize, goals, gamma, theta, i == 0);
-    cout << "value:\t" << timer.runningTime() << endl;
+//    timer.start();
+//    d.policyIteration(gridSize, gridSize, goals, gamma, theta, i == 0);
+//    cout << "policy:\t" << timer.runningTime() << endl;
+//    timer.start();
+//    d.valueIteration(gridSize, gridSize, goals, gamma, theta, i == 0);
+//    cout << "value:\t" << timer.runningTime() << endl;
     timer.start();
     d.MonteCarloEstimatingStarts(gridSize, gridSize, goals, gamma, maxIters, i == 0);
     cout << "mc:\t" << timer.runningTime() << endl;

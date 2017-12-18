@@ -1,6 +1,8 @@
-//
-// Created by dodo on 03/12/17.
-//
+/**
+ * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
+ * @brief  Helper class to read the contents of CSV files
+ * @date   2017-12-03
+ */
 
 #ifndef MACHINE_LEARNING_CSVREADER_HPP
 #define MACHINE_LEARNING_CSVREADER_HPP
@@ -14,6 +16,9 @@
 
 using namespace std;
 
+/**
+ * Helper class to read the contents of CSV files
+ */
 class CSVReader {
  public:
   //! Helper function that separates lines in a CSV file into tokens
@@ -53,6 +58,12 @@ class CSVReader {
     return result;
   }
 
+  /**
+   * Transforms a CSV file into a vector of vectors of strings, each vector representing a line in the original file
+   * @param path path to the CSV file
+   * @param checkRowLength whether to check if all lines have the same length
+   * @return a vector of vectors of strings, each vector representing a line in the original file
+   */
   static vector<vector<string>> csvToStringVecVec(string path, bool checkRowLength = false) {
     vector<vector<string>> outer;
     vector<string> innerVector;
@@ -74,6 +85,13 @@ class CSVReader {
     return outer;
   }
 
+
+  /**
+   * Transforms a CSV file into a vector of vectors of double, each vector representing a line in the original file
+   * @param path path to the CSV file
+   * @param checkRowLength whether to check if all lines have the same length
+   * @return a vector of vectors of double, each vector representing a line in the original file
+   */
   static vector<vector<double>> csvToNumericVecVec(const string &path, bool checkRowLength = false) {
     vector<vector<double>> outer;
     vector<double> innerVector;

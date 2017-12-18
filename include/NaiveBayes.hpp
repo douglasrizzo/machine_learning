@@ -13,12 +13,21 @@
 
 using namespace std;
 
+/**
+ * Naive Bayes classifier
+ */
 class NaiveBayes {
  private:
   MatrixI lookupTable, yFrequency;
   vector<string> lookupColumns, lookupRows;
  public:
 
+  /**
+   * Naive Bayes classifier
+   * @param csvPath path to a CSV file containing the data.
+   * The first row in the file must contain the names of the features
+   * @param verbose whether to output the generated lookup tables
+   */
   explicit NaiveBayes(const string &csvPath, bool verbose = true) {
     lookupColumns = vector<string>(), lookupRows = vector<string>();
 
@@ -71,6 +80,13 @@ class NaiveBayes {
     }
   }
 
+  /**
+   * Predict the classes of new data
+   * @param data a vector of vectors of strings, each vector representing an element to be classified
+   * @param verbose whether to output the class assignment probabilities for each element
+   * @return a vector containing the classes of the elements in <code>data</code>
+   * @see CSVReader, a class that helps in the creation of vectors of vectors of strings from CSV files
+   */
   vector<string> predict(vector<vector<string>> data, bool verbose = true) {
     vector<string> csvHeader = data[0];
     data.erase(data.begin());

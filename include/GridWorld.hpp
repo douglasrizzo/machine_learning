@@ -1,6 +1,6 @@
 /**
  * @author Douglas De Rizzo Meneghetti (douglasrizzom@gmail.com)
- * @brief  Class to solve the grid world toy problem using dynamic programming
+ * @brief  Class to solve the grid world toy problem as a Markov decision process
  * @date   2017-12-04
  */
 
@@ -12,6 +12,9 @@
 #include "MersenneTwister.hpp"
 #include "Timer.hpp"
 
+/**
+ * Implementation of the grid world as a Markov decision process
+ */
 class GridWorld {
  private:
   MatrixD V, Q, rewards, policy;
@@ -69,6 +72,12 @@ class GridWorld {
     return {row, col};
   }
 
+  /**
+   * Gets the q value of action <code>a</code> on state <code>s</code>
+   * @param s a state
+   * @param a an action
+   * @return action value of <code>a</code> in <code>s</code>
+   */
   double actionValue(size_t s, ActionType a) {
     double q = 0;
 
@@ -89,10 +98,20 @@ class GridWorld {
     return q;
   }
 
+  /**
+   * Normalizes a matriz so its sum equals 1
+   * @param m a matrix
+   * @return a matrix, the same dimensions as m, with all elements normalized so their sum equals 1
+   */
   Matrix<double> normalizeToOne(MatrixD m) {
     return m / m.sum();
   }
 
+  /**
+   * Gets the q values of all actions for a given state
+   * @param s a state
+   * @return a vector containing the action values in <code>s</code>
+   */
   vector<double> actionValuesForState(size_t s) {
     vector<double> result(actions.size());
 
@@ -102,6 +121,12 @@ class GridWorld {
     return result;
   }
 
+  /**
+   * Creates a new policy for a given state giving preference to the actions with maximum value.
+   * This method uses the current values of the value matrix <code>V</code> to generate the new policy.
+   * @param s a state
+   * @return a matrix in which each element represents the probability of selecting the given action, given the action value
+   */
   Matrix<double> policyIncrement(size_t s) {
     MatrixD result = MatrixD::zeros(actions.size(), 1);
 
@@ -125,6 +150,9 @@ class GridWorld {
     return normalizeToOne(result);
   }
 
+  /**
+   * @return a string with the policy represented as arrow characters
+   */
   string prettifyPolicy() {
     string s = "";
     for (size_t i = 0; i < V.nRows(); i++) {
@@ -175,6 +203,11 @@ class GridWorld {
     return s;
   }
 
+  /**
+   * Iterative policy evaluation implemented as decribed in Sutton and Barto, 2017.
+   * @param threshold hat decides whether convergence has been reached
+   * @param verbose if true, prints to stdout the number of evaluation iterations
+   */
   void iterativePolicyEvaluation(double threshold, bool verbose) {
     double delta;
     int iter = 0;
@@ -203,11 +236,24 @@ class GridWorld {
       cout << iter << " iterations of policy evaluation" << endl;
   }
 
+  /**
+   * Informs whether a state is a goal state in the grid world
+   * @param s a state
+   * @return true if <code>s</code> is a goal, otherwise false
+   */
   bool isGoal(size_t s) {
     pair<size_t, size_t> stateCoords = toCoord(s);
     return std::find(goals.begin(), goals.end(), stateCoords) != goals.end();
   }
 
+  /**
+   * Returns the transition probability to <code>nextState</code>,
+   * given <code>currentState </code>and <code>action</code>
+   * @param currentState the current state
+   * @param action an action to be applied in currentState
+   * @param nextState the possible next state
+   * @return probability that applying <code>action</code> in <code>currentState</code> leads to <code>nextState</code>
+   */
   double transition(size_t currentState, ActionType action, size_t nextState) {
     // the agent never leaves the goal
     if (isGoal(currentState))
@@ -218,6 +264,12 @@ class GridWorld {
     return resultingState == nextState;
   }
 
+  /**
+   * Returns the next state that results from applying an action to a state.
+   * @param currentState a state
+   * @param action an action
+   * @return future state resulting from applying action to currentState
+   */
   size_t applyAction(size_t currentState, ActionType action) {
     pair<size_t, size_t> s1 = toCoord(currentState);
     size_t s1row = s1.first, s1col = s1.second, s2row, s2col;
@@ -241,10 +293,19 @@ class GridWorld {
     return fromCoord(s2row, s2col);
   }
 
+  /**
+   * Gets the policy for state <code>s</code>
+   * @param s a state
+   * @return a matrix containing the policy for <code>s</code>
+   */
   MatrixD policyForState(size_t s) {
     return normalizeToOne(policy.getRow(s));
   }
 
+  /**
+   * Selects a random non-goal state
+   * @return a random non-goal state
+   */
   size_t getNonGoalState() {
     MersenneTwister t;
     size_t s;
@@ -256,6 +317,13 @@ class GridWorld {
     return s;
   }
 
+  /**
+   * Selects an action for a state <code>s</code> following an e-greedy policy.
+   * Action values are taken from the Q matrix.
+   * @param s a state
+   * @param epsilon e-greedy parameter
+   * @return an action
+   */
   ActionType eGreedy(size_t s, double epsilon) {
     MersenneTwister t;
 
@@ -280,6 +348,11 @@ class GridWorld {
     }
   }
 
+  /**
+   * Gets the best action value for state <code>s</code>. Action values are taken from the Q matrix.
+   * @param s a state
+   * @return best action value for <code>s</code>
+   */
   double bestQForState(size_t s) {
     double bestQ = Q(s, 0);
 
@@ -291,6 +364,9 @@ class GridWorld {
     return bestQ;
   }
 
+  /**
+   * Updates the policy matrix according to the action values from the Q matrix.
+   */
   void getOptimalPolicyFromQ() {
     for (size_t state = 0; state < nStates; state++) {
       // store best action value for the current state
@@ -313,6 +389,15 @@ class GridWorld {
 
  public:
 
+  /**
+   * Policy iteration method. This method evaluates <code>policy</code> using iterative policy evaluation, updating the value matrix <code>V</code>, and updates <code>policy</code> with the new value for <code>V</code>.
+   * @param height height of the grid world to be generated
+   * @param width width of the grid world to be generated
+   * @param goals vector containing the coordinates of goal states
+   * @param gamma discount factor
+   * @param threshold threshold that will dictate the convergence of the method
+   * @param verbose if true, prints to stdout number of iterations
+   */
   void policyIteration(size_t height,
                        size_t width,
                        vector<pair<size_t, size_t>> goals,
@@ -356,6 +441,15 @@ class GridWorld {
     } while (currentPolicy != policy);
   }
 
+  /**
+   * Value iteration method. This method alternates between one step of evaluation of <code>policy</code>, updating the value matrix <code>V</code>, and one step of <code>policy</code> update, using the new value for <code>V</code>.
+   * @param height height of the grid world to be generated
+   * @param width width of the grid world to be generated
+   * @param goals vector containing the coordinates of goal states
+   * @param gamma discount factor
+   * @param threshold threshold that will dictate the convergence of the method
+   * @param verbose if true, prints to stdout number of iterations
+   */
   void valueIteration(size_t height,
                       size_t width,
                       vector<pair<size_t, size_t>> goals,
@@ -401,6 +495,15 @@ class GridWorld {
     } while (delta >= threshold);
   }
 
+  /**
+   * Monte Carlo Estimating Starts algorithm for finding an optimal policy.
+   * @param height height of the grid world to be generated
+   * @param width width of the grid world to be generated
+   * @param goals vector containing the coordinates of goal states
+   * @param gamma discount factor
+   * @param maxIters maximum number of iterations
+   * @param verbose if true, prints to stdout the current policy each second
+   */
   void MonteCarloEstimatingStarts(size_t height,
                                   size_t width,
                                   vector<pair<size_t, size_t>> goals,
@@ -489,6 +592,17 @@ class GridWorld {
     }
   }
 
+  /**
+   * Temporal difference method for finding the optimal policy using SARSA.
+   * @param height height of the grid world to be generated
+   * @param width width of the grid world to be generated
+   * @param goals vector containing the coordinates of goal states
+   * @param gamma discount factor
+   * @param gamma learning rate
+   * @param gamma e-greedy parameter
+   * @param maxIters maximum number of iterations
+   * @param verbose if true, prints to stdout the current policy each second
+   */
   void Sarsa(size_t height, size_t width,
              vector<pair<size_t, size_t>> goals,
              double gamma = 1,
@@ -522,6 +636,15 @@ class GridWorld {
     }
   }
 
+  /**
+   * Temporal difference method for finding the optimal policy using Q-Learning.
+   * @param height height of the grid world to be generated
+   * @param width width of the grid world to be generated
+   * @param goals vector containing the coordinates of goal states
+   * @param gamma discount factor
+   * @param gamma learning rate
+   * @param gamma e-greedy parameter
+   */
   void QLearning(size_t height, size_t width,
                  vector<pair<size_t, size_t>> goals,
                  double gamma = 1,
@@ -554,6 +677,31 @@ class GridWorld {
           cout << prettifyPolicy();
       }
     }
+  }
+
+  const MatrixD &getV() const {
+    return V;
+  }
+  const MatrixD &getQ() const {
+    return Q;
+  }
+  const MatrixD &getRewards() const {
+    return rewards;
+  }
+  const MatrixD &getPolicy() const {
+    return policy;
+  }
+  double getGamma() const {
+    return gamma;
+  }
+  unsigned long getNStates() const {
+    return nStates;
+  }
+  const vector<pair<size_t, size_t>> &getGoals() const {
+    return goals;
+  }
+  const vector<ActionType> &getActions() const {
+    return actions;
   }
 };
 
