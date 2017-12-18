@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['eigenvalues',['eigenvalues',['../classLDA.html#a44e747d207352d7060d02828c5ee34f9',1,'LDA::eigenvalues()'],['../classPCA.html#a72bf0d7c762d3aac020ee866157eff0a',1,'PCA::eigenvalues()']]],
-  ['eigenvectors',['eigenvectors',['../classLDA.html#ad4873d1df7d89608cd670cddbed662a4',1,'LDA::eigenvectors()'],['../classPCA.html#acd23ea52beb31525d98f45aed8df0e76',1,'PCA::eigenvectors()']]]
+  ['data',['data',['../classKNN.html#a540138bc8fb118cb288246b6619a6675',1,'KNN::data()'],['../classMLP.html#ae9254a23104d7b3d2ab8c86c69b741b9',1,'MLP::data()']]],
+  ['datadev',['dataDev',['../classMLP.html#a82b9d97c5c367ca5716da250303f08d0',1,'MLP']]],
+  ['datamean',['dataMean',['../classMLP.html#a77e1a0c3e2c1e68f14d40022892c705b',1,'MLP']]],
+  ['distance',['distance',['../classKMeans.html#a184bdb084bac1bfae7dfb331fa73af85',1,'KMeans::distance()'],['../classKNN.html#aeb639afe57c9c7bda2f997e759d608a9',1,'KNN::distance()']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['regressiontype',['RegressionType',['../classLeastSquares.html#a6c419c316a43e0fca5d95d84c4d915c5',1,'LeastSquares']]]
+  ['initializationmethod',['InitializationMethod',['../classKMeans.html#a02599c3e9aaae6c029018003e1979706',1,'KMeans']]]
 ];

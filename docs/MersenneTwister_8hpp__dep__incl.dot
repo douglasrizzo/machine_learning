@@ -5,5 +5,9 @@ digraph "include/MersenneTwister.hpp"
   node [fontname="Helvetica",fontsize="10",shape=record];
   Node4 [label="include/MersenneTwister.hpp",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
   Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node5 [label="include/KMeans.hpp",height=0.2,width=0.4,color="black",URL="$KMeans_8hpp.html"];
+  Node5 [label="include/GridWorld.hpp",height=0.2,width=0.4,color="black",URL="$GridWorld_8hpp.html"];
+  Node4 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="include/KMeans.hpp",height=0.2,width=0.4,color="black",URL="$KMeans_8hpp.html"];
+  Node4 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="include/MLP.hpp",height=0.2,width=0.4,color="black",URL="$MLP_8hpp.html"];
 }

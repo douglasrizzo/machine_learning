@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['wri',['wri',['../structUnsymmeig.html#a387c8e4dfc5cf161da974ad985ff5115',1,'Unsymmeig']]]
+  ['sse',['sse',['../classKMeans.html#a190f4ddf361f7fbf58d48bd0b09a48f7',1,'KMeans']]],
+  ['starttime',['startTime',['../classTimer.html#a33b5a088131c659ce46e564e39349de2',1,'Timer']]]
 ];

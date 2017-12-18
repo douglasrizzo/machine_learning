@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['pca_2ehpp',['PCA.hpp',['../PCA_8hpp.html',1,'']]]
+  ['lda_2ehpp',['LDA.hpp',['../LDA_8hpp.html',1,'']]],
+  ['leastsquares_2ehpp',['LeastSquares.hpp',['../LeastSquares_8hpp.html',1,'']]]
 ];

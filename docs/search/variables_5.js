@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['mcols',['mCols',['../classMatrix.html#aed557841906d514c05c623f38a18756a',1,'Matrix']]],
-  ['mdata',['mData',['../classMatrix.html#aa081e780724326ff975292a1072a25f8',1,'Matrix']]],
-  ['mrows',['mRows',['../classMatrix.html#a01fd2ecdf26fb69e4e841ae47e69fc47',1,'Matrix']]],
-  ['mymersenne',['myMersenne',['../classMersenneTwister.html#a3c350c881dd86ecdb7fa2c99d4efe6f5',1,'MersenneTwister']]]
+  ['initmethod',['initMethod',['../classKMeans.html#a2390430fd7095dd3534518a8e3fbe379',1,'KMeans']]],
+  ['interval',['interval',['../classTimer.html#aaf9bce1286b714658a0f4484d8fee960',1,'Timer']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unsymmeig',['Unsymmeig',['../structUnsymmeig.html',1,'']]]
+  ['naivebayes',['NaiveBayes',['../classNaiveBayes.html',1,'']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['kmeans_2ehpp',['KMeans.hpp',['../KMeans_8hpp.html',1,'']]],
-  ['knn_2ehpp',['KNN.hpp',['../KNN_8hpp.html',1,'']]]
+  ['classifierutils_2ehpp',['ClassifierUtils.hpp',['../ClassifierUtils_8hpp.html',1,'']]],
+  ['csvreader_2ehpp',['CSVReader.hpp',['../CSVReader_8hpp.html',1,'']]]
 ];

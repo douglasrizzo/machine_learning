@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['kmeans',['KMeans',['../classKMeans.html',1,'']]],
-  ['knn',['KNN',['../classKNN.html',1,'']]]
+  ['classifierutils',['ClassifierUtils',['../classClassifierUtils.html',1,'']]],
+  ['csvreader',['CSVReader',['../classCSVReader.html',1,'']]]
 ];

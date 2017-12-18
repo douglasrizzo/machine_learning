@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['k',['k',['../classKMeans.html#a96df4cf39b137caf08c2b9d4dd90d6d4',1,'KMeans::k()'],['../classKNN.html#ad0dc51d3f9134f5e2e85ad18d0f2ff4d',1,'KNN::k()']]]
+  ['gamma',['gamma',['../classGridWorld.html#a760cb11aaa0bc2215e764dde6f70096b',1,'GridWorld']]],
+  ['goals',['goals',['../classGridWorld.html#a856e92ea1eff52a8e80978e7a03ffb0b',1,'GridWorld']]]
 ];

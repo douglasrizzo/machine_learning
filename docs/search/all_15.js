@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['x',['X',['../classKMeans.html#ac46cc4cc9eb10fe4eb4e01881461d68c',1,'KMeans::X()'],['../classLDA.html#ad204ebc89ca4703bd2b17cc58614b3b2',1,'LDA::X()'],['../classLeastSquares.html#aa1f9249f5cbed6139798c0ea745553d7',1,'LeastSquares::X()'],['../classPCA.html#a15b9d6832741ec6f71f54230d09df8ad',1,'PCA::X()']]]
+  ['w',['W',['../classMLP.html#ae0248e1909947e637d1c3debe3e7714d',1,'MLP']]],
+  ['weighted',['WEIGHTED',['../classLeastSquares.html#a6c419c316a43e0fca5d95d84c4d915c5a609db3d93bc0e7f6aa03b1580787845b',1,'LeastSquares']]],
+  ['weightinitialization',['WeightInitialization',['../classMLP.html#a43c16a781032c951266e9895051d6a3f',1,'MLP']]],
+  ['withinclassscatter',['WithinClassScatter',['../classMatrix.html#a5fd175e88fc60e7adf403e5c8f0f5670',1,'Matrix']]]
 ];

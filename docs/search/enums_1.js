@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['initializationmethod',['InitializationMethod',['../classKMeans.html#a02599c3e9aaae6c029018003e1979706',1,'KMeans']]]
+  ['distance',['Distance',['../classKNN.html#ac0f25e3fcb6794b95decfcd88050ab9d',1,'KNN']]]
 ];

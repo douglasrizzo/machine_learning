@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['zeros',['zeros',['../classMatrix.html#add5d1578ff238dccb73ddd5a4d0236e0',1,'Matrix']]]
+  ['withinclassscatter',['WithinClassScatter',['../classMatrix.html#a5fd175e88fc60e7adf403e5c8f0f5670',1,'Matrix']]]
 ];

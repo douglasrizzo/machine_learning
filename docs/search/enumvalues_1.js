@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hamming',['HAMMING',['../classKNN.html#ac0f25e3fcb6794b95decfcd88050ab9da147823fd04e5741216cbc75ffa71ff15',1,'KNN']]]
+  ['columns',['COLUMNS',['../classMatrix.html#af69237b098cb1876beaa3375f7dacbc1addd50a3b8abb7ff3da87498f2a267f9a',1,'Matrix']]]
 ];

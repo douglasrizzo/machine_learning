@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['regressiontype',['regressionType',['../classLeastSquares.html#a7a4527221a0682ebd956ec6a12810e60',1,'LeastSquares']]],
-  ['residuals',['residuals',['../classLeastSquares.html#ad2e81d762582106bbc001f76b5d8521b',1,'LeastSquares']]]
+  ['mcols',['mCols',['../classMatrix.html#aed557841906d514c05c623f38a18756a',1,'Matrix']]],
+  ['mdata',['mData',['../classMatrix.html#aa081e780724326ff975292a1072a25f8',1,'Matrix']]],
+  ['mrows',['mRows',['../classMatrix.html#a01fd2ecdf26fb69e4e841ae47e69fc47',1,'Matrix']]],
+  ['mymersenne',['myMersenne',['../classMersenneTwister.html#a3c350c881dd86ecdb7fa2c99d4efe6f5',1,'MersenneTwister']]]
 ];

@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['v',['v',['../classNRvector.html#a0de7eafaa4046db06361d079196afde9',1,'NRvector::v()'],['../classNRmatrix.html#a40ebd6666223b5566cd3568de0136f63',1,'NRmatrix::v()'],['../classNRMat3d.html#a838b678f101556cc76c368e114705dd3',1,'NRMat3d::v()']]]
+  ['regressiontype',['regressionType',['../classLeastSquares.html#a7a4527221a0682ebd956ec6a12810e60',1,'LeastSquares']]],
+  ['residuals',['residuals',['../classLeastSquares.html#ad2e81d762582106bbc001f76b5d8521b',1,'LeastSquares']]],
+  ['rewards',['rewards',['../classGridWorld.html#aff5941ac62df541956213becdd471292',1,'GridWorld']]]
 ];
