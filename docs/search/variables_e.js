@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['sse',['sse',['../classKMeans.html#a190f4ddf361f7fbf58d48bd0b09a48f7',1,'KMeans']]],
-  ['starttime',['startTime',['../classTimer.html#a33b5a088131c659ce46e564e39349de2',1,'Timer']]]
+  ['totaliterations',['totalIterations',['../classKMeans.html#a1026175b20be287cf425ecee95bbe0de',1,'KMeans']]],
+  ['transformeddata',['transformedData',['../classLDA.html#a55805a0fbf5bc887ab1e8e0452f72801',1,'LDA']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['columns',['COLUMNS',['../classMatrix.html#af69237b098cb1876beaa3375f7dacbc1addd50a3b8abb7ff3da87498f2a267f9a',1,'Matrix']]]
+  ['down',['DOWN',['../classGridWorld.html#af55746e1de514aa291a5bc9f5299404fa7baa9b322e37541cefbe229e0e94b642',1,'GridWorld']]]
 ];

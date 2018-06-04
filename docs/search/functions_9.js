@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['kmeans',['KMeans',['../classKMeans.html#abe5b1e8702f1accafd98b588a3edb5f8',1,'KMeans']]],
-  ['knn',['KNN',['../classKNN.html#a7ba1f26391b3bbb1a43b56f6a2fa274c',1,'KNN']]]
+  ['lda',['LDA',['../classLDA.html#a9e88ad20c86b0b9b7d4935b9840be1c8',1,'LDA']]],
+  ['leastsquares',['LeastSquares',['../classLeastSquares.html#afc31614eaac9f97326fd7c30a1d4b356',1,'LeastSquares']]]
 ];

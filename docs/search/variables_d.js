@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['regressiontype',['regressionType',['../classLeastSquares.html#a7a4527221a0682ebd956ec6a12810e60',1,'LeastSquares']]],
-  ['residuals',['residuals',['../classLeastSquares.html#ad2e81d762582106bbc001f76b5d8521b',1,'LeastSquares']]],
-  ['rewards',['rewards',['../classGridWorld.html#aff5941ac62df541956213becdd471292',1,'GridWorld']]]
+  ['sse',['sse',['../classKMeans.html#a190f4ddf361f7fbf58d48bd0b09a48f7',1,'KMeans']]],
+  ['starttime',['startTime',['../classTimer.html#a33b5a088131c659ce46e564e39349de2',1,'Timer']]]
 ];

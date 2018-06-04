@@ -4,9 +4,9 @@ digraph "GridWorld::eGreedy"
   edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
   node [fontname="Helvetica",fontsize="10",shape=record];
   rankdir="LR";
-  Node15 [label="GridWorld::eGreedy",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node15 -> Node16 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node16 [label="GridWorld::Sarsa",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#ad1c7b6d4e864ef8e8aca9163c2d8cd86",tooltip="Temporal difference method for finding the optimal policy using SARSA. "];
-  Node15 -> Node17 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node17 [label="GridWorld::QLearning",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#abdbd7b78344fe0db7dbdd4f55d8ace70",tooltip="Temporal difference method for finding the optimal policy using Q-Learning. "];
+  Node41 [label="GridWorld::eGreedy",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node41 -> Node42 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node42 [label="GridWorld::Sarsa",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#ad1c7b6d4e864ef8e8aca9163c2d8cd86",tooltip="Temporal difference method for finding the optimal policy using SARSA. "];
+  Node41 -> Node43 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node43 [label="GridWorld::QLearning",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#abdbd7b78344fe0db7dbdd4f55d8ace70",tooltip="Temporal difference method for finding the optimal policy using Q-Learning. "];
 }

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['d_5frandom',['d_random',['../classMersenneTwister.html#af59f92dbbe0898c25a985cc03854495d',1,'MersenneTwister::d_random()'],['../classMersenneTwister.html#ab10a35d31b546395cab15184ca993aa2',1,'MersenneTwister::d_random(double min, double max)'],['../classMersenneTwister.html#a6d463a0584811f96e6f9e2d5f36cafd6',1,'MersenneTwister::d_random(double max)']]],
-  ['determinant',['determinant',['../classMatrix.html#af87fc2165f7f129fbe690fa5b2d3acfe',1,'Matrix']]],
-  ['diagonal',['diagonal',['../classMatrix.html#a18fd808db3f9098a3732cd9d312f8da6',1,'Matrix::diagonal(size_t size, double value)'],['../classMatrix.html#a4a18a8e7de5d44b36eb77dffe00c891a',1,'Matrix::diagonal()']]]
+  ['egreedy',['eGreedy',['../classGridWorld.html#a87fc3feb5c480cfce865c7005d1eaf50',1,'GridWorld']]],
+  ['euclidean',['euclidean',['../classKNN.html#aa3273ce693b951e8b4384ffbc8616c1d',1,'KNN::euclidean()'],['../classMetrics.html#a886c6a038b62c72c66096b1215dee6b1',1,'Metrics::euclidean(MatrixD m, bool root=true)'],['../classMetrics.html#acd0a8472a5ece3aa36c92007aa201e84',1,'Metrics::euclidean(MatrixD a, MatrixD b, bool root=true)']]]
 ];

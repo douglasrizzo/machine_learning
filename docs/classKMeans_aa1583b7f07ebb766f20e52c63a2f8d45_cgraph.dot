@@ -6,9 +6,12 @@ digraph "KMeans::fit"
   rankdir="LR";
   Node2 [label="KMeans::fit",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
   Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node3 [label="KMeans::predict",height=0.2,width=0.4,color="black",URL="$classKMeans.html#a833e7824ae04358e7ea0d97e61e87040",tooltip="Assigns elements of a data set to clusters. "];
+  Node3 [label="KMeans::SSE",height=0.2,width=0.4,color="black",URL="$classKMeans.html#afa3dcc65e5f8a708fc9d7d28fe23baf7"];
   Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node4 [label="Metrics::minkowski",height=0.2,width=0.4,color="black",URL="$classMetrics.html#a3cbefc31a43ab7d5da2ce4cd806229a0"];
-  Node2 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node5 [label="KMeans::SSE",height=0.2,width=0.4,color="black",URL="$classKMeans.html#afa3dcc65e5f8a708fc9d7d28fe23baf7"];
+  Node4 [label="Metrics::euclidean",height=0.2,width=0.4,color="black",URL="$classMetrics.html#a886c6a038b62c72c66096b1215dee6b1"];
+  Node4 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="Metrics::minkowski",height=0.2,width=0.4,color="black",URL="$classMetrics.html#aa69f2a116d371fd7f7fae507d70174a5"];
+  Node2 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="KMeans::predict",height=0.2,width=0.4,color="black",URL="$classKMeans.html#a833e7824ae04358e7ea0d97e61e87040",tooltip="Assigns elements of a data set to clusters. "];
+  Node6 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
 }

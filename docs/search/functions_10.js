@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['randomvalues',['randomValues',['../classMersenneTwister.html#a0beb8fc1018a8e4ab47ae09e4e5fc7cc',1,'MersenneTwister::randomValues(int maxValue, unsigned int numValues, bool replacement=true)'],['../classMersenneTwister.html#a907f261c2dd4a424205978a9ddad8e2d',1,'MersenneTwister::randomValues(int minValue, int maxValue, unsigned int numValues, bool replacement=true)']]],
-  ['recall',['recall',['../classClassifierUtils.html#a08212d9c1e83aa241ae83a317c3dd2a0',1,'ClassifierUtils']]],
-  ['regression',['regression',['../classKNN.html#a3225657b930c1f773968dff3a0e912e3',1,'KNN::regression(const vector&lt; double &gt; &amp;testie)'],['../classKNN.html#a916675e2e8c7b8e87789f45cb6880247',1,'KNN::regression(const vector&lt; vector&lt; double &gt;&gt; &amp;test, bool verbose=false)']]],
-  ['removecolumn',['removeColumn',['../classMatrix.html#ad21c6b0f5a55559520b3b18b16015a61',1,'Matrix']]],
-  ['reshape',['reshape',['../classMatrix.html#a674262e658a7d79ae267e4b8ee2c8905',1,'Matrix']]],
-  ['runningtime',['runningTime',['../classTimer.html#a7f5fac9e0cce578f93a6925c31d58c75',1,'Timer']]]
+  ['tanh',['tanh',['../classMLP.html#adf512fba557c119b23ca9f782d786f83',1,'MLP']]],
+  ['tanhderivative',['tanhDerivative',['../classMLP.html#a107be6309a4d326d13755be96ba9fde6',1,'MLP']]],
+  ['timer',['Timer',['../classTimer.html#ad6961e6afa7a21a78e564d8f21d7387b',1,'Timer']]],
+  ['tocoord',['toCoord',['../classGridWorld.html#a03d2aaf35961c3e190e4b7ab12f76e4d',1,'GridWorld']]],
+  ['transform',['transform',['../classLDA.html#a8fe49aa4d80570bbc465df873a6749c3',1,'LDA::transform()'],['../classPCA.html#a19f454087daaaadef954bac217a9dc65',1,'PCA::transform()'],['../classPCA.html#a5fd9dd4bc8d882c37e0f5bee45bf4c39',1,'PCA::transform(int numComponents)']]],
+  ['transition',['transition',['../classGridWorld.html#aaf8d964cddf2d838737d0707481ad792',1,'GridWorld']]]
 ];

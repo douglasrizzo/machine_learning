@@ -4,11 +4,9 @@ digraph "GridWorld::getNonGoalState"
   edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
   node [fontname="Helvetica",fontsize="10",shape=record];
   rankdir="LR";
-  Node31 [label="GridWorld::getNonGoalState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node31 -> Node32 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node32 [label="MersenneTwister::i\l_random",height=0.2,width=0.4,color="black",URL="$classMersenneTwister.html#a063d531b0832d9ffa50c4c0340e7e510",tooltip="Pseudo-random number generator using the Mersenne Twister method. "];
-  Node32 -> Node33 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node33 [label="MersenneTwister::i\l_random",height=0.2,width=0.4,color="black",URL="$classMersenneTwister.html#aa9ac0f554639124111e344e9889334e8",tooltip="Pseudo-random number generator using the Mersenne Twister method. "];
-  Node31 -> Node34 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node34 [label="GridWorld::isGoal",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#a202b7bda8938f3c641c2812dcc9b5ac1",tooltip="Informs whether a state is a goal state in the grid world. "];
+  Node64 [label="GridWorld::getNonGoalState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node64 -> Node65 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node65 [label="GridWorld::isGoal",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#a202b7bda8938f3c641c2812dcc9b5ac1",tooltip="Informs whether a state is a goal state in the grid world. "];
+  Node65 -> Node66 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node66 [label="GridWorld::toCoord",height=0.2,width=0.4,color="black",URL="$classGridWorld.html#a03d2aaf35961c3e190e4b7ab12f76e4d",tooltip="Transforms a raster coordinate from the grid world into its corresponding row x column representation..."];
 }

@@ -1,9 +1,7 @@
 var searchData=
 [
-  ['egreedy',['eGreedy',['../classGridWorld.html#a87fc3feb5c480cfce865c7005d1eaf50',1,'GridWorld']]],
-  ['eigen',['eigen',['../classMatrix.html#af3f3bf019fa66546f249c497b6616206',1,'Matrix']]],
-  ['eigennonsymmetric',['eigenNonSymmetric',['../classMatrix.html#ab417377e7f5929b1027271b284ba4f1e',1,'Matrix']]],
-  ['eigensymmetric',['eigenSymmetric',['../classMatrix.html#a849e1dd04769a720c20e9d7120bfa487',1,'Matrix']]],
-  ['eigsort',['eigsort',['../classMatrix.html#a86232d13990243ef1dd1e7a514e446cc',1,'Matrix']]],
-  ['euclidean',['euclidean',['../classKNN.html#aa3273ce693b951e8b4384ffbc8616c1d',1,'KNN::euclidean()'],['../classMetrics.html#a886c6a038b62c72c66096b1215dee6b1',1,'Metrics::euclidean(MatrixD m, bool root=true)'],['../classMetrics.html#acd0a8472a5ece3aa36c92007aa201e84',1,'Metrics::euclidean(MatrixD a, MatrixD b, bool root=true)']]]
+  ['f_5fscore',['f_score',['../classClassifierUtils.html#a2eab9f9b399a27a65f7d6ac7dd29210e',1,'ClassifierUtils']]],
+  ['findlabel',['findLabel',['../classClassifierUtils.html#aba0abbd24fbd086684b0cf7f1996d55f',1,'ClassifierUtils']]],
+  ['fit',['fit',['../classKMeans.html#aa1583b7f07ebb766f20e52c63a2f8d45',1,'KMeans::fit()'],['../classLDA.html#ad98632dfc289d6b6363b28f267e2928f',1,'LDA::fit()'],['../classLeastSquares.html#a9055445bd54591f57d1ee3c8305adce1',1,'LeastSquares::fit()'],['../classMLP.html#ac6c07ed4aeefc4c013af94be0119902a',1,'MLP::fit(MatrixD X, MatrixD y, vector&lt; size_t &gt; hiddenConfig, int maxIters, size_t batchSize=0, double learningRate=0.01, double errorThreshold=0.0001, double regularization=0, ActivationFunction func=SIGMOID, WeightInitialization weightInit=UNIFORM, bool adaptiveLR=false, bool standardize=true, bool verbose=true)'],['../classMLP.html#a585e98d5b6ed65bf1bf2f8dbde6cb745',1,'MLP::fit(MatrixD X, MatrixD y, vector&lt; MatrixD &gt; hiddenLayers, unsigned int maxIters, size_t batchSize=0, double learningRate=0.01, double errorThreshold=0.0001, double regularization=0, ActivationFunction func=SIGMOID, bool adaptiveLR=false, bool standardize=true, bool verbose=true)'],['../classPCA.html#a9061e1dc0bf6f0cfec1b5007842efce6',1,'PCA::fit()']]],
+  ['fromcoord',['fromCoord',['../classGridWorld.html#a5241a21b520fc8c9d4c0110de285aec1',1,'GridWorld']]]
 ];

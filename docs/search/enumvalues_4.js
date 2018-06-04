@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['glorot',['GLOROT',['../classMLP.html#a43c16a781032c951266e9895051d6a3fa62d5417aa7301809d979f0795ec464bc',1,'MLP']]]
+  ['hamming',['HAMMING',['../classKNN.html#ac0f25e3fcb6794b95decfcd88050ab9da147823fd04e5741216cbc75ffa71ff15',1,'KNN']]]
 ];

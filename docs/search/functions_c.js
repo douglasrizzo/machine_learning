@@ -1,10 +1,12 @@
 var searchData=
 [
-  ['n_5frandom',['n_random',['../classMersenneTwister.html#a09ab04a186aa31e91bfe69acecb51435',1,'MersenneTwister::n_random()'],['../classMersenneTwister.html#ac89d53439b391f0c13d869a8f78979cf',1,'MersenneTwister::n_random(double mean, double stddev)']]],
-  ['naivebayes',['NaiveBayes',['../classNaiveBayes.html#ac2105097a317d00c2ebc69245c10ea30',1,'NaiveBayes']]],
-  ['ncols',['nCols',['../classMatrix.html#a978acd1635d3b39906fb359b64120eb1',1,'Matrix']]],
-  ['normalize',['normalize',['../classMatrix.html#aaba5a6085c6823cd65ffc7b485b9de62',1,'Matrix']]],
-  ['normalizetoone',['normalizeToOne',['../classGridWorld.html#adf34e6f50b2369c06afdfc8c1ff70caf',1,'GridWorld']]],
-  ['nrows',['nRows',['../classMatrix.html#ad654d350a6c4831500016c403756cb88',1,'Matrix']]],
-  ['numdigits',['numDigits',['../classTimer.html#a69c37a119bbc25f87b2651828150ca9e',1,'Timer::numDigits(int32_t x)'],['../classTimer.html#a846f27eb995fc080761456518b453195',1,'Timer::numDigits(char n)']]]
+  ['pca',['PCA',['../classPCA.html#a6b10aba0ac07b1cbb4d64fa7991992b7',1,'PCA']]],
+  ['policyforstate',['policyForState',['../classGridWorld.html#a483bf6d05d61a8e14f0fab04273d8593',1,'GridWorld']]],
+  ['policyincrement',['policyIncrement',['../classGridWorld.html#a5b720f7017beff840503f77c25da2586',1,'GridWorld']]],
+  ['policyiteration',['policyIteration',['../classGridWorld.html#add6d00c0d2eec4d16706a19b0527bba5',1,'GridWorld']]],
+  ['pow2',['pow2',['../classMLP.html#ad384a139f1bc06ba02cdb8b8dc9671e8',1,'MLP']]],
+  ['precision',['precision',['../classClassifierUtils.html#a18942f9191e113a018041a5ab1f306a7',1,'ClassifierUtils']]],
+  ['predict',['predict',['../classKMeans.html#a833e7824ae04358e7ea0d97e61e87040',1,'KMeans::predict()'],['../classLeastSquares.html#a3f8b982bc316603648723034fa172527',1,'LeastSquares::predict()'],['../classMLP.html#af0350e72053bdd77e12dcb0ac06600cf',1,'MLP::predict()'],['../classNaiveBayes.html#af342106a213efb5fe0d8dc44b5329b93',1,'NaiveBayes::predict()']]],
+  ['prettifypolicy',['prettifyPolicy',['../classGridWorld.html#a9dfe466eee829e7d1b8315b789078be9',1,'GridWorld']]],
+  ['prettytime',['prettyTime',['../classTimer.html#a449648647fc58458d12282335ae86ad9',1,'Timer']]]
 ];

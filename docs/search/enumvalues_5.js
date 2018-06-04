@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hamming',['HAMMING',['../classKNN.html#ac0f25e3fcb6794b95decfcd88050ab9da147823fd04e5741216cbc75ffa71ff15',1,'KNN']]]
+  ['left',['LEFT',['../classGridWorld.html#af55746e1de514aa291a5bc9f5299404fa6b59e68ceed85a8ce33d02969e7e289e',1,'GridWorld']]]
 ];

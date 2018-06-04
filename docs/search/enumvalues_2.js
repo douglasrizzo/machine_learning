@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['down',['DOWN',['../classGridWorld.html#af55746e1de514aa291a5bc9f5299404fa7baa9b322e37541cefbe229e0e94b642',1,'GridWorld']]]
+  ['euclidean',['EUCLIDEAN',['../classKNN.html#ac0f25e3fcb6794b95decfcd88050ab9dad1ac1a62a6064a46fb15d1f125bcb555',1,'KNN']]]
 ];

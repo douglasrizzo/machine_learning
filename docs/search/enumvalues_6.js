@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['left',['LEFT',['../classGridWorld.html#af55746e1de514aa291a5bc9f5299404fa6b59e68ceed85a8ce33d02969e7e289e',1,'GridWorld']]]
+  ['normal',['NORMAL',['../classMLP.html#a43c16a781032c951266e9895051d6a3fab685553cb1f20ce274b06988c7d291e6',1,'MLP']]]
 ];

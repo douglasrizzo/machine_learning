@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['random',['RANDOM',['../classKMeans.html#a02599c3e9aaae6c029018003e1979706a83dc0e476a55b881376166b9c625a763',1,'KMeans']]],
-  ['regular',['REGULAR',['../classLeastSquares.html#a6c419c316a43e0fca5d95d84c4d915c5aa6fb786d69c48e93a4ffe5d6539047c3',1,'LeastSquares']]],
-  ['right',['RIGHT',['../classGridWorld.html#af55746e1de514aa291a5bc9f5299404faf04cf29d733c87f9d7c7ace8ade11a33',1,'GridWorld']]],
-  ['rows',['ROWS',['../classMatrix.html#af69237b098cb1876beaa3375f7dacbc1a512f391c543634b676a0933d6f046f41',1,'Matrix']]]
+  ['sample',['SAMPLE',['../classKMeans.html#a02599c3e9aaae6c029018003e1979706a2af17dcefc0b61039e580b4e8bc06f9f',1,'KMeans']]],
+  ['sigmoid',['SIGMOID',['../classMLP.html#ad3f8ad4606e02037f3c1dbd873601f1fa0d7c4cb2b3f2ffd6fab7d2272eb19d8c',1,'MLP']]],
+  ['softmax',['SOFTMAX',['../classMLP.html#af344ea270fdc89643e91441836d10f32a23b3b06edfc5ae472c095e5b2d0b95a4',1,'MLP']]],
+  ['summary',['SUMMARY',['../classMLP.html#af344ea270fdc89643e91441836d10f32a9d1a244419f87e806eabe8293ff0d0ce',1,'MLP']]]
 ];
