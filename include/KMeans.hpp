@@ -7,9 +7,9 @@
 #ifndef MACHINE_LEARNING_KMEANS_HPP
 #define MACHINE_LEARNING_KMEANS_HPP
 
-#include "Matrix.hpp"
+#include "../include/matrix/Matrix.hpp"
 #include "Metrics.hpp"
-#include "MersenneTwister.hpp"
+#include "../include/mersenne_twister/MersenneTwister.hpp"
 
 /**
  * Implementaion of the k-means algorithm

@@ -8,8 +8,8 @@
 #ifndef MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP
 #define MACHINE_LEARNING_DYNAMICPROGRAMMING_HPP
 
-#include "Matrix.hpp"
-#include "MersenneTwister.hpp"
+#include "../include/matrix/Matrix.hpp"
+#include "../include/mersenne_twister/MersenneTwister.hpp"
 #include "Timer.hpp"
 
 /**

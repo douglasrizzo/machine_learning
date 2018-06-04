@@ -8,7 +8,7 @@
 #ifndef MACHINE_LEARNING_PCA_HPP
 #define MACHINE_LEARNING_PCA_HPP
 
-#include "Matrix.hpp"
+#include "../include/matrix/Matrix.hpp"
 
 using namespace std;
 

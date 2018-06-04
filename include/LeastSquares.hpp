@@ -7,7 +7,7 @@
 
 #include <utility>
 #include <vector>
-#include "Matrix.hpp"
+#include "../include/matrix/Matrix.hpp"
 
 using namespace std;
 

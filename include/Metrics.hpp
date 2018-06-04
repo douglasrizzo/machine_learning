@@ -5,7 +5,7 @@
 #ifndef MACHINE_LEARNING_METRICS_HPP
 #define MACHINE_LEARNING_METRICS_HPP
 
-#include "Matrix.hpp"
+#include "../include/matrix/Matrix.hpp"
 
 class Metrics {
 

@@ -9,7 +9,7 @@
 
 #include <utility>
 
-#include "Matrix.hpp"
+#include "../include/matrix/Matrix.hpp"
 
 using namespace std;
 

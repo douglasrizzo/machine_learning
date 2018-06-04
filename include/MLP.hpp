@@ -10,8 +10,8 @@
 #include <vector>
 #include <chrono>
 #include <iostream>
-#include "Matrix.hpp"
-#include "MersenneTwister.hpp"
+#include "../include/matrix/Matrix.hpp"
+#include "../include/mersenne_twister/MersenneTwister.hpp"
 #include "Timer.hpp"
 
 using namespace std;

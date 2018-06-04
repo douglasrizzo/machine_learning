@@ -4,7 +4,7 @@
 #include <fstream>
 #include <array>
 #include "include/KNN.hpp"
-#include "include/Matrix.hpp"
+#include "include/matrix/Matrix.hpp"
 #include "include/LeastSquares.hpp"
 #include "include/PCA.hpp"
 #include "include/LDA.hpp"
