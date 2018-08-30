@@ -1,0 +1,5 @@
+<map id="ClassifierUtils::confusionMatrix" name="ClassifierUtils::confusionMatrix">
+<area shape="rect" id="node2" href="$classClassifierUtils.html#a18942f9191e113a018041a5ab1f306a7" title="ClassifierUtils::precision" alt="" coords="237,5,417,32"/>
+<area shape="rect" id="node4" href="$classClassifierUtils.html#a08212d9c1e83aa241ae83a317c3dd2a0" title="ClassifierUtils::recall" alt="" coords="249,56,406,83"/>
+<area shape="rect" id="node3" href="$classClassifierUtils.html#a2eab9f9b399a27a65f7d6ac7dd29210e" title="ClassifierUtils::f\l_score" alt="" coords="465,23,592,65"/>
+</map>

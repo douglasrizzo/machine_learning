@@ -1,0 +1,7 @@
+<map id="Metrics::minkowski" name="Metrics::minkowski">
+<area shape="rect" id="node2" href="$classKMeans.html#a833e7824ae04358e7ea0d97e61e87040" title="Assigns elements of a data set to clusters. " alt="" coords="397,5,524,32"/>
+<area shape="rect" id="node4" href="$classMetrics.html#a886c6a038b62c72c66096b1215dee6b1" title="Calculates the Euclidean distances between elements in a matrix. " alt="" coords="205,56,345,83"/>
+<area shape="rect" id="node6" href="$classMetrics.html#aea9d7f8412a590586d97d4544eac60a7" title="Calculates the Manhattan distances between elements in a matrix. " alt="" coords="201,107,349,133"/>
+<area shape="rect" id="node3" href="$classKMeans.html#aa1583b7f07ebb766f20e52c63a2f8d45" title="Find the k centroids that best fit the data. " alt="" coords="572,31,667,57"/>
+<area shape="rect" id="node5" href="$classKMeans.html#afa3dcc65e5f8a708fc9d7d28fe23baf7" title="KMeans::SSE" alt="" coords="408,56,513,83"/>
+</map>

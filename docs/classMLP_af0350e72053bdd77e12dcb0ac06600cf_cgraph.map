@@ -1,0 +1,5 @@
+<map id="MLP::predict" name="MLP::predict">
+<area shape="rect" id="node2" href="$classMLP.html#af0add0da45ada6eb24bc0ddfbfd210f2" title="MLP::softmax" alt="" coords="164,5,275,32"/>
+<area shape="rect" id="node3" href="$classMLP.html#adfe65a83e7c44b17ad9021ab8994095b" title="MLP::binarize" alt="" coords="165,56,273,83"/>
+<area shape="rect" id="node4" href="$classMLP.html#ab2ac56e76a803e3cc2f0238da3d4d1d0" title="MLP::summarize" alt="" coords="155,107,284,133"/>
+</map>

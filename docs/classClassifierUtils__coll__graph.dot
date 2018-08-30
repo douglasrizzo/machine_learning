@@ -1,7 +1,0 @@
-digraph "ClassifierUtils"
-{
-  bgcolor="transparent";
-  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
-  node [fontname="Helvetica",fontsize="10",shape=record];
-  Node1 [label="{ClassifierUtils\n||+ checkLabels()\l+ checkBinaryLabels()\l+ binarize()\l+ confusionMatrix()\l+ accuracy()\l+ precision()\l+ recall()\l+ f_score()\l- findLabel()\l- getAllClasses()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-}

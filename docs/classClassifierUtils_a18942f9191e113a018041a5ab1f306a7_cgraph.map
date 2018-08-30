@@ -1,0 +1,7 @@
+<map id="ClassifierUtils::precision" name="ClassifierUtils::precision">
+<area shape="rect" id="node2" href="$classClassifierUtils.html#ad1ba8941d76b6f251601f60a52321796" title="ClassifierUtils::checkBinary\lLabels" alt="" coords="233,5,435,47"/>
+<area shape="rect" id="node4" href="$classClassifierUtils.html#abc1fc8d0290671468f3313abf500ba6d" title="ClassifierUtils::confusion\lMatrix" alt="" coords="242,71,426,112"/>
+<area shape="rect" id="node3" href="$classClassifierUtils.html#a5d2e296c795dceb1e033fae541bbc4da" title="ClassifierUtils::checkLabels" alt="" coords="487,19,688,46"/>
+<area shape="rect" id="node5" href="$classClassifierUtils.html#a28f096a4fc200737a6b4477965e1e8fa" title="ClassifierUtils::getAllClasses" alt="" coords="483,74,692,101"/>
+<area shape="rect" id="node6" href="$classClassifierUtils.html#aba0abbd24fbd086684b0cf7f1996d55f" title="ClassifierUtils::findLabel" alt="" coords="497,125,678,151"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="KMeans::fit" name="KMeans::fit">
+<area shape="rect" id="node2" href="$classKMeans.html#afa3dcc65e5f8a708fc9d7d28fe23baf7" title="KMeans::SSE" alt="" coords="148,5,253,32"/>
+<area shape="rect" id="node5" href="$classKMeans.html#a833e7824ae04358e7ea0d97e61e87040" title="Assigns elements of a data set to clusters. " alt="" coords="308,56,435,83"/>
+<area shape="rect" id="node3" href="$classMetrics.html#a886c6a038b62c72c66096b1215dee6b1" title="Calculates the Euclidean distances between elements in a matrix. " alt="" coords="301,5,441,32"/>
+<area shape="rect" id="node4" href="$classMetrics.html#aa69f2a116d371fd7f7fae507d70174a5" title="Calculates the Minkowski distances between elements in a matrix. " alt="" coords="489,31,637,57"/>
+</map>

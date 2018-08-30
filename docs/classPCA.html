@@ -69,11 +69,14 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Principal component analysis.  
+ <a href="classPCA.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for PCA:</div>
 <div class="dyncontent">
-<div class="center"><!-- SVG 0 -->
+<div class="center"><iframe scrolling="no" frameborder="0" src="classPCA__coll__graph.svg" width="214" height="390"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 </div>
 <table class="memberdecls">
@@ -86,8 +89,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a9061e1dc0bf6f0cfec1b5007842efce6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the principal components of a Matrix.  <a href="#a9061e1dc0bf6f0cfec1b5007842efce6">More...</a><br /></td></tr>
 <tr class="separator:a9061e1dc0bf6f0cfec1b5007842efce6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19f454087daaaadef954bac217a9dc65"><td class="memItemLeft" align="right" valign="top">MatrixD&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPCA.html#a19f454087daaaadef954bac217a9dc65">transform</a> ()</td></tr>
+<tr class="memdesc:a19f454087daaaadef954bac217a9dc65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotates the data set, using the eigenvectors of the covariance matrix as the new base.  <a href="#a19f454087daaaadef954bac217a9dc65">More...</a><br /></td></tr>
 <tr class="separator:a19f454087daaaadef954bac217a9dc65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5fd9dd4bc8d882c37e0f5bee45bf4c39"><td class="memItemLeft" align="right" valign="top">MatrixD&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPCA.html#a5fd9dd4bc8d882c37e0f5bee45bf4c39">transform</a> (int numComponents)</td></tr>
+<tr class="memdesc:a5fd9dd4bc8d882c37e0f5bee45bf4c39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotates the data set, using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base.  <a href="#a5fd9dd4bc8d882c37e0f5bee45bf4c39">More...</a><br /></td></tr>
 <tr class="separator:a5fd9dd4bc8d882c37e0f5bee45bf4c39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abde6f882db9bd11cc794a628114940b8"><td class="memItemLeft" align="right" valign="top">const MatrixD &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPCA.html#abde6f882db9bd11cc794a628114940b8">getEigenvalues</a> () const</td></tr>
 <tr class="separator:abde6f882db9bd11cc794a628114940b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -112,8 +117,9 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a185971a9bd6bb7007b8105d34c85e296"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00015">15</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<div class="textblock"><p>Principal component analysis. </p>
+
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00018">18</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6b10aba0ac07b1cbb4d64fa7991992b7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6b10aba0ac07b1cbb4d64fa7991992b7">&#9670;&nbsp;</a></span>PCA()</h2>
@@ -147,7 +153,7 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00025">25</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00028">28</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -178,7 +184,7 @@ Private Attributes</h2></td></tr>
 <p>Finds the principal components of a Matrix. </p>
 <p>Eigenvectors and eigenvalues are found via the Jacobi eigenvalue algorithm </p>
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00032">32</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00035">35</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -205,7 +211,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00083">83</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00091">91</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -232,7 +238,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00071">71</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00079">79</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -259,7 +265,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00075">75</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00083">83</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -286,7 +292,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00079">79</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00087">87</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -313,7 +319,10 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00055">55</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p>Rotates the data set, using the eigenvectors of the covariance matrix as the new base. </p>
+<dl class="section return"><dt>Returns</dt><dd>the original dataset rotated using the eigenvectors of the covariance matrix as the new base </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00060">60</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -341,7 +350,10 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00060">60</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p>Rotates the data set, using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base. </p>
+<dl class="section return"><dt>Returns</dt><dd>the original dataset rotated using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00068">68</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -366,7 +378,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00018">18</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00021">21</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -390,7 +402,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00018">18</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00021">21</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -414,7 +426,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00018">18</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00021">21</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -438,7 +450,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00018">18</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00021">21</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>
@@ -462,7 +474,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00018">18</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PCA_8hpp_source.html#l00021">21</a> of file <a class="el" href="PCA_8hpp_source.html">PCA.hpp</a>.</p>
 
 </div>
 </div>

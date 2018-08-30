@@ -1,0 +1,7 @@
+<map id="GridWorld::prettifyPolicy" name="GridWorld::prettifyPolicy">
+<area shape="rect" id="node2" href="$classGridWorld.html#a5241a21b520fc8c9d4c0110de285aec1" title="Transforms row x column coordinates from the grid world into a raster representation. " alt="" coords="248,5,412,32"/>
+<area shape="rect" id="node3" href="$classGridWorld.html#a202b7bda8938f3c641c2812dcc9b5ac1" title="Informs whether a state is a goal state in the grid world. " alt="" coords="262,56,398,83"/>
+<area shape="rect" id="node5" href="$classGridWorld.html#a483bf6d05d61a8e14f0fab04273d8593" title="Gets the policy for state s " alt="" coords="236,107,424,133"/>
+<area shape="rect" id="node4" href="$classGridWorld.html#a03d2aaf35961c3e190e4b7ab12f76e4d" title="Transforms a raster coordinate from the grid world into its corresponding row x column representation..." alt="" coords="500,56,647,83"/>
+<area shape="rect" id="node6" href="$classGridWorld.html#adf34e6f50b2369c06afdfc8c1ff70caf" title="Normalizes a matriz so its sum equals 1. " alt="" coords="472,107,675,133"/>
+</map>

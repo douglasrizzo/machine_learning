@@ -17,6 +17,9 @@
 using namespace std;
 using myClock = chrono::high_resolution_clock;
 
+/**
+ * Multi-layer perceptron
+ */
 class MLP {
  private:
   MatrixD data, dataMean, dataDev, classes, originalClasses;

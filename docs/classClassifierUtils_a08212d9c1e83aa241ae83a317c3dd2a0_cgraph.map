@@ -1,0 +1,7 @@
+<map id="ClassifierUtils::recall" name="ClassifierUtils::recall">
+<area shape="rect" id="node2" href="$classClassifierUtils.html#ad1ba8941d76b6f251601f60a52321796" title="ClassifierUtils::checkBinary\lLabels" alt="" coords="211,5,412,47"/>
+<area shape="rect" id="node4" href="$classClassifierUtils.html#abc1fc8d0290671468f3313abf500ba6d" title="ClassifierUtils::confusion\lMatrix" alt="" coords="219,71,403,112"/>
+<area shape="rect" id="node3" href="$classClassifierUtils.html#a5d2e296c795dceb1e033fae541bbc4da" title="ClassifierUtils::checkLabels" alt="" coords="464,19,665,46"/>
+<area shape="rect" id="node5" href="$classClassifierUtils.html#a28f096a4fc200737a6b4477965e1e8fa" title="ClassifierUtils::getAllClasses" alt="" coords="460,74,669,101"/>
+<area shape="rect" id="node6" href="$classClassifierUtils.html#aba0abbd24fbd086684b0cf7f1996d55f" title="ClassifierUtils::findLabel" alt="" coords="474,125,655,151"/>
+</map>

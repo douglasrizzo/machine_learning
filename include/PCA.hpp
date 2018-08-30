@@ -12,6 +12,9 @@
 
 using namespace std;
 
+/**
+ * Principal component analysis
+ */
 class PCA {
 
  private:
@@ -52,11 +55,16 @@ class PCA {
     }
   }
 
+  //! Rotates the data set, using the eigenvectors of the covariance matrix as the new base
+  //! \return the original dataset rotated using the eigenvectors of the covariance matrix as the new base
   MatrixD transform() {
     MatrixD finalData = eigenvectors.transpose() * X.minusMean().transpose();
     return finalData.transpose();
   }
 
+
+  //! Rotates the data set, using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base
+  //! \return the original dataset rotated using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base
   MatrixD transform(int numComponents) {
     MatrixI filter = MatrixI::zeros(eigenvalues.nRows(), 1);
 

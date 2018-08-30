@@ -11,6 +11,9 @@
 
 using namespace std;
 
+/**
+ * Ordinary and weighted Least squares algorithm
+ */
 class LeastSquares {
  public:
   enum RegressionType {

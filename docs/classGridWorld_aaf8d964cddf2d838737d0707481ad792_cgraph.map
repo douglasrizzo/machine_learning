@@ -1,0 +1,6 @@
+<map id="GridWorld::transition" name="GridWorld::transition">
+<area shape="rect" id="node2" href="$classGridWorld.html#a202b7bda8938f3c641c2812dcc9b5ac1" title="Informs whether a state is a goal state in the grid world. " alt="" coords="229,5,365,32"/>
+<area shape="rect" id="node4" href="$classGridWorld.html#aee5066a1ae4ad067c4ac846c6ed15dea" title="Returns the next state that results from applying an action to a state. " alt="" coords="211,56,383,83"/>
+<area shape="rect" id="node3" href="$classGridWorld.html#a03d2aaf35961c3e190e4b7ab12f76e4d" title="Transforms a raster coordinate from the grid world into its corresponding row x column representation..." alt="" coords="439,5,586,32"/>
+<area shape="rect" id="node5" href="$classGridWorld.html#a5241a21b520fc8c9d4c0110de285aec1" title="Transforms row x column coordinates from the grid world into a raster representation. " alt="" coords="431,56,595,83"/>
+</map>

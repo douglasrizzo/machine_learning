@@ -16,6 +16,9 @@
 
 using namespace std;
 
+/**
+ * k-nearest neighbors algorithm
+ */
 class KNN {
  public:
   enum Distance { HAMMING, EUCLIDEAN };
@@ -25,7 +28,7 @@ class KNN {
 
   Distance distance;
 
-//! Finds the k-nearest neighbors of a data element
+  //! Finds the k-nearest neighbors of a data element
   //! \param chosen_indices integer array that will keep the indices of the k-nearest neighbors
   //! \param testie a vector of real values representing a data element
   void getKNN(int *chosen_indices, const vector<double> &testie) {
@@ -126,10 +129,10 @@ class KNN {
     return sqrt(d);
   }
 
-  //! Calculates the Euclidean distance between two vectors
+  //! Calculates the Hamming distance between two vectors
   //! \param a first vector
   //! \param b second vector
-  //! \return Euclidean distance between a and b
+  //! \return Hamming distance between a and b
   double hamming(vector<double> a, vector<double> b) {
     double d = 0;
     for (int i = 0; i < a.size(); i++) {
@@ -142,6 +145,9 @@ class KNN {
     return d;
   }
 
+  //! Perform regression using
+  //! \param testie
+  //! \return
   double regression(const vector<double> &testie) {
     // get the indices of the k-nearest neighbors
     int chosen_indices[k];

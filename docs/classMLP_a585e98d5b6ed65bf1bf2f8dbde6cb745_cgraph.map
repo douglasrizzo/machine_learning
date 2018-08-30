@@ -1,0 +1,6 @@
+<map id="MLP::fit" name="MLP::fit">
+<area shape="rect" id="node2" href="$classTimer.html#a3a8b5272198d029779dc9302a54305a8" title="Start the timer. " alt="" coords="150,5,249,32"/>
+<area shape="rect" id="node3" href="$classTimer.html#a39c1c8047b50133aea46341f898da32f" title="Checks if the time interval passed in the constructor has passed. " alt="" coords="139,56,260,83"/>
+<area shape="rect" id="node5" href="$classTimer.html#a7f5fac9e0cce578f93a6925c31d58c75" title="Timer::runningTime" alt="" coords="124,107,275,133"/>
+<area shape="rect" id="node4" href="$classTimer.html#a449648647fc58458d12282335ae86ad9" title="Formats seconds as HH:MM:SS.mmm. " alt="" coords="323,81,463,108"/>
+</map>

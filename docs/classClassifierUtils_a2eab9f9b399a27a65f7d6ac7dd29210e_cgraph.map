@@ -1,0 +1,9 @@
+<map id="ClassifierUtils::f_score" name="ClassifierUtils::f_score">
+<area shape="rect" id="node2" href="$classClassifierUtils.html#ad1ba8941d76b6f251601f60a52321796" title="ClassifierUtils::checkBinary\lLabels" alt="" coords="408,5,609,47"/>
+<area shape="rect" id="node4" href="$classClassifierUtils.html#a18942f9191e113a018041a5ab1f306a7" title="ClassifierUtils::precision" alt="" coords="180,78,360,105"/>
+<area shape="rect" id="node8" href="$classClassifierUtils.html#a08212d9c1e83aa241ae83a317c3dd2a0" title="ClassifierUtils::recall" alt="" coords="191,27,349,54"/>
+<area shape="rect" id="node3" href="$classClassifierUtils.html#a5d2e296c795dceb1e033fae541bbc4da" title="ClassifierUtils::checkLabels" alt="" coords="661,17,863,43"/>
+<area shape="rect" id="node5" href="$classClassifierUtils.html#abc1fc8d0290671468f3313abf500ba6d" title="ClassifierUtils::confusion\lMatrix" alt="" coords="417,71,601,112"/>
+<area shape="rect" id="node6" href="$classClassifierUtils.html#a28f096a4fc200737a6b4477965e1e8fa" title="ClassifierUtils::getAllClasses" alt="" coords="657,125,867,151"/>
+<area shape="rect" id="node7" href="$classClassifierUtils.html#aba0abbd24fbd086684b0cf7f1996d55f" title="ClassifierUtils::findLabel" alt="" coords="671,74,853,101"/>
+</map>
