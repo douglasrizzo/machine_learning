@@ -63,8 +63,8 @@ class LeastSquares {
   }
 
   MatrixD predict(MatrixD m) {
-    m.addColumn(MatrixD::ones(1, X.nCols()), 0);
-    return m.transpose() * coefs;
+    m.addColumn(MatrixD::ones(m.nRows(), 1), 0);
+    return m * coefs;
   }
 
   const MatrixD &getCoefs() const {
