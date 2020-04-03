@@ -19,5 +19,8 @@ add_definitions(${GCC_ERROR_RETURN_TYPE})
 #add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 #add_definitions(${GCC_COVERAGE_LINK_FLAGS})
 
-set(SOURCE_FILES main.cpp include/KNN.hpp include/LeastSquares.hpp include/matrix/Matrix.hpp include/PCA.hpp include/LDA.hpp include/MersenneTwister.hpp include/KMeans.hpp include/Metrics.hpp include/MLP.hpp include/ClassifierUtils.hpp include/NaiveBayes.hpp include/GridWorld.hpp include/Timer.hpp)
+# this is necessary for debugging in CLion
+SET(CMAKE_BUILD_TYPE Debug)
+
+set(SOURCE_FILES main.cpp include/KNN.hpp include/LeastSquares.hpp include/matrix/Matrix.hpp include/PCA.hpp include/LDA.hpp include/KMeans.hpp include/Metrics.hpp include/MLP.hpp include/ClassifierUtils.hpp include/NaiveBayes.hpp include/GridWorld.hpp include/Timer.hpp)
 add_executable(machine_learning ${SOURCE_FILES})
