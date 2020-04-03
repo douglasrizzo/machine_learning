@@ -12,85 +12,88 @@
 
 using namespace std;
 
+
 /**
  * Principal component analysis
  */
 class PCA {
 
- private:
-  MatrixD X, eigenvalues, eigenvectors, percentages, cumPercentages;
- public :
+private:
+    MatrixD X, eigenvalues, eigenvectors, percentages, cumPercentages;
+public:
 
-  /**
-   * Principal component analysis algorithm
-   * @param data the matrix whose principal components will be found
-   */
-  explicit PCA(MatrixD data) {
-    X = std::move(data);
-  }
-
-  /**
-   * Finds the principal components of a Matrix. Eigenvectors and eigenvalues are found via the Jacobi eigenvalue algorithm
-   */
-  void fit() {
-    MatrixD XMinusMean = X.minusMean(); // standardize columns to have 0 mean
-    MatrixD covariances = XMinusMean.cov(); // get covariance matrix of the data
-
-    // get the sum of variances, this'll be useful later
-    double sumVar = 0;
-    for (size_t i = 0; i < covariances.nRows(); i++) {
-      sumVar += covariances(i, i);
+    /**
+     * Principal component analysis algorithm
+     * @param data the matrix whose principal components will be found
+     */
+    explicit PCA(MatrixD data) {
+        X = std::move(data);
     }
 
-    pair<MatrixD, MatrixD> eig = covariances.eigen(); // eigenvalues and eigenvectors of cov matrix
-    eigenvalues = eig.first;
-    eigenvectors = eig.second;
+    /**
+     * Finds the principal components of a Matrix. Eigenvectors and eigenvalues are found via the Jacobi eigenvalue algorithm
+     */
+    void fit() {
+        MatrixD XMinusMean = X.minusMean(); // standardize columns to have 0 mean
+        MatrixD covariances = XMinusMean.cov(); // get covariance matrix of the data
 
-    // calculate the percentage of variance that each eigenvalue "explains"
-    percentages = MatrixD(eigenvalues.nRows(), eigenvalues.nCols());
-    cumPercentages = MatrixD(eigenvalues.nRows(), eigenvalues.nCols());
-    for (int i = 0; i < eigenvalues.nRows(); i++) {
-      percentages(i, 0) = eigenvalues(i, 0) / sumVar;
-      cumPercentages(i, 0) = i == 0 ? percentages(i, 0) : percentages(i, 0) + cumPercentages(i - 1, 0);
-    }
-  }
+        // get the sum of variances, this'll be useful later
+        double sumVar = 0;
 
-  //! Rotates the data set, using the eigenvectors of the covariance matrix as the new base
-  //! \return the original dataset rotated using the eigenvectors of the covariance matrix as the new base
-  MatrixD transform() {
-    MatrixD finalData = eigenvectors.transpose() * X.minusMean().transpose();
-    return finalData.transpose();
-  }
+        for(size_t i = 0; i < covariances.nRows(); i++) {
+            sumVar += covariances(i, i);
+        }
 
+        pair<MatrixD, MatrixD> eig = covariances.eigen(); // eigenvalues and eigenvectors of cov matrix
+        eigenvalues = eig.first;
+        eigenvectors = eig.second;
 
-  //! Rotates the data set, using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base
-  //! \return the original dataset rotated using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base
-  MatrixD transform(int numComponents) {
-    MatrixI filter = MatrixI::zeros(eigenvalues.nRows(), 1);
+        // calculate the percentage of variance that each eigenvalue "explains"
+        percentages = MatrixD(eigenvalues.nRows(), eigenvalues.nCols());
+        cumPercentages = MatrixD(eigenvalues.nRows(), eigenvalues.nCols());
 
-    for (int i = 0; i < numComponents; i++) {
-      filter(i, 0) = 1;
+        for(int i = 0; i < eigenvalues.nRows(); i++) {
+            percentages(i, 0) = eigenvalues(i, 0) / sumVar;
+            cumPercentages(i, 0) = i == 0 ? percentages(i, 0) : percentages(i, 0) + cumPercentages(i - 1, 0);
+        }
     }
 
-    MatrixD finalData = eigenvectors.getColumns(filter).transpose() * X.minusMean().transpose();
-    return finalData.transpose();
-  }
+    // ! Rotates the data set, using the eigenvectors of the covariance matrix as the new base
+    // ! \return the original dataset rotated using the eigenvectors of the covariance matrix as the new base
+    MatrixD transform() {
+        MatrixD finalData = eigenvectors.transpose() * X.minusMean().transpose();
+        return finalData.transpose();
+    }
 
-  const MatrixD &getEigenvalues() const {
-    return eigenvalues;
-  }
+    // ! Rotates the data set, using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base
+    // ! \return the original dataset rotated using the eigenvectors of the covariance matrix with the largest eigenvalues as the new base
+    MatrixD transform(int numComponents) {
+        MatrixI filter = MatrixI::zeros(eigenvalues.nRows(), 1);
 
-  const MatrixD &getEigenvectors() const {
-    return eigenvectors;
-  }
+        for(int i = 0; i < numComponents; i++) {
+            filter(i, 0) = 1;
+        }
 
-  const MatrixD &getPercentages() const {
-    return percentages;
-  }
+        MatrixD finalData = eigenvectors.getColumns(filter).transpose() * X.minusMean().transpose();
+        return finalData.transpose();
+    }
 
-  const MatrixD &getCumPercentages() const {
-    return cumPercentages;
-  }
+    const MatrixD &getEigenvalues() const {
+        return eigenvalues;
+    }
+
+    const MatrixD &getEigenvectors() const {
+        return eigenvectors;
+    }
+
+    const MatrixD &getPercentages() const {
+        return percentages;
+    }
+
+    const MatrixD &getCumPercentages() const {
+        return cumPercentages;
+    }
 };
 
-#endif //MACHINE_LEARNING_PCA_HPP
+
+#endif // MACHINE_LEARNING_PCA_HPP

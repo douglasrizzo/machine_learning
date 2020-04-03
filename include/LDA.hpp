@@ -13,44 +13,48 @@
 
 using namespace std;
 
+
 /**
  * Linear discriminant analysis algorithm
  */
 class LDA {
- private:
-  MatrixD X, y, eigenvalues, eigenvectors, transformedData;
- public:
-  /**
-   * Linear discriminant analysis algorithm
-   * @param data The matrix whose linear discriminants will be found
-   * @param classes Column vector containing the classes each row element in <code>data</code> belongs to
-   */
-  LDA(MatrixD data, MatrixD classes) : X(std::move(data)), y(std::move(classes)) {
-    if (data.nRows() != classes.nRows())
-      throw invalid_argument("data and classes must have the same number of rows");
-    if (classes.nCols() != 1)
-      throw invalid_argument("classes must me a column vector");
-  }
+private:
+    MatrixD X, y, eigenvalues, eigenvectors, transformedData;
+public:
 
-  void fit() {
-    MatrixD Sw = X.WithinClassScatter(y);
-    MatrixD Sb = X.BetweenClassScatter(y);
+    /**
+     * Linear discriminant analysis algorithm
+     * @param data The matrix whose linear discriminants will be found
+     * @param classes Column vector containing the classes each row element in <code>data</code> belongs to
+     */
+    LDA(MatrixD data, MatrixD classes) : X(std::move(data)), y(std::move(classes)) {
+        if(data.nRows() != classes.nRows())
+            throw invalid_argument("data and classes must have the same number of rows");
 
-    auto eigen = (Sw.inverse() * Sb).eigen();
+        if(classes.nCols() != 1)
+            throw invalid_argument("classes must me a column vector");
+    }
 
-    eigenvalues = eigen.first;
-    eigenvectors = eigen.second;
+    void fit() {
+        MatrixD Sw = X.WithinClassScatter(y);
+        MatrixD Sb = X.BetweenClassScatter(y);
 
-    transformedData = (eigenvectors.transpose() * X.transpose()).transpose();
-  }
+        auto eigen = (Sw.inverse() * Sb).eigen();
 
-  /**
-   * Transforms the data matrix using the eigenvectors found by <code>fit()</code>
-   * @return
-   */
-  MatrixD transform() {
-    return transformedData;
-  }
+        eigenvalues = eigen.first;
+        eigenvectors = eigen.second;
+
+        transformedData = (eigenvectors.transpose() * X.transpose()).transpose();
+    }
+
+    /**
+     * Transforms the data matrix using the eigenvectors found by <code>fit()</code>
+     * @return
+     */
+    MatrixD transform() {
+        return transformedData;
+    }
 };
 
-#endif //MACHINE_LEARNING_LDA_HPP
+
+#endif // MACHINE_LEARNING_LDA_HPP
