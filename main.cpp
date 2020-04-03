@@ -229,26 +229,43 @@ void testLeastSquaresAlps() {
   cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
 }
 
-void testLeastSquaresBooks() {
-  MatrixD data = MatrixD::fromCSV(datasetDir + "books/training.csv");
-  MatrixD y = data.getColumn(2);
-  MatrixD X = data;
-  X.removeColumn(2);
-  LeastSquares l(X, y);
-  l.fit();
-  cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
+void testLeastSquaresBooks()
+{
+    MatrixD data = MatrixD::fromCSV(datasetDir+"books/training.csv");
+    MatrixD y = data.getColumn(2);
+    MatrixD X = data;
+    MatrixD testData=MatrixD::fromCSV(datasetDir+"books/test.csv");
 
-  X.addColumn(X.getColumn(0).hadamard(X.getColumn(0)), 2);
-  X.addColumn(X.getColumn(1).hadamard(X.getColumn(1)), 3);
-  l = LeastSquares(X, y);
-  l.fit();
-  cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
+    X.removeColumn(2);
+    LeastSquares l(X, y);
+    l.fit();
+    cout << "Coefficients" << endl
+         << l.getCoefs() << "Residuals" << endl
+         << l.getResiduals();
+    cout << "Test Results" << endl
+         << l.predict(testData);
 
-  X.removeColumn(2);
-  X.removeColumn(2);
-  l = LeastSquares(X, y, LeastSquares::WEIGHTED);
-  l.fit();
-  cout << "Coefficients" << endl << l.getCoefs() << "Residuals" << endl << l.getResiduals();
+    l = LeastSquares(X, y, LeastSquares::WEIGHTED);
+    l.fit();
+    cout << "Coefficients" << endl
+         << l.getCoefs() << "Residuals" << endl
+         << l.getResiduals();
+    testData.removeColumn(2);
+    testData.removeColumn(2);
+    cout << "Test Results" << endl
+         << l.predict(testData);
+
+    X.addColumn(X.getColumn(0).hadamard(X.getColumn(0)), 2);
+    X.addColumn(X.getColumn(1).hadamard(X.getColumn(1)), 3);
+    l = LeastSquares(X, y);
+    l.fit();
+    cout << "Coefficients" << endl
+         << l.getCoefs() << "Residuals" << endl
+         << l.getResiduals();
+    testData.addColumn(testData.getColumn(0).hadamard(testData.getColumn(0)), 2);
+    testData.addColumn(testData.getColumn(1).hadamard(testData.getColumn(1)), 3);
+    cout << "Test Results" << endl
+         << l.predict(testData);
 }
 
 void testLeastSquaresCensus() {
