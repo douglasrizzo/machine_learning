@@ -4,3 +4,6 @@
 [submodule "include/mersenne_twister"]
 	path = include/mersenne_twister
 	url = https://github.com/douglasrizzo/mersenne_twister.git
+[submodule "include/csv_reader"]
+	path = include/csv_reader
+	url = https://github.com/douglasrizzo/csv_reader.git
